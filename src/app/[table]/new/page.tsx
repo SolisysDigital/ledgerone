@@ -1,34 +1,29 @@
-import { supabase } from "@/lib/supabase";
-import { tableConfigs } from "@/lib/tableConfigs";
-import { redirect } from "next/navigation";
+"use client";
+
+import React from "react";
+import { tableConfigs, FieldConfig } from "@/lib/tableConfigs";
+import { createItem } from "@/lib/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui//button";
+import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-//import { Combobox } from "@/components/ui/combobox"; // Assume you have a Combobox component, or use shadcn's
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 
-// Server action
-export async function createItem(table: string, data: any) {
-  "use server";
-  const { error } = await supabase.from(table).insert(data);
-  if (error) throw error;
-  return redirect(`/${table}`);
-}
-
 // Note: This is a client component because of useForm
 export default function CreatePage({ params }: { params: { table: string } }) {
+  const searchParams = useSearchParams();
+  const form = useForm();
+  
   const table = params.table;
   const config = tableConfigs[table as keyof typeof tableConfigs];
   if (!config) return <div>Table not found</div>;
 
-  const searchParams = useSearchParams();
-  const prefill = {};
+  const prefill: Record<string, any> = {};
   const fk = searchParams.get("fk");
   const fkField = searchParams.get("fkField");
   if (fk && fkField) {
@@ -37,17 +32,21 @@ export default function CreatePage({ params }: { params: { table: string } }) {
 
   const formSchema = z.object(
     config.fields.reduce((acc, field) => {
-      acc[field.name] = z.any(); // Simplify, add validations as needed
+      if (field.type === 'number') {
+        acc[field.name] = z.string().optional();
+      } else {
+        acc[field.name] = z.string().optional();
+      }
       return acc;
-    }, {} as any)
+    }, {} as Record<string, any>)
   );
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: prefill,
-  });
+  // Update form with schema and default values
+  React.useEffect(() => {
+    form.reset(prefill);
+  }, [form, prefill]);
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     await createItem(table, data);
   };
 
@@ -101,11 +100,8 @@ export default function CreatePage({ params }: { params: { table: string } }) {
   );
 }
 
-// Example FkCombobox component (you need to implement or use shadcn combobox)
+// Simple FkCombobox component using Select
 function FkCombobox({ field, formField }: { field: FieldConfig; formField: any }) {
-  // Fetch options from supabase using useEffect or suspense, but since client, yes.
-  // For brevity, assume implementation that fetches `id, displayField` from refTable
-  // and uses Combobox with search.
-  // Placeholder:
-  return <Combobox {...formField} options={[]} />; // Implement fetching
+  // For now, use a simple input. In a real implementation, you would fetch options from supabase
+  return <Input {...formField} placeholder={`Enter ${field.refTable} ID`} />;
 }
