@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Link from "next/link";
-import { Plus, Eye, Edit, Trash2, Search } from "lucide-react";
+import { Plus, Eye, Edit, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import DeleteButton from "@/components/DeleteButton";
 
 export default async function ListPage({ params }: { params: Promise<{ table: string }> }) {
   const resolvedParams = await params;
@@ -136,26 +136,3 @@ export default async function ListPage({ params }: { params: Promise<{ table: st
   );
 }
 
-function DeleteButton({ table, id }: { table: string; id: string }) {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Confirm Deletion</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to delete this record? This action cannot be undone.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline">Cancel</Button>
-          <Button variant="destructive">Delete</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
