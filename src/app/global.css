@@ -54,3 +54,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .grid-cols-auto-fit {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
