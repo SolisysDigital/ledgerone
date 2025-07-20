@@ -1,16 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./global.css";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { tableConfigs } from "@/lib/tableConfigs";
-
+import Navigation from "@/components/Navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "LedgerOne",
-  description: "Full stack app with Supabase and Shadcn UI",
+  description: "Entity relationship management system",
 };
 
 export default function RootLayout({
@@ -21,20 +18,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <nav className="p-4 bg-primary text-primary-foreground">
-          <ul className="flex space-x-4">
-            {Object.keys(tableConfigs).map((table) => (
-              <li key={table}>
-                <Button variant="ghost" asChild>
-                  <Link href={`/${table}`}>{tableConfigs[table].label}</Link>
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <main className="p-4">
-          {children}
-        </main>
+        <div className="min-h-screen bg-background">
+          <div className="container mx-auto p-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              <div className="lg:col-span-1">
+                <Navigation />
+              </div>
+              <div className="lg:col-span-3">
+                {children}
+              </div>
+            </div>
+          </div>
+        </div>
       </body>
     </html>
   );
