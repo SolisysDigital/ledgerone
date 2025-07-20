@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { tableConfigs, FieldConfig } from "@/lib/tableConfigs";
 import { createItem } from "@/lib/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 
 // Note: This is a client component because of useForm
@@ -21,32 +20,25 @@ export default function CreatePage({ params }: { params: { table: string } }) {
   
   const table = params.table;
   const config = tableConfigs[table as keyof typeof tableConfigs];
+  
+  const prefill = useMemo(() => {
+    const result: Record<string, string> = {};
+    const fk = searchParams.get("fk");
+    const fkField = searchParams.get("fkField");
+    if (fk && fkField) {
+      result[fkField] = fk;
+    }
+    return result;
+  }, [searchParams]);
+
   if (!config) return <div>Table not found</div>;
 
-  const prefill: Record<string, any> = {};
-  const fk = searchParams.get("fk");
-  const fkField = searchParams.get("fkField");
-  if (fk && fkField) {
-    prefill[fkField] = fk;
-  }
-
-  const formSchema = z.object(
-    config.fields.reduce((acc, field) => {
-      if (field.type === 'number') {
-        acc[field.name] = z.string().optional();
-      } else {
-        acc[field.name] = z.string().optional();
-      }
-      return acc;
-    }, {} as Record<string, any>)
-  );
-
-  // Update form with schema and default values
+  // Update form with default values
   React.useEffect(() => {
     form.reset(prefill);
   }, [form, prefill]);
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: Record<string, string>) => {
     await createItem(table, data);
   };
 
