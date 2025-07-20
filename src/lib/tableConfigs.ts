@@ -9,6 +9,7 @@ export type FieldConfig = {
 export type ParentConfig = {
   table: string;
   fk: string;
+  displayField?: string;
 };
 
 export type ChildConfig = {
