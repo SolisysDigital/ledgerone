@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-export default async function ListPage({ params }: { params: { table: string } }) {
-  const table = params.table;
+export default async function ListPage({ params }: { params: Promise<{ table: string }> }) {
+  const resolvedParams = await params;
+  const table = resolvedParams.table;
   const config = tableConfigs[table as keyof typeof tableConfigs];
   if (!config) return <div>Table not found</div>;
 
@@ -20,7 +21,7 @@ export default async function ListPage({ params }: { params: { table: string } }
 
   if (error) return <div>Error: {error.message}</div>;
 
-  const columns = [{ name: "id", label: "ID" }, ...config.fields];
+  const columns = [{ name: "id", label: "ID", type: "text" as const }, ...config.fields];
 
   return (
     <div>
@@ -33,16 +34,16 @@ export default async function ListPage({ params }: { params: { table: string } }
       <Table>
         <TableHeader>
           <TableRow>
-            {columns.map((col) => <TableHead key={col.name}>{col.label || col.name}</TableHead>)}
+            {columns.map((col) => <TableHead key={col.name}>{'label' in col ? col.label : col.name}</TableHead>)}
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data?.map((row) => (
+          {data?.map((row: any) => (
             <TableRow key={row.id}>
               {columns.map((col) => (
                 <TableCell key={col.name}>
-                  {col.type === "fk" ? row[`${col.name}_display`] : row[col.name as keyof typeof row]}
+                  {col.type === "fk" ? row[`${col.name}_display`] : row[col.name]}
                 </TableCell>
               ))}
               <TableCell>
