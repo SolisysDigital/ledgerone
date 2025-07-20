@@ -112,7 +112,7 @@ export default async function HomePage() {
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickActions.map((action) => {
               const Icon = action.icon;
               return (
@@ -121,7 +121,7 @@ export default async function HomePage() {
                     <div className={`p-2 rounded-full ${action.color} text-white`}>
                       <Icon className="h-5 w-5" />
                     </div>
-                    <span className="text-sm font-medium">{action.name}</span>
+                    <span className="text-sm font-medium text-center">{action.name}</span>
                   </Link>
                 </Button>
               );
@@ -136,7 +136,7 @@ export default async function HomePage() {
           <CardTitle>Database Tables</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {recentTables.map(([tableName, config]) => {
               const count = tableCounts[tableName] || 0;
               const getIcon = (name: string) => {
@@ -162,14 +162,14 @@ export default async function HomePage() {
                 <Card key={tableName} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Icon className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <h3 className="font-medium">{config.label}</h3>
+                      <div className="flex items-center space-x-3 min-w-0 flex-1">
+                        <Icon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-medium truncate">{config.label}</h3>
                           <p className="text-sm text-muted-foreground">{count} records</p>
                         </div>
                       </div>
-                      <div className="flex space-x-2">
+                      <div className="flex space-x-2 flex-shrink-0">
                         <Button asChild size="sm" variant="outline">
                           <Link href={`/${tableName}`}>
                             View

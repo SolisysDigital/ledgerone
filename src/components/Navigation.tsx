@@ -48,7 +48,7 @@ export default function Navigation() {
         <CardTitle>Database Tables</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="space-y-2">
           {Object.entries(tableConfigs).map(([tableName, config]) => {
             const Icon = tableIcons[tableName] || Building2;
             const isActive = currentTable === tableName;
@@ -58,15 +58,15 @@ export default function Navigation() {
                 key={tableName}
                 asChild
                 variant={isActive ? "default" : "outline"}
-                className="h-auto p-4 flex flex-col items-center space-y-2"
+                className="w-full justify-start h-auto p-3"
               >
                 <Link href={`/${tableName}`}>
-                  <Icon className="h-5 w-5" />
-                  <span className="text-xs font-medium text-center">
+                  <Icon className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="text-sm font-medium truncate">
                     {config.label}
                   </span>
                   {isActive && (
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="ml-auto text-xs">
                       Active
                     </Badge>
                   )}
