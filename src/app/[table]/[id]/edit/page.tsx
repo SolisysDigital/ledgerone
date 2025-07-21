@@ -40,8 +40,8 @@ export default async function EditPage({
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Edit {config.label}</h1>
-            <p className="text-muted-foreground">ID: {id}</p>
+            <h1 className="text-lg font-bold">Edit {config.label}</h1>
+            <p className="text-xs text-muted-foreground">ID: {id}</p>
           </div>
         </div>
       </div>
@@ -49,7 +49,7 @@ export default async function EditPage({
       {/* Edit Form */}
       <Card>
         <CardHeader>
-          <CardTitle>Update Information</CardTitle>
+          <CardTitle className="text-sm">Update Information</CardTitle>
         </CardHeader>
         <CardContent>
           <EditForm table={table} config={config} initialData={data} />

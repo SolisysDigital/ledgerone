@@ -8,9 +8,10 @@ import { useSearchParams } from "next/navigation";
 interface CreateFormProps {
   table: string;
   config: any;
+  entityName?: string;
 }
 
-export default function CreateForm({ table, config }: CreateFormProps) {
+export default function CreateForm({ table, config, entityName }: CreateFormProps) {
   const searchParams = useSearchParams();
   
   const prefill = useMemo(() => {
