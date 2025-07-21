@@ -15,14 +15,7 @@ export default async function ListPage({ params }: { params: Promise<{ table: st
   const config = tableConfigs[table as keyof typeof tableConfigs];
   if (!config) return <div>Table not found</div>;
 
-  let select = "*";
-  config.fields.forEach((field) => {
-    if (field.type === "fk") {
-      select += `, ${field.refTable}!${field.name}(${field.displayField} as ${field.name}_display)`;
-    }
-  });
-
-  const { data, error } = await supabase.from(table).select(select);
+  const { data, error } = await supabase.from(table).select("*");
 
   if (error) return <div>Error: {error.message}</div>;
 
@@ -100,7 +93,7 @@ export default async function ListPage({ params }: { params: Promise<{ table: st
                         {col.type === "select" ? (
                           <Badge variant="secondary">{row[col.name]}</Badge>
                         ) : col.type === "fk" ? (
-                          row[`${col.name}_display`] || row[col.name]
+                          row[col.name]
                         ) : col.type === "date" ? (
                           row[col.name] ? new Date(row[col.name]).toLocaleDateString() : '-'
                         ) : col.type === "number" ? (
