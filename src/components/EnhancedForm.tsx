@@ -133,25 +133,32 @@ export default function EnhancedForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {config.fields.map((field: FieldConfig) => (
-            <FormField
-              key={field.name}
-              control={form.control}
-              name={field.name}
-              render={({ field: formField }) => (
-                <FormItem>
-                  <FormLabel className="capitalize font-medium">
-                    {field.name.replace(/_/g, ' ')}
-                    {field.type === "fk" && <Badge variant="outline" className="ml-2 text-xs">Related</Badge>}
-                  </FormLabel>
-                  <FormControl>
-                    {renderField(field, formField)}
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
+          {config.fields.map((field: FieldConfig) => {
+            // Hide foreign key fields that are pre-filled (like entity_id when creating legal info)
+            if (field.type === "fk" && initialData && initialData[field.name]) {
+              return null;
+            }
+            
+            return (
+              <FormField
+                key={field.name}
+                control={form.control}
+                name={field.name}
+                render={({ field: formField }) => (
+                  <FormItem>
+                    <FormLabel className="capitalize font-medium">
+                      {field.name.replace(/_/g, ' ')}
+                      {field.type === "fk" && <Badge variant="outline" className="ml-2 text-xs">Related</Badge>}
+                    </FormLabel>
+                    <FormControl>
+                      {renderField(field, formField)}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            );
+          })}
         </div>
         
         <div className="flex justify-end space-x-2 pt-6 border-t">
