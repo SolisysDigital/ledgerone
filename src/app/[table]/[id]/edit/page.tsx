@@ -1,5 +1,5 @@
 import React from "react";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { tableConfigs } from "@/lib/tableConfigs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

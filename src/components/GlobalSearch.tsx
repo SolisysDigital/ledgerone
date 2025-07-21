@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { tableConfigs } from "@/lib/tableConfigs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Search, Building2, Users, Mail, Phone, CreditCard, Globe, Server, Bitcoin, TrendingUp, BarChart3, FileText, Link as LinkIcon } from "lucide-react";
@@ -102,7 +102,7 @@ export default function GlobalSearch() {
     return () => clearTimeout(debounceTimer);
   }, [searchTerm]);
 
-  const handleResultClick = (result: SearchResult) => {
+  const handleResultClick = () => {
     setIsOpen(false);
     setSearchTerm("");
   };
@@ -142,7 +142,7 @@ export default function GlobalSearch() {
                   <Link
                     key={`${result.table}-${result.id}`}
                     href={`/${result.table}/${result.id}`}
-                    onClick={() => handleResultClick(result)}
+                    onClick={() => handleResultClick()}
                   >
                     <Card className="hover:bg-accent transition-colors cursor-pointer">
                       <CardContent className="p-3">
@@ -172,7 +172,7 @@ export default function GlobalSearch() {
 
           {!isSearching && searchTerm && results.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No results found for "{searchTerm}"</p>
+              <p className="text-muted-foreground">No results found for &quot;{searchTerm}&quot;</p>
             </div>
           )}
         </div>
