@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import Link from "next/link";
 import { Plus, Eye, Edit } from "lucide-react";
 import DeleteButton from "@/components/DeleteButton";
+import GlobalSearch from "@/components/GlobalSearch";
 
 export default async function HomePage() {
   const table = "entities";
@@ -15,14 +16,7 @@ export default async function HomePage() {
   
   if (!config) return <div>Table not found</div>;
 
-  let select = "*";
-  config.fields.forEach((field) => {
-    if (field.type === "fk") {
-      select += `, ${field.refTable}!${field.name}(${field.displayField} as ${field.name}_display)`;
-    }
-  });
-
-  const { data, error } = await supabase.from(table).select(select);
+  const { data, error } = await supabase.from(table).select("*");
 
   if (error) return <div>Error: {error.message}</div>;
 
@@ -30,7 +24,7 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header with Global Search */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Entities</h1>
@@ -38,12 +32,15 @@ export default async function HomePage() {
             Manage your entities and their relationships
           </p>
         </div>
-        <Button asChild>
-          <Link href={`/${table}/new`}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create New Entity
-          </Link>
-        </Button>
+        <div className="flex items-center space-x-4">
+          <GlobalSearch />
+          <Button asChild>
+            <Link href={`/${table}/new`}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create New Entity
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Data Table */}
@@ -82,7 +79,7 @@ export default async function HomePage() {
                         {col.type === "select" ? (
                           <Badge variant="secondary">{row[col.name]}</Badge>
                         ) : col.type === "fk" ? (
-                          row[`${col.name}_display`] || row[col.name]
+                          row[col.name]
                         ) : col.type === "date" ? (
                           row[col.name] ? new Date(row[col.name]).toLocaleDateString() : '-'
                         ) : col.type === "number" ? (

@@ -3,7 +3,6 @@
 import React from "react";
 import { tableConfigs } from "@/lib/tableConfigs";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -43,39 +42,33 @@ export default function Navigation() {
   const currentTable = pathname.split('/')[1];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Database Tables</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          {Object.entries(tableConfigs).map(([tableName, config]) => {
-            const Icon = tableIcons[tableName] || Building2;
-            const isActive = currentTable === tableName;
-            
-            return (
-              <Button
-                key={tableName}
-                asChild
-                variant={isActive ? "default" : "outline"}
-                className="w-full justify-start h-auto p-3"
-              >
-                <Link href={`/${tableName}`}>
-                  <Icon className="h-4 w-4 mr-2 flex-shrink-0" />
-                  <span className="text-sm font-medium truncate">
-                    {config.label}
-                  </span>
-                  {isActive && (
-                    <Badge variant="secondary" className="ml-auto text-xs">
-                      Active
-                    </Badge>
-                  )}
-                </Link>
-              </Button>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-2">
+      <h3 className="text-sm font-medium text-muted-foreground mb-3">Database Tables</h3>
+      {Object.entries(tableConfigs).map(([tableName, config]) => {
+        const Icon = tableIcons[tableName] || Building2;
+        const isActive = currentTable === tableName;
+        
+        return (
+          <Button
+            key={tableName}
+            asChild
+            variant={isActive ? "default" : "ghost"}
+            className="w-full justify-start h-auto p-3"
+          >
+            <Link href={`/${tableName}`}>
+              <Icon className="h-4 w-4 mr-2 flex-shrink-0" />
+              <span className="text-sm font-medium truncate">
+                {config.label}
+              </span>
+              {isActive && (
+                <Badge variant="secondary" className="ml-auto text-xs">
+                  Active
+                </Badge>
+              )}
+            </Link>
+          </Button>
+        );
+      })}
+    </div>
   );
 } 

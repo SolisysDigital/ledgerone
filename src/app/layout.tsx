@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./global.css";
 import Navigation from "@/components/Navigation";
-import GlobalSearch from "@/components/GlobalSearch";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,7 +24,6 @@ export default function RootLayout({
             <div className="w-64 min-h-screen bg-card border-r p-4 space-y-4">
               <div>
                 <h1 className="text-xl font-bold mb-4">LedgerOne</h1>
-                <GlobalSearch />
               </div>
               <Navigation />
             </div>
