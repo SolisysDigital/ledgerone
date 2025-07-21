@@ -169,8 +169,8 @@ export default function HomePage() {
                         <div className="flex items-center space-x-4">
                           <Icon className="h-6 w-6 text-muted-foreground flex-shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-3 mb-1">
-                              <h3 className="font-medium text-lg truncate">{result.displayName}</h3>
+                                                         <div className="flex items-center space-x-3 mb-1">
+                               <h3 className="font-medium text-lg truncate cursor-help" title={`ID: ${result.id}`}>{result.displayName}</h3>
                               <Badge variant="outline" className="text-xs">
                                 {tableConfigs[result.table]?.label}
                               </Badge>
@@ -180,9 +180,9 @@ export default function HomePage() {
                                 {result.description}
                               </p>
                             )}
-                            <p className="text-xs text-muted-foreground mt-1">
-                              ID: {result.id}
-                            </p>
+                                                         <p className="text-xs text-muted-foreground mt-1">
+                               Hover over name to see ID
+                             </p>
                           </div>
                         </div>
                       </CardContent>

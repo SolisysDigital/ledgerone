@@ -46,7 +46,7 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
     <Tabs defaultValue={children[0]?.table || "parent"} className="w-full">
       <TabsList className="grid w-full grid-cols-auto-fit">
         {parent && (
-          <TabsTrigger value="parent" className="text-sm">
+          <TabsTrigger value="parent" className="text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             {(() => {
               const Icon = tableIcons[parent.table] || Building2;
               return (
@@ -59,7 +59,7 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
           </TabsTrigger>
         )}
         {children.map((child) => (
-          <TabsTrigger key={child.table} value={child.table} className="text-sm">
+          <TabsTrigger key={child.table} value={child.table} className="text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             {(() => {
               const Icon = tableIcons[child.table] || Building2;
               return (
@@ -77,7 +77,7 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
         <TabsContent value="parent" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between text-base">
+              <CardTitle className="flex items-center justify-between text-sm">
                 <div className="flex items-center">
                   {(() => {
                     const Icon = tableIcons[parent.table] || Building2;
@@ -122,7 +122,7 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
         <TabsContent key={child.table} value={child.table} className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between text-base">
+              <CardTitle className="flex items-center justify-between text-sm">
                 <div className="flex items-center">
                   {(() => {
                     const Icon = tableIcons[child.table] || Building2;
@@ -143,7 +143,6 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-xs">ID</TableHead>
                       <TableHead className="text-xs">Name</TableHead>
                       <TableHead className="text-xs">Type</TableHead>
                       <TableHead className="text-xs">Actions</TableHead>
@@ -152,9 +151,10 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                   <TableBody>
                     {relatedData[child.table].map((item: any) => (
                       <TableRow key={item.id}>
-                        <TableCell className="text-xs">{item.id}</TableCell>
                         <TableCell className="text-xs">
-                          {item.name || item[tableConfigs[child.table]?.fields.find(f => f.name === 'name')?.name || 'id']}
+                          <div title={`ID: ${item.id}`} className="cursor-help">
+                            {item.name || item[tableConfigs[child.table]?.fields.find(f => f.name === 'name')?.name || 'id']}
+                          </div>
                         </TableCell>
                         <TableCell className="text-xs">
                           <Badge variant="secondary" className="text-xs">

@@ -19,15 +19,15 @@ export default async function ListPage({ params }: { params: Promise<{ table: st
 
   if (error) return <div>Error: {error.message}</div>;
 
-  const columns = [{ name: "id", label: "ID", type: "text" as const }, ...config.fields];
+  const columns = config.fields;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold">{config.label}</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-lg font-bold">{config.label}</h1>
+          <p className="text-xs text-muted-foreground">
             Manage your {config.label.toLowerCase()} records
           </p>
         </div>
@@ -42,7 +42,7 @@ export default async function ListPage({ params }: { params: Promise<{ table: st
       {/* Search and Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center text-base">
+          <CardTitle className="flex items-center text-sm">
             <Search className="h-4 w-4 mr-2" />
             Search & Filter
           </CardTitle>
@@ -60,7 +60,7 @@ export default async function ListPage({ params }: { params: Promise<{ table: st
       {/* Data Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Records ({data?.length || 0})</CardTitle>
+          <CardTitle className="text-sm">Records ({data?.length || 0})</CardTitle>
         </CardHeader>
         <CardContent>
           {data?.length === 0 ? (
@@ -77,9 +77,9 @@ export default async function ListPage({ params }: { params: Promise<{ table: st
             <Table>
               <TableHeader>
                 <TableRow>
-                  {columns.slice(0, 6).map((col) => (
+                  {columns.slice(0, 5).map((col) => (
                     <TableHead key={col.name}>
-                      {'label' in col ? col.label : col.name}
+                      {col.name === 'name' ? 'Name' : col.name.replace(/_/g, ' ')}
                     </TableHead>
                   ))}
                   <TableHead>Actions</TableHead>
@@ -88,9 +88,13 @@ export default async function ListPage({ params }: { params: Promise<{ table: st
               <TableBody>
                 {data?.map((row: any) => (
                   <TableRow key={row.id}>
-                    {columns.slice(0, 6).map((col) => (
+                    {columns.slice(0, 5).map((col) => (
                       <TableCell key={col.name}>
-                        {col.type === "select" ? (
+                        {col.name === 'name' ? (
+                          <div title={`ID: ${row.id}`} className="cursor-help">
+                            {row[col.name] || '-'}
+                          </div>
+                        ) : col.type === "select" ? (
                           <Badge variant="secondary">{row[col.name]}</Badge>
                         ) : col.type === "fk" ? (
                           row[col.name]
