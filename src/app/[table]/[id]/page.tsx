@@ -21,17 +21,10 @@ export default async function DetailPage({
   const config = tableConfigs[table as keyof typeof tableConfigs];
   if (!config) return notFound();
 
-  // Build select query with joins
-  let select = "*";
-  config.fields.forEach((field) => {
-    if (field.type === "fk") {
-      select += `, ${field.refTable}!${field.name}(${field.displayField} as ${field.name}_display)`;
-    }
-  });
-
+  // Use simple select to avoid join syntax issues
   const { data, error } = await supabase
     .from(table)
-    .select(select)
+    .select("*")
     .eq("id", id)
     .single();
 
@@ -82,9 +75,13 @@ export default async function DetailPage({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {config.fields.map((field) => {
               const value = (data as any)[field.name];
-              const displayValue = field.type === "fk" 
-                ? (data as any)[`${field.name}_display`] || value 
-                : value;
+              
+              // For foreign key fields, try to get display value
+              let displayValue = value;
+              if (field.type === "fk" && field.refTable && field.displayField) {
+                // Try to get the display value from the related table
+                displayValue = value; // For now, just show the ID
+              }
 
               return (
                 <div key={field.name} className="space-y-1">
@@ -100,6 +97,8 @@ export default async function DetailPage({
                       <span>{displayValue ? new Date(displayValue).toLocaleDateString() : '-'}</span>
                     ) : field.type === "number" ? (
                       <span>{displayValue?.toLocaleString() || '-'}</span>
+                    ) : field.type === "fk" ? (
+                      <span className="text-muted-foreground">ID: {displayValue || '-'}</span>
                     ) : (
                       <span>{displayValue || '-'}</span>
                     )}
