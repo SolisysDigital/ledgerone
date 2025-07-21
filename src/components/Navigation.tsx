@@ -42,6 +42,9 @@ export default function Navigation() {
   const pathname = usePathname();
   const currentTable = pathname.split('/')[1];
 
+  // Filter out legal_information as it's an extension of entities
+  const filteredTables = Object.entries(tableConfigs).filter(([tableName]) => tableName !== 'legal_information');
+
   return (
     <div className="space-y-1">
       {/* Home Link */}
@@ -64,7 +67,7 @@ export default function Navigation() {
       </Button>
 
       {/* Database Tables */}
-      {Object.entries(tableConfigs).map(([tableName, config]) => {
+      {filteredTables.map(([tableName, config]) => {
         const Icon = tableIcons[tableName] || Building2;
         const isActive = currentTable === tableName;
         

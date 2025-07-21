@@ -26,8 +26,8 @@ export default async function ListPage({ params }: { params: Promise<{ table: st
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">{config.label}</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold">{config.label}</h1>
+          <p className="text-sm text-muted-foreground">
             Manage your {config.label.toLowerCase()} records
           </p>
         </div>
@@ -42,7 +42,7 @@ export default async function ListPage({ params }: { params: Promise<{ table: st
       {/* Search and Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
+          <CardTitle className="flex items-center text-base">
             <Search className="h-4 w-4 mr-2" />
             Search & Filter
           </CardTitle>
@@ -60,7 +60,7 @@ export default async function ListPage({ params }: { params: Promise<{ table: st
       {/* Data Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Records ({data?.length || 0})</CardTitle>
+          <CardTitle className="text-base">Records ({data?.length || 0})</CardTitle>
         </CardHeader>
         <CardContent>
           {data?.length === 0 ? (

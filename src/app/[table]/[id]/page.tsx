@@ -52,8 +52,8 @@ export default async function DetailPage({
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">{config.label} Details</h1>
-            <p className="text-muted-foreground">ID: {id}</p>
+            <h1 className="text-xl font-bold">{config.label} Details</h1>
+            <p className="text-sm text-muted-foreground">ID: {id}</p>
           </div>
         </div>
         <div className="flex space-x-2">
@@ -73,7 +73,7 @@ export default async function DetailPage({
       {/* Main Data */}
       <Card>
         <CardHeader>
-          <CardTitle>Information</CardTitle>
+          <CardTitle className="text-base">Information</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -112,7 +112,7 @@ export default async function DetailPage({
       {(config.parent || config.children?.length) && (
         <Card>
           <CardHeader>
-            <CardTitle>Related Data</CardTitle>
+            <CardTitle className="text-base">Related Data</CardTitle>
           </CardHeader>
           <CardContent>
             <RelationshipTabs 

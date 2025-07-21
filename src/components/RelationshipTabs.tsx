@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Plus, ExternalLink } from "lucide-react";
+import { Plus, ExternalLink, Building2, Users, Mail, Phone, CreditCard, Globe, Server, Bitcoin, TrendingUp, BarChart3, FileText } from "lucide-react";
 import { tableConfigs } from "@/lib/tableConfigs";
 
 interface RelationshipTabsProps {
@@ -15,6 +15,21 @@ interface RelationshipTabsProps {
   currentId: string;
   relatedData: Record<string, any[]>;
 }
+
+const tableIcons: Record<string, React.ComponentType<any>> = {
+  entities: Building2,
+  legal_information: FileText,
+  contacts: Users,
+  emails: Mail,
+  phones: Phone,
+  bank_accounts: CreditCard,
+  investment_accounts: TrendingUp,
+  crypto_accounts: Bitcoin,
+  credit_cards: CreditCard,
+  websites: Globe,
+  hosting_accounts: Server,
+  securities_held: BarChart3,
+};
 
 export default function RelationshipTabs({ currentTable, currentId, relatedData }: RelationshipTabsProps) {
   const config = tableConfigs[currentTable as keyof typeof tableConfigs];
@@ -31,13 +46,29 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
     <Tabs defaultValue={children[0]?.table || "parent"} className="w-full">
       <TabsList className="grid w-full grid-cols-auto-fit">
         {parent && (
-          <TabsTrigger value="parent">
-            {tableConfigs[parent.table]?.label || parent.table}
+          <TabsTrigger value="parent" className="text-sm">
+            {(() => {
+              const Icon = tableIcons[parent.table] || Building2;
+              return (
+                <>
+                  <Icon className="h-3 w-3 mr-2" />
+                  {tableConfigs[parent.table]?.label || parent.table}
+                </>
+              );
+            })()}
           </TabsTrigger>
         )}
         {children.map((child) => (
-          <TabsTrigger key={child.table} value={child.table}>
-            {tableConfigs[child.table]?.label || child.table}
+          <TabsTrigger key={child.table} value={child.table} className="text-sm">
+            {(() => {
+              const Icon = tableIcons[child.table] || Building2;
+              return (
+                <>
+                  <Icon className="h-3 w-3 mr-2" />
+                  {tableConfigs[child.table]?.label || child.table}
+                </>
+              );
+            })()}
           </TabsTrigger>
         ))}
       </TabsList>
@@ -46,8 +77,14 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
         <TabsContent value="parent" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                {tableConfigs[parent.table]?.label || parent.table}
+              <CardTitle className="flex items-center justify-between text-base">
+                <div className="flex items-center">
+                  {(() => {
+                    const Icon = tableIcons[parent.table] || Building2;
+                    return <Icon className="h-4 w-4 mr-2" />;
+                  })()}
+                  {tableConfigs[parent.table]?.label || parent.table}
+                </div>
                 {relatedData[parent.table]?.[0] && (
                   <Button asChild variant="outline" size="sm">
                     <Link href={`/${parent.table}/${relatedData[parent.table][0].id}`}>
@@ -64,17 +101,17 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                   {relatedData[parent.table].map((item: any) => (
                     <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
                       <div>
-                        <h4 className="font-medium">{item.name || item[parent.displayField || 'id']}</h4>
+                        <h4 className="font-medium text-sm">{item.name || item[parent.displayField || 'id']}</h4>
                         {item.description && (
-                          <p className="text-sm text-muted-foreground">{item.description}</p>
+                          <p className="text-xs text-muted-foreground">{item.description}</p>
                         )}
                       </div>
-                      <Badge variant="secondary">{item.type || 'Related'}</Badge>
+                      <Badge variant="secondary" className="text-xs">{item.type || 'Related'}</Badge>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground text-center py-4">No related data found</p>
+                <p className="text-muted-foreground text-center py-4 text-sm">No related data found</p>
               )}
             </CardContent>
           </Card>
@@ -85,8 +122,14 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
         <TabsContent key={child.table} value={child.table} className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                {tableConfigs[child.table]?.label || child.table}
+              <CardTitle className="flex items-center justify-between text-base">
+                <div className="flex items-center">
+                  {(() => {
+                    const Icon = tableIcons[child.table] || Building2;
+                    return <Icon className="h-4 w-4 mr-2" />;
+                  })()}
+                  {tableConfigs[child.table]?.label || child.table}
+                </div>
                 <Button asChild size="sm">
                   <Link href={`/${child.table}/new?fk=${currentId}&fkField=${child.fk}`}>
                     <Plus className="h-4 w-4 mr-2" />
@@ -100,45 +143,44 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      {tableConfigs[child.table]?.fields.map((field) => (
-                        <TableHead key={field.name}>
-                          {field.name === child.fk ? 'ID' : field.name}
-                        </TableHead>
-                      ))}
-                      <TableHead>Actions</TableHead>
+                      <TableHead className="text-xs">ID</TableHead>
+                      <TableHead className="text-xs">Name</TableHead>
+                      <TableHead className="text-xs">Type</TableHead>
+                      <TableHead className="text-xs">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {relatedData[child.table].map((item: any) => (
                       <TableRow key={item.id}>
-                        {tableConfigs[child.table]?.fields.map((field) => (
-                          <TableCell key={field.name}>
-                            {field.type === 'fk' && field.refTable === currentTable
-                              ? item[`${field.name}_display`] || item[field.name]
-                              : item[field.name]}
-                          </TableCell>
-                        ))}
-                        <TableCell>
-                          <Button asChild variant="outline" size="sm">
-                            <Link href={`/${child.table}/${item.id}`}>
-                              View
-                            </Link>
-                          </Button>
+                        <TableCell className="text-xs">{item.id}</TableCell>
+                        <TableCell className="text-xs">
+                          {item.name || item[tableConfigs[child.table]?.fields.find(f => f.name === 'name')?.name || 'id']}
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          <Badge variant="secondary" className="text-xs">
+                            {item.type || 'Related'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          <div className="flex space-x-2">
+                            <Button asChild variant="outline" size="sm">
+                              <Link href={`/${child.table}/${item.id}`}>
+                                <ExternalLink className="h-3 w-3" />
+                              </Link>
+                            </Button>
+                            <Button asChild variant="outline" size="sm">
+                              <Link href={`/${child.table}/${item.id}/edit`}>
+                                <Plus className="h-3 w-3" />
+                              </Link>
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">No {tableConfigs[child.table]?.label || child.table} found</p>
-                  <Button asChild>
-                    <Link href={`/${child.table}/new?fk=${currentId}&fkField=${child.fk}`}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add First {tableConfigs[child.table]?.label || child.table}
-                    </Link>
-                  </Button>
-                </div>
+                <p className="text-muted-foreground text-center py-4 text-sm">No related data found</p>
               )}
             </CardContent>
           </Card>
