@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { tableConfigs, FieldConfig } from "@/lib/tableConfigs";
+import { FieldConfig } from "@/lib/tableConfigs";
 import { supabase } from "@/lib/supabase";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";

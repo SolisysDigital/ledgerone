@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Plus, ExternalLink } from "lucide-react";
-import { tableConfigs, TableConfig } from "@/lib/tableConfigs";
+import { tableConfigs } from "@/lib/tableConfigs";
 
 interface RelationshipTabsProps {
   currentTable: string;

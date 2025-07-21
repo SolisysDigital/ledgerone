@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { tableConfigs } from "@/lib/tableConfigs";
 import { Input } from "@/components/ui/input";
@@ -155,7 +155,7 @@ export default function HomePage() {
           ) : results.length > 0 ? (
             <div className="space-y-3">
               <h2 className="text-lg font-semibold mb-4">
-                Found {results.length} result{results.length !== 1 ? 's' : ''} for "{searchTerm}"
+                                 Found {results.length} result{results.length !== 1 ? 's' : ''} for &quot;{searchTerm}&quot;
               </h2>
               {results.map((result) => {
                 const Icon = result.icon;
