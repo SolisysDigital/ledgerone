@@ -39,6 +39,9 @@ export default async function DetailPage({
 
   // Fetch related data
   const relatedData = await fetchRelatedDataWithJoins(table, id);
+  
+  // Debug logging
+  console.log('Detail page relatedData:', { table, id, relatedData });
 
   return (
     <div className="space-y-6">

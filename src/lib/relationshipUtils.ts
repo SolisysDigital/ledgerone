@@ -22,21 +22,22 @@ export async function fetchRelatedData(table: string, id: string) {
   // Fetch children data
   if (config.children) {
     for (const child of config.children) {
-      console.log(`Fetching ${child.table} where ${child.fk} = ${id}`);
       const { data: childData, error: childError } = await supabase
         .from(child.table)
         .select("*")
         .eq(child.fk, id);
 
-      console.log(`Result for ${child.table}:`, { data: childData, error: childError });
-
       if (!childError && childData) {
         relatedData[child.table] = childData;
+      }
+      
+      // Debug logging for specific tables
+      if (child.table === 'contacts' || child.table === 'emails' || child.table === 'phones' || child.table === 'bank_accounts') {
+        console.log(`${child.table} query:`, { table: child.table, fk: child.fk, id, data: childData, error: childError });
       }
     }
   }
 
-  console.log('Final relatedData:', relatedData);
   return relatedData;
 }
 
