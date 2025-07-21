@@ -2,6 +2,7 @@ import React from "react";
 import { tableConfigs } from "@/lib/tableConfigs";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import CreateForm from "./CreateForm";
 
 export default async function CreatePage({ 
@@ -36,14 +37,21 @@ export default async function CreatePage({
     }
   }
 
-  const headerText = entityName 
-    ? `Create ${config.label} for ${entityName}`
-    : `Create ${config.label}`;
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm">{headerText}</CardTitle>
+        <CardTitle className="text-sm">
+          {entityName ? (
+            <div className="flex items-center space-x-2">
+              <span>Create {config.label} for</span>
+              <Badge variant="default" className="text-sm font-semibold bg-primary/10 text-primary border-primary/20">
+                {entityName}
+              </Badge>
+            </div>
+          ) : (
+            `Create ${config.label}`
+          )}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <CreateForm 
