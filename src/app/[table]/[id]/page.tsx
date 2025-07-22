@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import RelationshipTabs from "@/components/RelationshipTabs";
 import Link from "next/link";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordian";
 
 export default async function DetailPage({ 
   params 
@@ -35,6 +36,36 @@ export default async function DetailPage({
   
   // Debug logging
   console.log('Detail page relatedData:', { table, id, relatedData });
+
+  // Helper: group fields
+  const legalInfoFields = [
+    'legal_business_name',
+    'employer_identification_number',
+    'incorporation_date',
+    'country_of_formation',
+    'state_of_formation',
+    'business_type',
+    'industry',
+    'naics_code',
+    'legal_address',
+    'mailing_address',
+    'registered_agent_name',
+    'registered_agent_address',
+  ];
+  const officerFields = [
+    ['officer1_name', 'officer1_title', 'officer1_ownership_percent'],
+    ['officer2_name', 'officer2_title', 'officer2_ownership_percent'],
+    ['officer3_name', 'officer3_title', 'officer3_ownership_percent'],
+    ['officer4_name', 'officer4_title', 'officer4_ownership_percent'],
+  ];
+  const texasFields = [
+    'texas_taxpayer_number',
+    'texas_file_number',
+    'texas_webfile_number',
+    'texas_webfile_login',
+    'texas_webfile_password',
+  ];
+  const stateOfFormation = data['state_of_formation'];
 
   return (
     <div className="space-y-6">
@@ -73,16 +104,10 @@ export default async function DetailPage({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {config.fields.map((field) => {
+            {config.fields.filter((f) => !legalInfoFields.includes(f.name) && !texasFields.includes(f.name) && !officerFields.flat().includes(f.name)).map((field) => {
               const value = (data as any)[field.name];
-              
-              // For foreign key fields, try to get display value
               let displayValue = value;
-              if (field.type === "fk" && field.refTable && field.displayField) {
-                // Try to get the display value from the related table
-                displayValue = value; // For now, just show the ID
-              }
-
+              if (field.type === "fk" && field.refTable && field.displayField) displayValue = value;
               return (
                 <div key={field.name} className="space-y-1">
                   <label className="text-sm font-medium text-muted-foreground capitalize">
@@ -107,6 +132,91 @@ export default async function DetailPage({
               );
             })}
           </div>
+          {/* Legal Info Accordion */}
+          <Accordion type="single" collapsible defaultValue="legal-info">
+            <AccordionItem value="legal-info">
+              <AccordionTrigger>Legal Info</AccordionTrigger>
+              <AccordionContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {config.fields.filter((f) => legalInfoFields.includes(f.name)).map((field) => {
+                    const value = (data as any)[field.name];
+                    if (!value) return null;
+                    if (field.name === 'naics_code') {
+                      return (
+                        <div key={field.name} className="space-y-1">
+                          <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            NAICS Code
+                            <a href="https://www.census.gov/naics/" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Help</a>
+                          </label>
+                          <div className="text-sm">{value}</div>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={field.name} className="space-y-1">
+                        <label className="text-sm font-medium text-muted-foreground capitalize">
+                          {field.name.replace(/_/g, ' ')}
+                        </label>
+                        <div className="text-sm">{value}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Officer Section */}
+                <div className="mt-8">
+                  <div className="font-semibold mb-2">Officers (up to 4)</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {officerFields.map((fields, idx) => {
+                      const hasOfficer = fields.some(fname => data[fname]);
+                      if (!hasOfficer) return null;
+                      return (
+                        <div key={idx} className="border rounded p-3 mb-2">
+                          <div className="font-medium mb-1">Officer {idx + 1}</div>
+                          {fields.map((fname) => {
+                            const field = config.fields.find(f => f.name === fname);
+                            if (!field) return null;
+                            const value = data[fname];
+                            if (!value && value !== 0) return null;
+                            return (
+                              <div key={fname} className="space-y-1">
+                                <label className="text-sm font-medium text-muted-foreground capitalize">
+                                  {field.name.replace(/_/g, ' ')}
+                                </label>
+                                <div className="text-sm">{value}</div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                {/* Texas-specific fields */}
+                {stateOfFormation === 'Texas' && (
+                  <div className="mt-8">
+                    <div className="font-semibold mb-2 flex items-center gap-2">Texas-Specific Info
+                      <a href="https://security.app.cpa.state.tx.us/Public/create-account" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Webfile Portal</a>
+                      <a href="https://mycpa.cpa.state.tx.us/coa/search.do" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Entity Search</a>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {config.fields.filter((f) => texasFields.includes(f.name)).map((field) => {
+                        const value = (data as any)[field.name];
+                        if (!value) return null;
+                        return (
+                          <div key={field.name} className="space-y-1">
+                            <label className="text-sm font-medium text-muted-foreground capitalize">
+                              {field.name.replace(/_/g, ' ')}
+                            </label>
+                            <div className="text-sm">{value}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </CardContent>
       </Card>
 
