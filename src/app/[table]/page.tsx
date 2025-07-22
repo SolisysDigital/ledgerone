@@ -40,29 +40,26 @@ export default async function ListPage({ params }: { params: Promise<{ table: st
       </div>
 
       {/* Search and Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center text-sm">
-            <Search className="h-4 w-4 mr-2" />
-            Search & Filter
+      <Card className="bg-gray-50 rounded-lg p-4 mb-6">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Search className="h-4 w-4" /> Search & Filter
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex space-x-4">
-            <div className="flex-1">
-              <Input placeholder="Search records..." />
-            </div>
-            <Button variant="outline">Filter</Button>
+        <CardContent className="flex flex-row gap-2 items-center">
+          <div className="flex-1">
+            <Input placeholder="Search records..." />
           </div>
+          <Button variant="secondary" className="bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-200">Filter</Button>
         </CardContent>
       </Card>
 
       {/* Data Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Records ({data?.length || 0})</CardTitle>
+      <Card className="bg-gray-50 rounded-lg p-4">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Records ({data?.length || 0})</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {data?.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground mb-4">No {config.label.toLowerCase()} found</p>
