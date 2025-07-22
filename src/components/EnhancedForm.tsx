@@ -190,96 +190,36 @@ export default function EnhancedForm({
             );
           })}
         </div>
-        {/* Legal Info Accordion */}
-        <Accordion type="single" collapsible defaultValue="legal-info">
-          <AccordionItem value="legal-info">
-            <AccordionTrigger>Legal Info</AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {config.fields.filter((f: FieldConfig) => legalInfoFields.includes(f.name)).map((field: FieldConfig) => {
-                  if (field.name === 'naics_code') {
-                    return (
-                      <FormField
-                        key={field.name}
-                        control={form.control}
-                        name={field.name}
-                        render={({ field: formField }) => (
-                          <FormItem>
-                            <FormLabel className="capitalize font-medium flex items-center gap-2">
-                              NAICS Code
-                              <a href="https://www.census.gov/naics/" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Help</a>
-                            </FormLabel>
-                            <FormControl>
-                              {renderField(field, formField)}
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    );
-                  }
-                  return (
-                    <FormField
-                      key={field.name}
-                      control={form.control}
-                      name={field.name}
-                      render={({ field: formField }) => (
-                        <FormItem>
-                          <FormLabel className="capitalize font-medium">
-                            {field.name.replace(/_/g, ' ')}
-                          </FormLabel>
-                          <FormControl>
-                            {renderField(field, formField)}
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  );
-                })}
-              </div>
-              {/* Officer Section */}
-              <div className="mt-8">
-                <div className="font-semibold mb-2">Officers (up to 4)</div>
+        {/* Legal Info Accordion - Only show for entities table */}
+        {table === 'entities' && (
+          <Accordion type="single" collapsible defaultValue="legal-info">
+            <AccordionItem value="legal-info">
+              <AccordionTrigger>Legal Info</AccordionTrigger>
+              <AccordionContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {officerFields.map((fields, idx) => (
-                    <div key={idx} className="border rounded p-3 mb-2">
-                      <div className="font-medium mb-1">Officer {idx + 1}</div>
-                      {fields.map((fname) => {
-                        const field = config.fields.find((f: FieldConfig) => f.name === fname);
-                        if (!field) return null;
-                        return (
-                          <FormField
-                            key={field.name}
-                            control={form.control}
-                            name={field.name}
-                            render={({ field: formField }) => (
-                              <FormItem>
-                                <FormLabel className="capitalize font-medium">
-                                  {field.name.replace(/_/g, ' ')}
-                                </FormLabel>
-                                <FormControl>
-                                  {renderField(field, formField)}
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* Texas-specific fields */}
-              {stateOfFormation === 'Texas' && (
-                <div className="mt-8">
-                  <div className="font-semibold mb-2 flex items-center gap-2">Texas-Specific Info
-                    <a href="https://security.app.cpa.state.tx.us/Public/create-account" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Webfile Portal</a>
-                    <a href="https://mycpa.cpa.state.tx.us/coa/search.do" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Entity Search</a>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {config.fields.filter((f: FieldConfig) => texasFields.includes(f.name)).map((field: FieldConfig) => (
+                  {config.fields.filter((f: FieldConfig) => legalInfoFields.includes(f.name)).map((field: FieldConfig) => {
+                    if (field.name === 'naics_code') {
+                      return (
+                        <FormField
+                          key={field.name}
+                          control={form.control}
+                          name={field.name}
+                          render={({ field: formField }) => (
+                            <FormItem>
+                              <FormLabel className="capitalize font-medium flex items-center gap-2">
+                                NAICS Code
+                                <a href="https://www.census.gov/naics/" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Help</a>
+                              </FormLabel>
+                              <FormControl>
+                                {renderField(field, formField)}
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      );
+                    }
+                    return (
                       <FormField
                         key={field.name}
                         control={form.control}
@@ -296,13 +236,75 @@ export default function EnhancedForm({
                           </FormItem>
                         )}
                       />
+                    );
+                  })}
+                </div>
+                {/* Officer Section */}
+                <div className="mt-8">
+                  <div className="font-semibold mb-2">Officers (up to 4)</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {officerFields.map((fields, idx) => (
+                      <div key={idx} className="border rounded p-3 mb-2">
+                        <div className="font-medium mb-1">Officer {idx + 1}</div>
+                        {fields.map((fname) => {
+                          const field = config.fields.find((f: FieldConfig) => f.name === fname);
+                          if (!field) return null;
+                          return (
+                            <FormField
+                              key={field.name}
+                              control={form.control}
+                              name={field.name}
+                              render={({ field: formField }) => (
+                                <FormItem>
+                                  <FormLabel className="capitalize font-medium">
+                                    {field.name.replace(/_/g, ' ')}
+                                  </FormLabel>
+                                  <FormControl>
+                                    {renderField(field, formField)}
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          );
+                        })}
+                      </div>
                     ))}
                   </div>
                 </div>
-              )}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+                {/* Texas-specific fields */}
+                {stateOfFormation === 'Texas' && (
+                  <div className="mt-8">
+                    <div className="font-semibold mb-2 flex items-center gap-2">Texas-Specific Info
+                      <a href="https://security.app.cpa.state.tx.us/Public/create-account" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Webfile Portal</a>
+                      <a href="https://mycpa.cpa.state.tx.us/coa/search.do" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Entity Search</a>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {config.fields.filter((f: FieldConfig) => texasFields.includes(f.name)).map((field: FieldConfig) => (
+                        <FormField
+                          key={field.name}
+                          control={form.control}
+                          name={field.name}
+                          render={({ field: formField }) => (
+                            <FormItem>
+                              <FormLabel className="capitalize font-medium">
+                                {field.name.replace(/_/g, ' ')}
+                              </FormLabel>
+                              <FormControl>
+                                {renderField(field, formField)}
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )}
         <div className="flex justify-end space-x-2 pt-6 border-t">
           <Button type="submit" className="min-w-[100px]">
             {submitLabel}
