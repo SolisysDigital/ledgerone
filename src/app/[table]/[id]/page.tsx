@@ -113,7 +113,7 @@ export default async function DetailPage({
                   <label className="text-sm font-medium text-muted-foreground capitalize">
                     {field.name.replace(/_/g, ' ')}
                   </label>
-                  <div className="text-sm">
+                  <div className="text-sm text-teal-800">
                     {field.type === "select" ? (
                       <Badge variant="secondary">{displayValue}</Badge>
                     ) : field.type === "textarea" ? (
@@ -149,7 +149,7 @@ export default async function DetailPage({
                             NAICS Code
                             <a href="https://www.census.gov/naics/" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Help</a>
                           </label>
-                          <div className="text-sm">{value}</div>
+                          <div className="text-sm text-teal-800">{value}</div>
                         </div>
                       );
                     }
@@ -158,7 +158,7 @@ export default async function DetailPage({
                         <label className="text-sm font-medium text-muted-foreground capitalize">
                           {field.name.replace(/_/g, ' ')}
                         </label>
-                        <div className="text-sm">{value}</div>
+                        <div className="text-sm text-teal-800">{value}</div>
                       </div>
                     );
                   })}
@@ -183,7 +183,7 @@ export default async function DetailPage({
                                 <label className="text-sm font-medium text-muted-foreground capitalize">
                                   {field.name.replace(/_/g, ' ')}
                                 </label>
-                                <div className="text-sm">{value}</div>
+                                <div className="text-sm text-teal-800">{value}</div>
                               </div>
                             );
                           })}
@@ -208,7 +208,7 @@ export default async function DetailPage({
                             <label className="text-sm font-medium text-muted-foreground capitalize">
                               {field.name.replace(/_/g, ' ')}
                             </label>
-                            <div className="text-sm">{value}</div>
+                            <div className="text-sm text-teal-800">{value}</div>
                           </div>
                         );
                       })}

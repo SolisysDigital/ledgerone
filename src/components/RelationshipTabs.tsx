@@ -105,9 +105,9 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                         {relatedData[parent.table].map((item: any) => (
                           <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
                             <div>
-                              <h4 className="font-medium text-sm">{item.name || item[parent.displayField || 'id']}</h4>
+                              <h4 className="font-medium text-sm text-teal-800">{item.name || item[parent.displayField || 'id']}</h4>
                               {item.description && (
-                                <p className="text-xs text-muted-foreground">{item.description}</p>
+                                <p className="text-xs text-teal-800">{item.description}</p>
                               )}
                             </div>
                             <Badge variant="secondary" className="text-xs">{item.type || 'Related'}</Badge>
@@ -156,7 +156,7 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                           {relatedData[child.table].map((item: any) => (
                             <TableRow key={item.id}>
                               <TableCell className="text-xs">
-                                <div title={`ID: ${item.id}`} className="cursor-help">
+                                <div title={`ID: ${item.id}`} className="cursor-help text-teal-800">
                                   {item.name || item[tableConfigs[child.table]?.fields.find(f => f.name === 'name')?.name || 'id']}
                                 </div>
                               </TableCell>
