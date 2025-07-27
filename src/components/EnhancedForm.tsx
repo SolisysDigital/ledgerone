@@ -176,7 +176,7 @@ export default function EnhancedForm({
                 name={field.name}
                 render={({ field: formField }) => (
                   <FormItem>
-                    <FormLabel className="capitalize font-medium">
+                    <FormLabel className="capitalize font-medium border-b border-gray-300 pb-1">
                       {field.name.replace(/_/g, ' ')}
                       {field.type === "fk" && <Badge variant="outline" className="ml-2 text-xs">Related</Badge>}
                     </FormLabel>
@@ -206,7 +206,7 @@ export default function EnhancedForm({
                           name={field.name}
                           render={({ field: formField }) => (
                             <FormItem>
-                              <FormLabel className="capitalize font-medium flex items-center gap-2">
+                              <FormLabel className="capitalize font-medium flex items-center gap-2 border-b border-gray-300 pb-1">
                                 NAICS Code
                                 <a href="https://www.census.gov/naics/" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Help</a>
                               </FormLabel>
@@ -226,7 +226,7 @@ export default function EnhancedForm({
                         name={field.name}
                         render={({ field: formField }) => (
                           <FormItem>
-                            <FormLabel className="capitalize font-medium">
+                            <FormLabel className="capitalize font-medium border-b border-gray-300 pb-1">
                               {field.name.replace(/_/g, ' ')}
                             </FormLabel>
                             <FormControl>
@@ -256,7 +256,7 @@ export default function EnhancedForm({
                               name={field.name}
                               render={({ field: formField }) => (
                                 <FormItem>
-                                  <FormLabel className="capitalize font-medium">
+                                  <FormLabel className="capitalize font-medium border-b border-gray-300 pb-1">
                                     {field.name.replace(/_/g, ' ')}
                                   </FormLabel>
                                   <FormControl>
