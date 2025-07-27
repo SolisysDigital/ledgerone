@@ -86,9 +86,30 @@ export default function EnhancedForm({
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      await onSubmit(data);
+      console.log('Raw form data:', data);
+      
+      // Clean up the data - remove empty strings and undefined values
+      const cleanedData: Record<string, any> = {};
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          cleanedData[key] = value;
+        }
+      });
+      
+      console.log('Cleaned data:', cleanedData);
+      console.log('Table:', table);
+      
+      // Ensure we have at least the required fields
+      if (!cleanedData.name || !cleanedData.type) {
+        console.error('Missing required fields: name or type');
+        alert('Please fill in the required fields: Entity Name and Type of Entity');
+        return;
+      }
+      
+      await onSubmit(cleanedData);
     } catch (error) {
       console.error('Error submitting form:', error);
+      alert('Error creating entity. Please check the console for details.');
     }
   };
 
