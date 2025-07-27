@@ -135,10 +135,10 @@ export default async function DetailPage({
           </div>
           {/* Legal Info Accordion - Only show for entities table */}
           {table === 'entities' && (
-            <Accordion type="single" collapsible defaultValue="legal-info">
+            <Accordion type="single" collapsible defaultValue="legal-info" className="mt-6">
             <AccordionItem value="legal-info">
               <AccordionTrigger className="bg-blue-50 hover:bg-blue-100 text-blue-800 font-semibold rounded-lg px-4 py-2">Legal Information for the entity</AccordionTrigger>
-              <AccordionContent className="bg-gray-50 p-4 rounded-lg">
+              <AccordionContent className="bg-gray-100 p-4 rounded-lg">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {config.fields.filter((f) => legalInfoFields.includes(f.name)).map((field) => {
                     const value = (data as any)[field.name];
