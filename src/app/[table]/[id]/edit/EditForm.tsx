@@ -16,8 +16,10 @@ export default function EditForm({ table, config, initialData }: EditFormProps) 
 
   const onSubmit = async (data: Record<string, string>) => {
     try {
+      console.log('=== EDITFORM SUBMISSION STARTED ===');
       console.log('EditForm submitting data:', data);
       await updateItem(table, initialData.id, data);
+      console.log('=== EDITFORM SUBMISSION COMPLETED ===');
       router.push(`/${table}/${initialData.id}`);
     } catch (error) {
       console.error('Error updating item:', error);

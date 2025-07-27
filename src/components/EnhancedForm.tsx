@@ -86,6 +86,7 @@ export default function EnhancedForm({
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
+      console.log('=== FORM SUBMISSION STARTED ===');
       console.log('Raw form data:', data);
       
       // Clean up the data - handle updates vs creates differently
@@ -115,7 +116,9 @@ export default function EnhancedForm({
         return;
       }
       
+      console.log('=== ABOUT TO CALL onSubmit ===');
       await onSubmit(cleanedData);
+      console.log('=== FORM SUBMISSION COMPLETED ===');
     } catch (error) {
       console.error('Error submitting form:', error);
       alert('Error submitting form. Please check the console for details.');
