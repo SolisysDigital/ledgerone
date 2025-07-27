@@ -28,7 +28,7 @@ export const tableConfigs: Record<string, TableConfig> = {
   entities: {
     label: 'Entities',
     fields: [
-      { name: 'type', type: 'select', options: ['person', 'business'] },
+      { name: 'type', type: 'select', options: ['Person', 'Business'] },
       { name: 'name', type: 'text' },
       { name: 'description', type: 'textarea' },
       // Legal Info Section
