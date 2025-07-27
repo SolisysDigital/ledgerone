@@ -112,16 +112,17 @@ export default async function DetailPage({
             </TabsList>
             
             <TabsContent value="information" className="space-y-6">
+          {/* Special layout for short_description and description */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {config.fields.filter((f) => !legalInfoFields.includes(f.name) && !texasFields.includes(f.name) && !officerFields.flat().includes(f.name)).map((field) => {
+            {config.fields.filter((f) => !legalInfoFields.includes(f.name) && !texasFields.includes(f.name) && !officerFields.flat().includes(f.name) && f.name !== 'short_description' && f.name !== 'description').map((field) => {
               const value = (data as any)[field.name];
               let displayValue = value;
               if (field.type === "fk" && field.refTable && field.displayField) displayValue = value;
               return (
                 <div key={field.name} className="space-y-1">
-                  <label className="text-sm font-medium text-muted-foreground capitalize border-b border-gray-300 pb-1">
+                  <Label className="text-sm font-medium text-muted-foreground capitalize">
                     {field.name.replace(/_/g, ' ')}
-                  </label>
+                  </Label>
                   <div className="text-sm">
                     {field.type === "select" ? (
                       <Badge variant="secondary" className="text-teal-800">{displayValue}</Badge>
@@ -140,6 +141,29 @@ export default async function DetailPage({
                 </div>
               );
             })}
+          </div>
+          
+          {/* Horizontal layout for short_description and description */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Short Description */}
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-muted-foreground">
+                Short Description
+              </Label>
+              <div className="text-sm">
+                <span className="text-teal-800">{(data as any)['short_description'] || '-'}</span>
+              </div>
+            </div>
+            
+            {/* Description */}
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-muted-foreground">
+                Description
+              </Label>
+              <div className="text-sm">
+                <p className="whitespace-pre-wrap text-teal-800">{(data as any)['description'] || '-'}</p>
+              </div>
+            </div>
           </div>
           {/* Legal Info Accordion - Only show for entities table */}
           {table === 'entities' && (

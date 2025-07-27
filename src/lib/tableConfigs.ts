@@ -30,6 +30,7 @@ export const tableConfigs: Record<string, TableConfig> = {
     fields: [
       { name: 'type', type: 'select', options: ['Person', 'Business'] },
       { name: 'name', type: 'text' },
+      { name: 'short_description', type: 'text' },
       { name: 'description', type: 'textarea' },
       // Legal Info Section
       { name: 'legal_business_name', type: 'text' },
