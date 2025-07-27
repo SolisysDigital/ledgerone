@@ -106,9 +106,9 @@ export default async function DetailPage({
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="information" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="information">Information</TabsTrigger>
-              <TabsTrigger value="related-data">Related Data</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 rounded-lg">
+              <TabsTrigger value="information" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm">Information</TabsTrigger>
+              <TabsTrigger value="related-data" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm">Related Data</TabsTrigger>
             </TabsList>
             
             <TabsContent value="information" className="space-y-6">
