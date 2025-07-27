@@ -177,7 +177,7 @@ export default function EnhancedForm({
                 render={({ field: formField }) => (
                   <FormItem>
                     <FormLabel className="capitalize font-medium">
-                      {field.name.replace(/_/g, ' ')}
+                      {field.label || field.name.replace(/_/g, ' ')}
                       {field.type === "fk" && <Badge variant="outline" className="ml-2 text-xs">Related</Badge>}
                     </FormLabel>
                     <FormControl>
@@ -274,7 +274,7 @@ export default function EnhancedForm({
                         render={({ field: formField }) => (
                           <FormItem>
                             <FormLabel className="capitalize font-medium">
-                              {field.name.replace(/_/g, ' ')}
+                              {field.label || field.name.replace(/_/g, ' ')}
                             </FormLabel>
                             <FormControl>
                               {renderField(field, formField)}
@@ -304,7 +304,7 @@ export default function EnhancedForm({
                               render={({ field: formField }) => (
                                 <FormItem>
                                   <FormLabel className="capitalize font-medium">
-                                    {field.name.replace(/_/g, ' ')}
+                                    {field.label || field.name.replace(/_/g, ' ')}
                                   </FormLabel>
                                   <FormControl>
                                     {renderField(field, formField)}

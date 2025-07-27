@@ -121,7 +121,7 @@ export default async function DetailPage({
               return (
                 <div key={field.name} className="space-y-1">
                   <Label className="text-sm font-medium text-muted-foreground capitalize">
-                    {field.name.replace(/_/g, ' ')}
+                    {field.label || field.name.replace(/_/g, ' ')}
                   </Label>
                   <div className="text-sm">
                     {field.type === "select" ? (
@@ -201,7 +201,7 @@ export default async function DetailPage({
                     return (
                       <div key={field.name} className="space-y-1">
                         <Label className="text-sm font-medium text-muted-foreground capitalize">
-                          {field.name.replace(/_/g, ' ')}
+                          {field.label || field.name.replace(/_/g, ' ')}
                         </Label>
                         <div className="text-sm">
                           {field.type === "select" ? (
@@ -238,7 +238,7 @@ export default async function DetailPage({
                             return (
                               <div key={fname} className="space-y-1">
                                 <Label className="text-sm font-medium text-muted-foreground capitalize">
-                                  {field.name.replace(/_/g, ' ')}
+                                  {field.label || field.name.replace(/_/g, ' ')}
                                 </Label>
                                 <div className="text-sm"><span className="text-teal-800">{value}</span></div>
                               </div>
@@ -263,7 +263,7 @@ export default async function DetailPage({
                         return (
                           <div key={field.name} className="space-y-1">
                             <Label className="text-sm font-medium text-muted-foreground capitalize">
-                              {field.name.replace(/_/g, ' ')}
+                              {field.label || field.name.replace(/_/g, ' ')}
                             </Label>
                             <div className="text-sm">
                               {field.type === "select" ? (
