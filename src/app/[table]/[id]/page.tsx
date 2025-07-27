@@ -110,7 +110,7 @@ export default async function DetailPage({
               if (field.type === "fk" && field.refTable && field.displayField) displayValue = value;
               return (
                 <div key={field.name} className="space-y-1">
-                  <label className="text-sm font-medium text-muted-foreground capitalize">
+                  <label className="text-sm font-medium text-muted-foreground capitalize border-b border-gray-300 pb-1">
                     {field.name.replace(/_/g, ' ')}
                   </label>
                   <div className="text-sm">
