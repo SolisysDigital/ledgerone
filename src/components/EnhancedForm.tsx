@@ -216,6 +216,17 @@ export default function EnhancedForm({
       });
     } catch (error) {
       console.error('Error submitting form:', error);
+      
+      // Check if this is a redirect error (which is actually success)
+      if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+        console.log('Form submission successful - redirecting...');
+        await AppLogger.info('EnhancedForm', 'form_submission_success', 'Form submitted successfully (redirect)', { 
+          table, 
+          rawData: data 
+        });
+        return; // Don't show error alert for successful redirects
+      }
+      
       await AppLogger.error('EnhancedForm', 'form_submission_error', 'Form submission failed', error, { 
         table, 
         rawData: data 
