@@ -155,17 +155,35 @@ export default function EnhancedForm({
         cleanedData 
       });
       
-      // Ensure we have at least the required fields
-      if (!cleanedData.name || !cleanedData.type) {
-        const error = new Error('Missing required fields: name or type');
-        console.error('Missing required fields: name or type');
-        await AppLogger.error('EnhancedForm', 'validation', 'Missing required fields', error, { 
-          table, 
-          cleanedData, 
-          missingFields: { name: !cleanedData.name, type: !cleanedData.type } 
-        });
-        alert('Please fill in the required fields: Entity Name and Type of Entity');
-        return;
+      // Ensure we have at least the required fields based on table type
+      if (table === 'entities') {
+        // For entities, require name and type
+        if (!cleanedData.name || !cleanedData.type) {
+          const error = new Error('Missing required fields: name or type');
+          console.error('Missing required fields: name or type');
+          await AppLogger.error('EnhancedForm', 'validation', 'Missing required fields', error, { 
+            table, 
+            cleanedData, 
+            missingFields: { name: !cleanedData.name, type: !cleanedData.type } 
+          });
+          alert('Please fill in the required fields: Entity Name and Type of Entity');
+          return;
+        }
+      } else {
+        // For other tables (contacts, emails, etc.), require at least one non-fk field
+        const nonFkFields = config.fields.filter((field: FieldConfig) => field.type !== 'fk');
+        const hasNonFkData = nonFkFields.some((field: FieldConfig) => cleanedData[field.name]);
+        
+        if (!hasNonFkData) {
+          const error = new Error('Please fill in at least one field');
+          console.error('No data provided for', table);
+          await AppLogger.error('EnhancedForm', 'validation', 'No data provided', error, { 
+            table, 
+            cleanedData 
+          });
+          alert('Please fill in at least one field');
+          return;
+        }
       }
       
       console.log('=== ABOUT TO CALL onSubmit ===');
