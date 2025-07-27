@@ -43,11 +43,17 @@ export default function EnhancedForm({
   const schemaObject: Record<string, any> = {};
   config.fields.forEach((field: FieldConfig) => {
     if (field.type === "number") {
-      schemaObject[field.name] = z.string().optional();
+      // For number fields, allow string, null, or undefined (all optional)
+      schemaObject[field.name] = z.union([
+        z.string(),
+        z.null(),
+        z.undefined()
+      ]).optional();
     } else if (field.type === "date") {
       schemaObject[field.name] = z.string().optional();
     } else {
       // For text fields, allow string, null, or undefined
+      // All fields are optional, including Texas-specific fields and officer fields
       schemaObject[field.name] = z.union([
         z.string(),
         z.null(),

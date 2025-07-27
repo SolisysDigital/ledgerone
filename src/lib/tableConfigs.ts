@@ -47,7 +47,7 @@ export const tableConfigs: Record<string, TableConfig> = {
       { name: 'mailing_address', type: 'text' },
       { name: 'registered_agent_name', type: 'text' },
       { name: 'registered_agent_address', type: 'text' },
-      // Officer fields (up to 4 officers)
+      // Officer fields (optional, up to 4 officers - enter any combination of 1-4)
       { name: 'officer1_name', type: 'text' },
       { name: 'officer1_title', type: 'text' },
       { name: 'officer1_ownership_percent', type: 'number' },
@@ -60,7 +60,7 @@ export const tableConfigs: Record<string, TableConfig> = {
       { name: 'officer4_name', type: 'text' },
       { name: 'officer4_title', type: 'text' },
       { name: 'officer4_ownership_percent', type: 'number' },
-      // Texas-specific fields (conditionally shown in UI)
+      // Texas-specific fields (optional, conditionally shown in UI)
       { name: 'texas_taxpayer_number', type: 'text' },
       { name: 'texas_file_number', type: 'text' },
       { name: 'texas_webfile_number', type: 'text' },
