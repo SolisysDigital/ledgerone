@@ -92,9 +92,7 @@ export default async function ListPage({ params }: { params: Promise<{ table: st
                             {row[col.name] || '-'}
                           </div>
                         ) : col.type === "select" ? (
-                          <Badge variant="secondary">
-                            {col.name === 'type' ? row[col.name]?.charAt(0).toUpperCase() + row[col.name]?.slice(1) : row[col.name]}
-                          </Badge>
+                          <Badge variant="secondary">{row[col.name]}</Badge>
                         ) : col.type === "fk" ? (
                           row[col.name]
                         ) : col.type === "date" ? (
