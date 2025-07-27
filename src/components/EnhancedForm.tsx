@@ -66,7 +66,7 @@ export default function EnhancedForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {},
-    mode: 'onChange', // Enable real-time validation
+    mode: 'onSubmit', // Only validate on submit
   });
 
   // Fetch foreign key options
@@ -109,20 +109,19 @@ export default function EnhancedForm({
         rawData: data 
       });
       
-      // Check form validation state
+      // Log form validation state for debugging
       const formState = form.formState;
       console.log('Form validation state:', formState);
       console.log('Form errors:', formState.errors);
       
-      if (!formState.isValid) {
-        console.error('Form validation failed:', formState.errors);
-        await AppLogger.error('EnhancedForm', 'validation_failed', 'Form validation failed', new Error('Form validation errors'), { 
+      // Log any validation errors but don't block submission
+      if (Object.keys(formState.errors).length > 0) {
+        console.warn('Form has validation errors:', formState.errors);
+        await AppLogger.warning('EnhancedForm', 'validation_warnings', 'Form has validation warnings', { 
           table, 
           errors: formState.errors,
           rawData: data 
         });
-        alert('Please fix the form validation errors before submitting.');
-        return;
       }
       
       // Clean up the data - handle updates vs creates differently
