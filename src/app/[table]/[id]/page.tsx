@@ -149,7 +149,19 @@ export default async function DetailPage({
                             NAICS Code
                             <a href="https://www.census.gov/naics/" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Help</a>
                           </label>
-                          <div className="text-sm"><span className="text-teal-800">{value}</span></div>
+                          <div className="text-sm">
+                            {field.type === "select" ? (
+                              <Badge variant="secondary" className="text-teal-800">{value}</Badge>
+                            ) : field.type === "textarea" ? (
+                              <p className="whitespace-pre-wrap text-teal-800">{value}</p>
+                            ) : field.type === "date" ? (
+                              <span className="text-teal-800">{value ? new Date(value).toLocaleDateString() : '-'}</span>
+                            ) : field.type === "number" ? (
+                              <span className="text-teal-800">{value?.toLocaleString() || '-'}</span>
+                            ) : (
+                              <span className="text-teal-800">{value}</span>
+                            )}
+                          </div>
                         </div>
                       );
                     }
@@ -158,7 +170,19 @@ export default async function DetailPage({
                         <label className="text-sm font-medium text-muted-foreground capitalize">
                           {field.name.replace(/_/g, ' ')}
                         </label>
-                        <div className="text-sm"><span className="text-teal-800">{value}</span></div>
+                        <div className="text-sm">
+                          {field.type === "select" ? (
+                            <Badge variant="secondary" className="text-teal-800">{value}</Badge>
+                          ) : field.type === "textarea" ? (
+                            <p className="whitespace-pre-wrap text-teal-800">{value}</p>
+                          ) : field.type === "date" ? (
+                            <span className="text-teal-800">{value ? new Date(value).toLocaleDateString() : '-'}</span>
+                          ) : field.type === "number" ? (
+                            <span className="text-teal-800">{value?.toLocaleString() || '-'}</span>
+                          ) : (
+                            <span className="text-teal-800">{value}</span>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -208,7 +232,19 @@ export default async function DetailPage({
                             <label className="text-sm font-medium text-muted-foreground capitalize">
                               {field.name.replace(/_/g, ' ')}
                             </label>
-                            <div className="text-sm"><span className="text-teal-800">{value}</span></div>
+                            <div className="text-sm">
+                              {field.type === "select" ? (
+                                <Badge variant="secondary" className="text-teal-800">{value}</Badge>
+                              ) : field.type === "textarea" ? (
+                                <p className="whitespace-pre-wrap text-teal-800">{value}</p>
+                              ) : field.type === "date" ? (
+                                <span className="text-teal-800">{value ? new Date(value).toLocaleDateString() : '-'}</span>
+                              ) : field.type === "number" ? (
+                                <span className="text-teal-800">{value?.toLocaleString() || '-'}</span>
+                              ) : (
+                                <span className="text-teal-800">{value}</span>
+                              )}
+                            </div>
                           </div>
                         );
                       })}
