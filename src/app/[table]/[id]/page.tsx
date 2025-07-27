@@ -143,8 +143,19 @@ export default async function DetailPage({
             })}
           </div>
           
-          {/* Description field */}
-          <div className="grid grid-cols-1 gap-4">
+          {/* Horizontal layout for short_description and description */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Short Description */}
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-muted-foreground">
+                Short Description
+              </Label>
+              <div className="text-sm">
+                <span className="text-teal-800">{(data as any)['short_description'] || '-'}</span>
+              </div>
+            </div>
+            
+            {/* Description */}
             <div className="space-y-1">
               <Label className="text-sm font-medium text-muted-foreground">
                 Description
