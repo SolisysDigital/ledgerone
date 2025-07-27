@@ -14,6 +14,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Search, X } from "lucide-react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordian";
+import { AppLogger } from "@/lib/logger";
 
 interface EnhancedFormProps {
   table: string;
@@ -89,6 +90,13 @@ export default function EnhancedForm({
       console.log('=== FORM SUBMISSION STARTED ===');
       console.log('Raw form data:', data);
       
+      // Log form submission start
+      await AppLogger.debug('EnhancedForm', 'form_submission_start', `Form submission started for table: ${table}`, { 
+        table, 
+        isUpdate: !!initialData, 
+        rawData: data 
+      });
+      
       // Clean up the data - handle updates vs creates differently
       const cleanedData: Record<string, any> = {};
       Object.entries(data).forEach(([key, value]) => {
@@ -109,18 +117,45 @@ export default function EnhancedForm({
       console.log('Table:', table);
       console.log('Is update:', !!initialData);
       
+      // Log cleaned data
+      await AppLogger.debug('EnhancedForm', 'data_cleaning', `Data cleaned for ${table}`, { 
+        table, 
+        isUpdate: !!initialData, 
+        cleanedData 
+      });
+      
       // Ensure we have at least the required fields
       if (!cleanedData.name || !cleanedData.type) {
+        const error = new Error('Missing required fields: name or type');
         console.error('Missing required fields: name or type');
+        await AppLogger.error('EnhancedForm', 'validation', 'Missing required fields', error, { 
+          table, 
+          cleanedData, 
+          missingFields: { name: !cleanedData.name, type: !cleanedData.type } 
+        });
         alert('Please fill in the required fields: Entity Name and Type of Entity');
         return;
       }
       
       console.log('=== ABOUT TO CALL onSubmit ===');
+      await AppLogger.debug('EnhancedForm', 'onSubmit_call', `About to call onSubmit for ${table}`, { 
+        table, 
+        cleanedData 
+      });
+      
       await onSubmit(cleanedData);
+      
       console.log('=== FORM SUBMISSION COMPLETED ===');
+      await AppLogger.info('EnhancedForm', 'form_submission_success', `Form submitted successfully for ${table}`, { 
+        table, 
+        cleanedData 
+      });
     } catch (error) {
       console.error('Error submitting form:', error);
+      await AppLogger.error('EnhancedForm', 'form_submission_error', 'Form submission failed', error, { 
+        table, 
+        rawData: data 
+      });
       alert('Error submitting form. Please check the console for details.');
     }
   };
