@@ -51,6 +51,8 @@ export async function updateItem(table: string, id: string, data: Record<string,
   
   console.log('Item updated successfully');
   await AppLogger.info('updateItem', 'database_update', `Successfully updated item in ${table}`, { table, id, data });
+  
+  // Don't log redirect as an error - it's expected behavior
   return redirect(`/${table}/${id}`);
 }
 
