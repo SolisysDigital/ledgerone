@@ -6,6 +6,7 @@ import { fetchRelatedDataWithJoins } from "@/lib/relationshipUtils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import RelationshipTabs from "@/components/RelationshipTabs";
 import Link from "next/link";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
@@ -145,10 +146,10 @@ export default async function DetailPage({
                     if (field.name === 'naics_code') {
                       return (
                         <div key={field.name} className="space-y-1">
-                          <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                             NAICS Code
                             <a href="https://www.census.gov/naics/" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Help</a>
-                          </label>
+                          </Label>
                           <div className="text-sm">
                             {field.type === "select" ? (
                               <Badge variant="secondary" className="text-teal-800">{value}</Badge>
@@ -167,9 +168,9 @@ export default async function DetailPage({
                     }
                     return (
                       <div key={field.name} className="space-y-1">
-                        <label className="text-sm font-medium text-muted-foreground capitalize">
+                        <Label className="text-sm font-medium text-muted-foreground capitalize">
                           {field.name.replace(/_/g, ' ')}
-                        </label>
+                        </Label>
                         <div className="text-sm">
                           {field.type === "select" ? (
                             <Badge variant="secondary" className="text-teal-800">{value}</Badge>
@@ -204,9 +205,9 @@ export default async function DetailPage({
                             if (!value && value !== 0) return null;
                             return (
                               <div key={fname} className="space-y-1">
-                                <label className="text-sm font-medium text-muted-foreground capitalize">
+                                <Label className="text-sm font-medium text-muted-foreground capitalize">
                                   {field.name.replace(/_/g, ' ')}
-                                </label>
+                                </Label>
                                 <div className="text-sm"><span className="text-teal-800">{value}</span></div>
                               </div>
                             );
@@ -229,9 +230,9 @@ export default async function DetailPage({
                         if (!value) return null;
                         return (
                           <div key={field.name} className="space-y-1">
-                            <label className="text-sm font-medium text-muted-foreground capitalize">
+                            <Label className="text-sm font-medium text-muted-foreground capitalize">
                               {field.name.replace(/_/g, ' ')}
-                            </label>
+                            </Label>
                             <div className="text-sm">
                               {field.type === "select" ? (
                                 <Badge variant="secondary" className="text-teal-800">{value}</Badge>
