@@ -29,7 +29,7 @@ export const tableConfigs: Record<string, TableConfig> = {
   entities: {
     label: 'Entities',
     fields: [
-      { name: 'type', type: 'select', label: 'Type of Entity', options: ['Person', 'Business'] },
+      { name: 'type', type: 'select', label: 'Type of Entity', options: ['person', 'business'] },
       { name: 'name', type: 'text', label: 'Entity Name' },
       { name: 'short_description', type: 'text' },
       { name: 'description', type: 'textarea' },

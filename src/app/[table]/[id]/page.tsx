@@ -125,7 +125,9 @@ export default async function DetailPage({
                   </Label>
                   <div className="text-sm">
                     {field.type === "select" ? (
-                      <Badge variant="secondary" className="text-teal-800">{displayValue}</Badge>
+                      <Badge variant="secondary" className="text-teal-800">
+                        {field.name === 'type' ? displayValue?.charAt(0).toUpperCase() + displayValue?.slice(1) : displayValue}
+                      </Badge>
                     ) : field.type === "textarea" ? (
                       <p className="whitespace-pre-wrap text-teal-800">{displayValue}</p>
                     ) : field.type === "date" ? (
