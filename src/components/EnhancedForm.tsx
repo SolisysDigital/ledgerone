@@ -88,16 +88,25 @@ export default function EnhancedForm({
     try {
       console.log('Raw form data:', data);
       
-      // Clean up the data - remove empty strings and undefined values
+      // Clean up the data - handle updates vs creates differently
       const cleanedData: Record<string, any> = {};
       Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          cleanedData[key] = value;
+        // For updates, include all fields even if empty to allow clearing
+        // For creates, only include non-empty values
+        if (initialData) {
+          // This is an update - include all fields
+          cleanedData[key] = value === '' ? null : value;
+        } else {
+          // This is a create - only include non-empty values
+          if (value !== undefined && value !== null && value !== '') {
+            cleanedData[key] = value;
+          }
         }
       });
       
       console.log('Cleaned data:', cleanedData);
       console.log('Table:', table);
+      console.log('Is update:', !!initialData);
       
       // Ensure we have at least the required fields
       if (!cleanedData.name || !cleanedData.type) {
@@ -109,7 +118,7 @@ export default function EnhancedForm({
       await onSubmit(cleanedData);
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('Error creating entity. Please check the console for details.');
+      alert('Error submitting form. Please check the console for details.');
     }
   };
 

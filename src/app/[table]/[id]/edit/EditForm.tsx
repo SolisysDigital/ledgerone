@@ -16,10 +16,12 @@ export default function EditForm({ table, config, initialData }: EditFormProps) 
 
   const onSubmit = async (data: Record<string, string>) => {
     try {
+      console.log('EditForm submitting data:', data);
       await updateItem(table, initialData.id, data);
       router.push(`/${table}/${initialData.id}`);
     } catch (error) {
       console.error('Error updating item:', error);
+      alert('Error updating entity. Please check the console for details.');
     }
   };
 

@@ -22,8 +22,20 @@ export async function createItem(table: string, data: Record<string, string>) {
 }
 
 export async function updateItem(table: string, id: string, data: Record<string, string>) {
+  console.log('Updating item in table:', table, 'with id:', id, 'and data:', data);
+  
+  // Ensure we have at least some data
+  if (!data || Object.keys(data).length === 0) {
+    throw new Error('No data provided for update');
+  }
+  
   const { error } = await supabase.from(table).update(data).eq('id', id);
-  if (error) throw error;
+  if (error) {
+    console.error('Supabase update error:', error);
+    throw error;
+  }
+  
+  console.log('Item updated successfully');
   return redirect(`/${table}/${id}`);
 }
 
