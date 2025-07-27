@@ -86,7 +86,12 @@ export default function EnhancedForm({
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      await onSubmit(data);
+      // Filter out short_description if it doesn't exist in database yet
+      const filteredData = { ...data };
+      if (table === 'entities' && !filteredData.short_description) {
+        delete filteredData.short_description;
+      }
+      await onSubmit(filteredData);
     } catch (error) {
       console.error('Error submitting form:', error);
     }
@@ -191,31 +196,8 @@ export default function EnhancedForm({
           })}
         </div>
         
-        {/* Horizontal layout for short_description and description */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Short Description */}
-          <FormField
-            control={form.control}
-            name="short_description"
-            render={({ field: formField }) => (
-              <FormItem>
-                <FormLabel className="capitalize font-medium">
-                  Short Description
-                </FormLabel>
-                <FormControl>
-                  <Input 
-                    {...formField} 
-                    value={formField.value as string || ''}
-                    placeholder="Enter short description (max 50 characters)"
-                    maxLength={50}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          {/* Description */}
+        {/* Description field */}
+        <div className="grid grid-cols-1 gap-6">
           <FormField
             control={form.control}
             name="description"
