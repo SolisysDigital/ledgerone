@@ -55,6 +55,7 @@ export default function EnhancedForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {},
+    mode: 'onChange', // Enable real-time validation
   });
 
   // Fetch foreign key options
@@ -96,6 +97,22 @@ export default function EnhancedForm({
         isUpdate: !!initialData, 
         rawData: data 
       });
+      
+      // Check form validation state
+      const formState = form.formState;
+      console.log('Form validation state:', formState);
+      console.log('Form errors:', formState.errors);
+      
+      if (!formState.isValid) {
+        console.error('Form validation failed:', formState.errors);
+        await AppLogger.error('EnhancedForm', 'validation_failed', 'Form validation failed', new Error('Form validation errors'), { 
+          table, 
+          errors: formState.errors,
+          rawData: data 
+        });
+        alert('Please fix the form validation errors before submitting.');
+        return;
+      }
       
       // Clean up the data - handle updates vs creates differently
       const cleanedData: Record<string, any> = {};
@@ -231,8 +248,14 @@ export default function EnhancedForm({
   const stateOfFormation = form.watch('state_of_formation');
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit, (errors) => {
+          console.error('Form validation errors on submit:', errors);
+          AppLogger.error('EnhancedForm', 'submit_validation_failed', 'Form submission blocked by validation errors', new Error('Validation failed'), { 
+            table, 
+            errors 
+          });
+        })} className="space-y-6">
         {/* Main fields (not legal info) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {config.fields.filter((f: FieldConfig) => !legalInfoFields.includes(f.name) && !texasFields.includes(f.name) && !officerFields.flat().includes(f.name) && f.name !== 'short_description' && f.name !== 'description').map((field: FieldConfig) => {
