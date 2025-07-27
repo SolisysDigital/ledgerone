@@ -156,6 +156,9 @@ export default function EnhancedForm({
       });
       
       // Ensure we have at least the required fields based on table type
+      console.log('Validating table:', table);
+      console.log('Cleaned data:', cleanedData);
+      
       if (table === 'entities') {
         // For entities, require name and type
         if (!cleanedData.name || !cleanedData.type) {
@@ -172,7 +175,10 @@ export default function EnhancedForm({
       } else {
         // For other tables (contacts, emails, etc.), require at least one non-fk field
         const nonFkFields = config.fields.filter((field: FieldConfig) => field.type !== 'fk');
+        console.log('Non-FK fields for', table, ':', nonFkFields.map((f: FieldConfig) => f.name));
+        
         const hasNonFkData = nonFkFields.some((field: FieldConfig) => cleanedData[field.name]);
+        console.log('Has non-FK data:', hasNonFkData);
         
         if (!hasNonFkData) {
           const error = new Error('Please fill in at least one field');
