@@ -11,6 +11,7 @@ import RelationshipTabs from "@/components/RelationshipTabs";
 import Link from "next/link";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordian";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default async function DetailPage({ 
   params 
@@ -98,12 +99,19 @@ export default async function DetailPage({
         </div>
       </div>
 
-      {/* Main Data */}
+      {/* Main Data with Tabs */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Information</CardTitle>
+          <CardTitle className="text-sm">Entity Details</CardTitle>
         </CardHeader>
         <CardContent>
+          <Tabs defaultValue="information" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="information">Information</TabsTrigger>
+              <TabsTrigger value="related-data">Related Data</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="information" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {config.fields.filter((f) => !legalInfoFields.includes(f.name) && !texasFields.includes(f.name) && !officerFields.flat().includes(f.name)).map((field) => {
               const value = (data as any)[field.name];
@@ -256,24 +264,20 @@ export default async function DetailPage({
             </AccordionItem>
           </Accordion>
           )}
+            </TabsContent>
+            
+            <TabsContent value="related-data" className="space-y-6">
+              {(config.parent || config.children?.length) && (
+                <RelationshipTabs 
+                  currentTable={table} 
+                  currentId={id} 
+                  relatedData={relatedData} 
+                />
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
-
-      {/* Relationships */}
-      {(config.parent || config.children?.length) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Related Data</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <RelationshipTabs 
-              currentTable={table} 
-              currentId={id} 
-              relatedData={relatedData} 
-            />
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 } 
