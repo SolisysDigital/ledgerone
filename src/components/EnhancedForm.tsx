@@ -42,6 +42,11 @@ export default function EnhancedForm({
   // Build validation schema
   const schemaObject: Record<string, any> = {};
   config.fields.forEach((field: FieldConfig) => {
+    // Skip foreign key fields from Zod validation - they're handled automatically
+    if (field.type === "fk") {
+      return;
+    }
+    
     if (field.type === "number") {
       // For number fields, allow string, null, or undefined (all optional)
       schemaObject[field.name] = z.union([
@@ -297,6 +302,8 @@ export default function EnhancedForm({
         {/* Main fields (not legal info) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {config.fields.filter((f: FieldConfig) => !legalInfoFields.includes(f.name) && !texasFields.includes(f.name) && !officerFields.flat().includes(f.name) && f.name !== 'short_description' && f.name !== 'description').map((field: FieldConfig) => {
+            // For foreign key fields, only show them if they're not already set (for creates)
+            // For updates, foreign key fields are typically hidden since they shouldn't change
             if (field.type === "fk" && initialData && initialData[field.name]) return null;
             return (
               <FormField
