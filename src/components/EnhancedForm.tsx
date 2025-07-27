@@ -181,16 +181,20 @@ export default function EnhancedForm({
         // For other tables (contacts, emails, etc.), require at least one non-fk field
         const nonFkFields = config.fields.filter((field: FieldConfig) => field.type !== 'fk');
         console.log('Non-FK fields for', table, ':', nonFkFields.map((f: FieldConfig) => f.name));
+        console.log('All fields for', table, ':', config.fields.map((f: FieldConfig) => `${f.name} (${f.type})`));
         
         const hasNonFkData = nonFkFields.some((field: FieldConfig) => cleanedData[field.name]);
         console.log('Has non-FK data:', hasNonFkData);
+        console.log('Cleaned data keys:', Object.keys(cleanedData));
+        console.log('Non-FK data values:', nonFkFields.map((f: FieldConfig) => ({ field: f.name, value: cleanedData[f.name] })));
         
         if (!hasNonFkData) {
           const error = new Error('Please fill in at least one field');
           console.error('No data provided for', table);
           await AppLogger.error('EnhancedForm', 'validation', 'No data provided', error, { 
             table, 
-            cleanedData 
+            cleanedData,
+            nonFkFields: nonFkFields.map((f: FieldConfig) => f.name)
           });
           alert('Please fill in at least one field');
           return;
