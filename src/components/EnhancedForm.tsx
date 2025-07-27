@@ -47,7 +47,12 @@ export default function EnhancedForm({
     } else if (field.type === "date") {
       schemaObject[field.name] = z.string().optional();
     } else {
-      schemaObject[field.name] = z.string().optional();
+      // For text fields, allow string, null, or undefined
+      schemaObject[field.name] = z.union([
+        z.string(),
+        z.null(),
+        z.undefined()
+      ]).optional();
     }
   });
 
@@ -120,8 +125,12 @@ export default function EnhancedForm({
         // For updates, include all fields even if empty to allow clearing
         // For creates, only include non-empty values
         if (initialData) {
-          // This is an update - include all fields
-          cleanedData[key] = value === '' ? null : value;
+          // This is an update - include all fields, but handle null/empty properly
+          if (value === '' || value === null || value === undefined) {
+            cleanedData[key] = null;
+          } else {
+            cleanedData[key] = value;
+          }
         } else {
           // This is a create - only include non-empty values
           if (value !== undefined && value !== null && value !== '') {
