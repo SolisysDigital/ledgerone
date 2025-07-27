@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Building2, Users, Mail, Phone, CreditCard, Globe, Server, Bitcoin, TrendingUp, BarChart3, FileText, Link as LinkIcon } from "lucide-react";
+import { Search, Building2, Users, Mail, Phone, CreditCard, Globe, Server, Bitcoin, TrendingUp, BarChart3, FileText } from "lucide-react";
 import Link from "next/link";
 
 interface SearchResult {
@@ -31,7 +31,7 @@ const tableIcons: Record<string, React.ComponentType<any>> = {
   websites: Globe,
   hosting_accounts: Server,
   securities_held: BarChart3,
-  entity_relationships: LinkIcon,
+  entity_relationships: FileText,
 };
 
 export default function HomePage() {
@@ -204,32 +204,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Quick Actions */}
-      {!hasSearched && (
-        <div className="w-full max-w-4xl mt-8">
-          <h2 className="text-lg font-semibold mb-4 text-center">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button asChild variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
-              <Link href="/entities">
-                <Building2 className="h-8 w-8" />
-                <span>View All Entities</span>
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
-              <Link href="/entities/new">
-                <Building2 className="h-8 w-8" />
-                <span>Create New Entity</span>
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
-              <Link href="/entity_relationships">
-                <LinkIcon className="h-8 w-8" />
-                <span>Manage Relationships</span>
-              </Link>
-            </Button>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 } 
