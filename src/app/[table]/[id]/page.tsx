@@ -12,6 +12,7 @@ import Link from "next/link";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordian";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Suspense } from "react";
 
 export default async function DetailPage({ 
   params 
@@ -286,7 +287,9 @@ export default async function DetailPage({
             
             <TabsContent value="related-data" className="space-y-6">
               {table === 'entities' && (
-                <RelationshipTabs entityId={id} />
+                <Suspense fallback={<div className="text-center py-8">Loading relationships...</div>}>
+                  <RelationshipTabs entityId={id} />
+                </Suspense>
               )}
             </TabsContent>
           </Tabs>

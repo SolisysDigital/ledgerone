@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,11 +26,7 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
   const [relationships, setRelationships] = useState<Relationship[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadRelationships();
-  }, [entityId]);
-
-  const loadRelationships = async () => {
+  const loadRelationships = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getEntityRelationships(entityId);
@@ -40,7 +36,11 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [entityId]);
+
+  useEffect(() => {
+    loadRelationships();
+  }, [loadRelationships]);
 
   const handleAddRelationship = (type: string) => {
     router.push(`/entities/${entityId}/relationships/${type}/add`);
