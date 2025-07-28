@@ -2,12 +2,12 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { tableConfigs } from "@/lib/tableConfigs";
-import { fetchRelatedDataWithJoins } from "@/lib/relationshipUtils";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import RelationshipTabs from "@/components/RelationshipTabs";
+import RelationshipTabs from "@/components/relationships/RelationshipTabs";
 import Link from "next/link";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordian";
@@ -32,12 +32,6 @@ export default async function DetailPage({
     .single();
 
   if (error || !data) return notFound();
-
-  // Fetch related data
-  const relatedData = await fetchRelatedDataWithJoins(table, id);
-  
-  // Debug logging
-  console.log('Detail page relatedData:', { table, id, relatedData });
 
   // Helper: group fields
   const legalInfoFields = [
@@ -291,12 +285,8 @@ export default async function DetailPage({
             </TabsContent>
             
             <TabsContent value="related-data" className="space-y-6">
-              {(config.parent || config.children?.length) && (
-                <RelationshipTabs 
-                  currentTable={table} 
-                  currentId={id} 
-                  relatedData={relatedData} 
-                />
+              {table === 'entities' && (
+                <RelationshipTabs entityId={id} />
               )}
             </TabsContent>
           </Tabs>
