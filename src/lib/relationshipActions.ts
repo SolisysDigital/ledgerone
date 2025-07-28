@@ -115,7 +115,7 @@ export async function getAvailableRecords(typeOfRecord: string, entityId: string
     const existingIds = (existingRelationships || []).map(r => r.related_data_id);
 
     // Get all records of the specified type that are not already related to this entity
-    let query = supabase
+    const query = supabase
       .from(typeOfRecord)
       .select('*')
       .order(displayField, { ascending: true });
