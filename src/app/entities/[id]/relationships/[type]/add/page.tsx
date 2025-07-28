@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,21 +23,33 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
   const [relationshipDescription, setRelationshipDescription] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [loadingRecords, setLoadingRecords] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const resolveParams = async () => {
-      const { id, type } = await params;
-      setResolvedParams({ id, type });
-      
-      // Load available records
       try {
-        setLoadingRecords(true);
-        const records = await getAvailableRecords(type, id);
-        setAvailableRecords(records || []);
+        console.log('Resolving params...');
+        const { id, type } = await params;
+        console.log('Params resolved:', { id, type });
+        setResolvedParams({ id, type });
+        
+        // Load available records
+        try {
+          setLoadingRecords(true);
+          setError(null);
+          console.log('Loading available records for type:', type, 'entityId:', id);
+          const records = await getAvailableRecords(type, id);
+          console.log('Available records loaded:', records);
+          setAvailableRecords(records || []);
+        } catch (error) {
+          console.error('Error loading available records:', error);
+          setError('Failed to load available records. Please try again.');
+        } finally {
+          setLoadingRecords(false);
+        }
       } catch (error) {
-        console.error('Error loading available records:', error);
-      } finally {
-        setLoadingRecords(false);
+        console.error('Error resolving params:', error);
+        setError('Failed to load page data. Please try again.');
       }
     };
 
@@ -85,6 +96,13 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
 
     try {
       setLoading(true);
+      console.log('Creating relationship:', {
+        entityId: resolvedParams.id,
+        relatedDataId: selectedRecordId,
+        typeOfRecord: resolvedParams.type,
+        relationshipDescription
+      });
+      
       await createRelationship(
         resolvedParams.id,
         selectedRecordId,
@@ -92,6 +110,7 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
         relationshipDescription
       );
       
+      console.log('Relationship created successfully');
       // Redirect back to entity detail page
       router.push(`/entities/${resolvedParams.id}`);
     } catch (error) {
@@ -102,8 +121,25 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
     }
   };
 
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center text-red-600">
+          <p className="mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()} variant="outline">
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (!resolvedParams) {
-    return <div>Loading...</div>;
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
   }
 
   const typeLabel = getTypeLabel(resolvedParams.type);

@@ -93,6 +93,8 @@ export async function getEntityRelationships(entityId: string) {
 
 export async function getAvailableRecords(typeOfRecord: string, entityId: string) {
   try {
+    console.log('getAvailableRecords called with:', { typeOfRecord, entityId });
+    
     // Get the correct display field for ordering based on table type
     const getDisplayField = (type: string) => {
       const displayFields: Record<string, string> = {
@@ -110,6 +112,7 @@ export async function getAvailableRecords(typeOfRecord: string, entityId: string
     };
 
     const displayField = getDisplayField(typeOfRecord);
+    console.log('Display field for', typeOfRecord, ':', displayField);
 
     // First get the IDs of records that are already related to this entity
     const { data: existingRelationships, error: existingError } = await supabase
@@ -119,12 +122,16 @@ export async function getAvailableRecords(typeOfRecord: string, entityId: string
       .eq('type_of_record', typeOfRecord);
 
     if (existingError) {
+      console.error('Error fetching existing relationships:', existingError);
       await AppLogger.error('relationshipActions', 'getAvailableRecords', 'Failed to fetch existing relationships', existingError, { typeOfRecord, entityId });
       throw existingError;
     }
 
+    console.log('Existing relationships:', existingRelationships);
+
     // Get the IDs of already related records
     const existingIds = (existingRelationships || []).map(r => r.related_data_id);
+    console.log('Existing IDs to exclude:', existingIds);
 
     // Get all records of the specified type that are not already related to this entity
     const query = supabase
@@ -138,13 +145,17 @@ export async function getAvailableRecords(typeOfRecord: string, entityId: string
       const { data: allRecords, error: allRecordsError } = await query;
       
       if (allRecordsError) {
+        console.error('Error fetching all records:', allRecordsError);
         await AppLogger.error('relationshipActions', 'getAvailableRecords', 'Failed to fetch all records', allRecordsError, { typeOfRecord, entityId });
         throw allRecordsError;
       }
 
+      console.log('All records fetched:', allRecords);
+
       // Filter out existing records in JavaScript
       const availableRecords = (allRecords || []).filter(record => !existingIds.includes(record.id));
       
+      console.log('Available records after filtering:', availableRecords);
       await AppLogger.info('relationshipActions', 'getAvailableRecords', 'Successfully fetched available records', { typeOfRecord, entityId, count: availableRecords?.length });
       return availableRecords;
     }
@@ -152,13 +163,16 @@ export async function getAvailableRecords(typeOfRecord: string, entityId: string
     const { data, error } = await query;
 
     if (error) {
+      console.error('Error fetching available records:', error);
       await AppLogger.error('relationshipActions', 'getAvailableRecords', 'Failed to fetch available records', error, { typeOfRecord, entityId });
       throw error;
     }
 
+    console.log('Available records (no filtering needed):', data);
     await AppLogger.info('relationshipActions', 'getAvailableRecords', 'Successfully fetched available records', { typeOfRecord, entityId, count: data?.length });
     return data;
   } catch (error) {
+    console.error('Exception in getAvailableRecords:', error);
     await AppLogger.error('relationshipActions', 'getAvailableRecords', 'Exception in getAvailableRecords', error, { typeOfRecord, entityId });
     throw error;
   }
