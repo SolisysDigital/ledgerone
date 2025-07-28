@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
@@ -38,11 +38,7 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
     { key: 'hosting_accounts', label: 'Hosting Accounts', icon: '☁️' }
   ];
 
-  useEffect(() => {
-    loadRelationships();
-  }, [entityId]);
-
-  const loadRelationships = async () => {
+  const loadRelationships = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -61,7 +57,11 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [entityId]);
+
+  useEffect(() => {
+    loadRelationships();
+  }, [loadRelationships]);
 
   const handleAddRelationship = (type: string) => {
     router.push(`/entities/${entityId}/relationships/${type}/add`);

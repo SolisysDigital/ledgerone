@@ -4,10 +4,10 @@ import { AppLogger } from '@/lib/logger';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const relationshipId = params.id;
+    const { id: relationshipId } = await params;
 
     const { error } = await supabase
       .from('entity_related_data')
@@ -29,10 +29,10 @@ export async function DELETE(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const relationshipId = params.id;
+    const { id: relationshipId } = await params;
     const body = await request.json();
     const { relationshipDescription } = body;
 
