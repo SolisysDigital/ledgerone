@@ -7,46 +7,46 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { clientGetAvailableRecords, clientCreateRelationship } from "@/lib/clientActions";
 
 interface AddRelationshipPageProps {
   params: Promise<{ id: string; type: string }>;
 }
 
+interface AvailableRecord {
+  id: string;
+  [key: string]: any;
+}
+
 export default function AddRelationshipPage({ params }: AddRelationshipPageProps) {
   const router = useRouter();
   const [resolvedParams, setResolvedParams] = useState<{ id: string; type: string } | null>(null);
-  const [availableRecords, setAvailableRecords] = useState<any[]>([]);
+  const [availableRecords, setAvailableRecords] = useState<AvailableRecord[]>([]);
   const [selectedRecordId, setSelectedRecordId] = useState<string>("");
   const [relationshipDescription, setRelationshipDescription] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [loadingRecords, setLoadingRecords] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const relationshipTypes = [
+    { key: 'contacts', label: 'Contact', icon: '👥' },
+    { key: 'emails', label: 'Email', icon: '📧' },
+    { key: 'phones', label: 'Phone', icon: '📞' },
+    { key: 'bank_accounts', label: 'Bank Account', icon: '🏦' },
+    { key: 'investment_accounts', label: 'Investment Account', icon: '📈' },
+    { key: 'crypto_accounts', label: 'Crypto Account', icon: '₿' },
+    { key: 'credit_cards', label: 'Credit Card', icon: '💳' },
+    { key: 'websites', label: 'Website', icon: '🌐' },
+    { key: 'hosting_accounts', label: 'Hosting Account', icon: '☁️' }
+  ];
+
   useEffect(() => {
     const resolveParams = async () => {
       try {
-        console.log('Resolving params...');
         const { id, type } = await params;
-        console.log('Params resolved:', { id, type });
         setResolvedParams({ id, type });
-        
-        // Load available records
-        try {
-          setLoadingRecords(true);
-          setError(null);
-          console.log('Loading available records for type:', type, 'entityId:', id);
-          const records = await clientGetAvailableRecords(type, id);
-          console.log('Available records loaded:', records);
-          setAvailableRecords(records || []);
-        } catch (error) {
-          console.error('Error loading available records:', error);
-          setError('Failed to load available records. Please try again.');
-        } finally {
-          setLoadingRecords(false);
-        }
+        await loadAvailableRecords(id, type);
       } catch (error) {
         console.error('Error resolving params:', error);
         setError('Failed to load page data. Please try again.');
@@ -56,19 +56,28 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
     resolveParams();
   }, [params]);
 
-  const getTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      contacts: 'Contact',
-      emails: 'Email',
-      phones: 'Phone',
-      bank_accounts: 'Bank Account',
-      investment_accounts: 'Investment Account',
-      crypto_accounts: 'Crypto Account',
-      credit_cards: 'Credit Card',
-      websites: 'Website',
-      hosting_accounts: 'Hosting Account'
-    };
-    return labels[type] || type;
+  const loadAvailableRecords = async (entityId: string, type: string) => {
+    try {
+      setLoadingRecords(true);
+      setError(null);
+      
+      const response = await fetch(`/api/available-records?type=${type}&entityId=${entityId}`);
+      if (!response.ok) {
+        throw new Error('Failed to load available records');
+      }
+      
+      const data = await response.json();
+      setAvailableRecords(data || []);
+    } catch (error) {
+      console.error('Error loading available records:', error);
+      setError('Failed to load available records. Please try again.');
+    } finally {
+      setLoadingRecords(false);
+    }
+  };
+
+  const getTypeInfo = (type: string) => {
+    return relationshipTypes.find(t => t.key === type) || { key: type, label: type, icon: '📄' };
   };
 
   const getDisplayField = (type: string) => {
@@ -96,21 +105,24 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
 
     try {
       setLoading(true);
-      console.log('Creating relationship:', {
-        entityId: resolvedParams.id,
-        relatedDataId: selectedRecordId,
-        typeOfRecord: resolvedParams.type,
-        relationshipDescription
+      
+      const response = await fetch('/api/relationships', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          entityId: resolvedParams.id,
+          relatedDataId: selectedRecordId,
+          typeOfRecord: resolvedParams.type,
+          relationshipDescription
+        }),
       });
       
-      await clientCreateRelationship(
-        resolvedParams.id,
-        selectedRecordId,
-        resolvedParams.type,
-        relationshipDescription
-      );
+      if (!response.ok) {
+        throw new Error('Failed to create relationship');
+      }
       
-      console.log('Relationship created successfully');
       // Redirect back to entity detail page
       router.push(`/entities/${resolvedParams.id}`);
     } catch (error) {
@@ -137,12 +149,15 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
   if (!resolvedParams) {
     return (
       <div className="container mx-auto p-6">
-        <div className="text-center">Loading...</div>
+        <div className="text-center">
+          <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+          <p>Loading...</p>
+        </div>
       </div>
     );
   }
 
-  const typeLabel = getTypeLabel(resolvedParams.type);
+  const typeInfo = getTypeInfo(resolvedParams.type);
   const displayField = getDisplayField(resolvedParams.type);
 
   return (
@@ -156,36 +171,42 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
           Back to Entity
         </Link>
         
-        <h1 className="text-3xl font-bold">Add {typeLabel} Relationship</h1>
-        <p className="text-gray-600 mt-2">
-          Select an existing {typeLabel.toLowerCase()} and describe how it relates to this entity
+        <div className="flex items-center gap-3 mb-2">
+          <span className="text-3xl">{typeInfo.icon}</span>
+          <h1 className="text-3xl font-bold">Add {typeInfo.label} Relationship</h1>
+        </div>
+        <p className="text-gray-600">
+          Select an existing {typeInfo.label.toLowerCase()} and describe how it relates to this entity
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Add {typeLabel} Relationship</CardTitle>
+          <CardTitle>Add {typeInfo.label} Relationship</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="record">Select {typeLabel}</Label>
+              <Label htmlFor="record">Select {typeInfo.label}</Label>
               <Select
                 value={selectedRecordId}
                 onValueChange={setSelectedRecordId}
                 disabled={loadingRecords}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={`Choose a ${typeLabel.toLowerCase()}`} />
+                  <SelectValue placeholder={`Choose a ${typeInfo.label.toLowerCase()}`} />
                 </SelectTrigger>
                 <SelectContent>
                   {loadingRecords ? (
                     <SelectItem value="" disabled>
-                      Loading {typeLabel.toLowerCase()}s...
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Loading {typeInfo.label.toLowerCase()}s...
+                      </div>
                     </SelectItem>
                   ) : availableRecords.length === 0 ? (
                     <SelectItem value="" disabled>
-                      No available {typeLabel.toLowerCase()}s found
+                      No available {typeInfo.label.toLowerCase()}s found
                     </SelectItem>
                   ) : (
                     availableRecords.map((record) => (
@@ -198,9 +219,9 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
               </Select>
               {availableRecords.length === 0 && !loadingRecords && (
                 <p className="text-sm text-gray-500">
-                  All {typeLabel.toLowerCase()}s are already related to this entity. 
+                  All {typeInfo.label.toLowerCase()}s are already related to this entity. 
                   <Link href={`/${resolvedParams.type}/new`} className="text-blue-600 hover:text-blue-800 ml-1">
-                    Create a new {typeLabel.toLowerCase()}
+                    Create a new {typeInfo.label.toLowerCase()}
                   </Link>
                 </p>
               )}
@@ -210,7 +231,7 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
               <Label htmlFor="description">Relationship Description</Label>
               <Textarea
                 id="description"
-                placeholder={`Describe how this ${typeLabel.toLowerCase()} relates to the entity (e.g., "Primary Attorney", "Tax Advisor")`}
+                placeholder={`Describe how this ${typeInfo.label.toLowerCase()} relates to the entity (e.g., "Primary Attorney", "Tax Advisor")`}
                 value={relationshipDescription}
                 onChange={(e) => setRelationshipDescription(e.target.value)}
                 rows={3}
@@ -221,8 +242,16 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
               <Button
                 type="submit"
                 disabled={loading || !selectedRecordId || loadingRecords}
+                className="bg-blue-600 hover:bg-blue-700"
               >
-                {loading ? 'Creating...' : 'Create Relationship'}
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create Relationship'
+                )}
               </Button>
               <Button
                 type="button"

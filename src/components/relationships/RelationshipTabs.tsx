@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2 } from "lucide-react";
-import { clientGetEntityRelationships, clientDeleteRelationship } from "@/lib/clientActions";
+import { Plus, Edit, Trash2, ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 interface Relationship {
   id: string;
@@ -25,15 +26,34 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadRelationships = useCallback(async () => {
+  const relationshipTypes = [
+    { key: 'contacts', label: 'Contacts', icon: '👥' },
+    { key: 'emails', label: 'Emails', icon: '📧' },
+    { key: 'phones', label: 'Phones', icon: '📞' },
+    { key: 'bank_accounts', label: 'Bank Accounts', icon: '🏦' },
+    { key: 'investment_accounts', label: 'Investment Accounts', icon: '📈' },
+    { key: 'crypto_accounts', label: 'Crypto Accounts', icon: '₿' },
+    { key: 'credit_cards', label: 'Credit Cards', icon: '💳' },
+    { key: 'websites', label: 'Websites', icon: '🌐' },
+    { key: 'hosting_accounts', label: 'Hosting Accounts', icon: '☁️' }
+  ];
+
+  useEffect(() => {
+    loadRelationships();
+  }, [entityId]);
+
+  const loadRelationships = async () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('Loading relationships for entity:', entityId);
       
-      const data = await clientGetEntityRelationships(entityId);
-      console.log('Relationships loaded:', data);
+      // For now, we'll use a simple fetch approach
+      const response = await fetch(`/api/relationships?entityId=${entityId}`);
+      if (!response.ok) {
+        throw new Error('Failed to load relationships');
+      }
       
+      const data = await response.json();
       setRelationships(data || []);
     } catch (error) {
       console.error('Error loading relationships:', error);
@@ -41,13 +61,7 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
     } finally {
       setLoading(false);
     }
-  }, [entityId]);
-
-  useEffect(() => {
-    if (entityId) {
-      loadRelationships();
-    }
-  }, [loadRelationships, entityId]);
+  };
 
   const handleAddRelationship = (type: string) => {
     router.push(`/entities/${entityId}/relationships/${type}/add`);
@@ -61,7 +75,14 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
     if (!confirm('Are you sure you want to remove this relationship?')) return;
 
     try {
-      await clientDeleteRelationship(relationshipId);
+      const response = await fetch(`/api/relationships/${relationshipId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete relationship');
+      }
+      
       await loadRelationships(); // Reload the relationships
     } catch (error) {
       console.error('Error deleting relationship:', error);
@@ -69,36 +90,9 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
     }
   };
 
-  const getTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      contacts: 'Contacts',
-      emails: 'Emails',
-      phones: 'Phones',
-      bank_accounts: 'Bank Accounts',
-      investment_accounts: 'Investment Accounts',
-      crypto_accounts: 'Crypto Accounts',
-      credit_cards: 'Credit Cards',
-      websites: 'Websites',
-      hosting_accounts: 'Hosting Accounts'
-    };
-    return labels[type] || type;
-  };
-
   const getRelationshipsByType = (type: string) => {
     return relationships.filter(r => r.type_of_record === type);
   };
-
-  const relationshipTypes = [
-    'contacts',
-    'emails', 
-    'phones',
-    'bank_accounts',
-    'investment_accounts',
-    'crypto_accounts',
-    'credit_cards',
-    'websites',
-    'hosting_accounts'
-  ];
 
   if (loading) {
     return (
@@ -126,40 +120,55 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {relationshipTypes.map((type, index) => {
-        const typeRelationships = getRelationshipsByType(type);
-        const typeLabel = getTypeLabel(type);
+    <div className="space-y-8">
+      {relationshipTypes.map((typeInfo, index) => {
+        const typeRelationships = getRelationshipsByType(typeInfo.key);
+        const hasRelationships = typeRelationships.length > 0;
         
         return (
-          <div key={type}>
+          <div key={typeInfo.key}>
             <Card>
               <CardHeader>
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg">{typeLabel}</CardTitle>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{typeInfo.icon}</span>
+                    <div>
+                      <CardTitle className="text-lg">{typeInfo.label}</CardTitle>
+                      <p className="text-sm text-gray-500">
+                        {typeRelationships.length} relationship{typeRelationships.length !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
                   <Button 
-                    onClick={() => handleAddRelationship(type)} 
+                    onClick={() => handleAddRelationship(typeInfo.key)} 
                     size="sm"
+                    className="bg-blue-600 hover:bg-blue-700"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Add {typeLabel.slice(0, -1)} Relationship
+                    Add {typeInfo.label.slice(0, -1)}
                   </Button>
                 </div>
               </CardHeader>
+              
               <CardContent>
-                {typeRelationships.length > 0 ? (
+                {hasRelationships ? (
                   <div className="space-y-3">
                     {typeRelationships.map((relationship) => (
                       <div
                         key={relationship.id}
-                        className="flex justify-between items-center p-4 border rounded-lg bg-gray-50"
+                        className="flex justify-between items-center p-4 border rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                       >
                         <div className="flex-1">
-                          <h3 className="font-medium text-teal-800">
-                            {relationship.related_data_display_name}
-                          </h3>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-medium text-teal-800">
+                              {relationship.related_data_display_name}
+                            </h3>
+                            <Badge variant="secondary" className="text-xs">
+                              {typeInfo.label.slice(0, -1)}
+                            </Badge>
+                          </div>
                           {relationship.relationship_description && (
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-sm text-gray-600">
                               {relationship.relationship_description}
                             </p>
                           )}
@@ -168,7 +177,7 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleEditRelationship(relationship.id, type)}
+                            onClick={() => handleEditRelationship(relationship.id, typeInfo.key)}
                           >
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
@@ -177,7 +186,7 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                             variant="outline"
                             size="sm"
                             onClick={() => handleDeleteRelationship(relationship.id)}
-                            className="text-red-600 hover:text-red-700"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
                             <Trash2 className="w-4 h-4 mr-1" />
                             Remove
@@ -188,22 +197,24 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-gray-500 mb-4">No {typeLabel.toLowerCase()} relationships yet</p>
+                    <div className="text-4xl mb-4">{typeInfo.icon}</div>
+                    <p className="text-gray-500 mb-4">No {typeInfo.label.toLowerCase()} relationships yet</p>
                     <Button 
-                      onClick={() => handleAddRelationship(type)} 
+                      onClick={() => handleAddRelationship(typeInfo.key)} 
                       variant="outline"
+                      className="bg-blue-50 hover:bg-blue-100"
                     >
                       <Plus className="w-4 h-4 mr-2" />
-                      Add Your First {typeLabel.slice(0, -1)} Relationship
+                      Add Your First {typeInfo.label.slice(0, -1)}
                     </Button>
                   </div>
                 )}
               </CardContent>
             </Card>
             
-            {/* Add horizontal separator between tables (except for the last one) */}
+            {/* Add separator between sections (except for the last one) */}
             {index < relationshipTypes.length - 1 && (
-              <div className="border-t border-gray-300 my-6"></div>
+              <Separator className="my-6" />
             )}
           </div>
         );
