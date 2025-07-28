@@ -1,5 +1,6 @@
 import { tableConfigs } from "@/lib/tableConfigs";
 import CreateForm from "@/app/[table]/new/CreateForm";
+import { Suspense } from "react";
 
 export default function NewEmailPage() {
   const config = tableConfigs.emails;
@@ -11,7 +12,9 @@ export default function NewEmailPage() {
         <p className="text-gray-600 mt-2">Add a new email that can be related to entities later</p>
       </div>
       
-      <CreateForm table="emails" config={config} />
+      <Suspense fallback={<div>Loading form...</div>}>
+        <CreateForm table="emails" config={config} />
+      </Suspense>
     </div>
   );
 } 

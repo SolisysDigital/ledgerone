@@ -1,5 +1,6 @@
 import { tableConfigs } from "@/lib/tableConfigs";
 import CreateForm from "@/app/[table]/new/CreateForm";
+import { Suspense } from "react";
 
 export default function NewContactPage() {
   const config = tableConfigs.contacts;
@@ -11,7 +12,9 @@ export default function NewContactPage() {
         <p className="text-gray-600 mt-2">Add a new contact that can be related to entities later</p>
       </div>
       
-      <CreateForm table="contacts" config={config} />
+      <Suspense fallback={<div>Loading form...</div>}>
+        <CreateForm table="contacts" config={config} />
+      </Suspense>
     </div>
   );
 } 
