@@ -120,9 +120,10 @@ export async function getAvailableRecords(typeOfRecord: string, entityId: string
       .select('*')
       .order(displayField, { ascending: true });
 
-    // If there are existing relationships, filter them out
+    // If there are existing relationships, filter them out using a different approach
     if (existingIds.length > 0) {
-      query = query.not('id', 'in', `(${existingIds.join(',')})`);
+      // Use the 'not in' filter with proper UUID handling
+      query = query.not('id', 'in', existingIds);
     }
 
     const { data, error } = await query;
