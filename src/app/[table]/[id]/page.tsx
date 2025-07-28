@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import RelationshipTabs from "@/components/relationships/RelationshipTabs";
+import ClientRelationshipTabs from "@/components/relationships/ClientRelationshipTabs";
 import Link from "next/link";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordian";
@@ -288,7 +288,7 @@ export default async function DetailPage({
             <TabsContent value="related-data" className="space-y-6">
               {table === 'entities' && (
                 <Suspense fallback={<div className="text-center py-8">Loading relationships...</div>}>
-                  <RelationshipTabs entityId={id} />
+                  <ClientRelationshipTabs entityId={id} />
                 </Suspense>
               )}
             </TabsContent>
