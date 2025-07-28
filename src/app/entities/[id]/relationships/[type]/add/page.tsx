@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { getAvailableRecords, createRelationship } from "@/lib/relationshipActions";
+import { clientGetAvailableRecords, clientCreateRelationship } from "@/lib/clientActions";
 
 interface AddRelationshipPageProps {
   params: Promise<{ id: string; type: string }>;
@@ -38,7 +38,7 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
           setLoadingRecords(true);
           setError(null);
           console.log('Loading available records for type:', type, 'entityId:', id);
-          const records = await getAvailableRecords(type, id);
+          const records = await clientGetAvailableRecords(type, id);
           console.log('Available records loaded:', records);
           setAvailableRecords(records || []);
         } catch (error) {
@@ -103,7 +103,7 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
         relationshipDescription
       });
       
-      await createRelationship(
+      await clientCreateRelationship(
         resolvedParams.id,
         selectedRecordId,
         resolvedParams.type,

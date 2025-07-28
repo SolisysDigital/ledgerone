@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import { getEntityRelationships, deleteRelationship } from "@/lib/relationshipActions";
+import { clientGetEntityRelationships, clientDeleteRelationship } from "@/lib/clientActions";
 
 interface Relationship {
   id: string;
@@ -31,7 +31,7 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
       setError(null);
       console.log('Loading relationships for entity:', entityId);
       
-      const data = await getEntityRelationships(entityId);
+      const data = await clientGetEntityRelationships(entityId);
       console.log('Relationships loaded:', data);
       
       setRelationships(data || []);
@@ -61,7 +61,7 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
     if (!confirm('Are you sure you want to remove this relationship?')) return;
 
     try {
-      await deleteRelationship(relationshipId);
+      await clientDeleteRelationship(relationshipId);
       await loadRelationships(); // Reload the relationships
     } catch (error) {
       console.error('Error deleting relationship:', error);
