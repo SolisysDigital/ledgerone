@@ -67,17 +67,7 @@ export const tableConfigs: Record<string, TableConfig> = {
       { name: 'texas_webfile_login', type: 'text' },
       { name: 'texas_webfile_password', type: 'text' },
     ],
-    children: [
-      { table: 'contacts', fk: 'entity_id' },
-      { table: 'emails', fk: 'entity_id' },
-      { table: 'phones', fk: 'entity_id' },
-      { table: 'bank_accounts', fk: 'entity_id' },
-      { table: 'investment_accounts', fk: 'entity_id' },
-      { table: 'crypto_accounts', fk: 'entity_id' },
-      { table: 'credit_cards', fk: 'entity_id' },
-      { table: 'websites', fk: 'entity_id' },
-      { table: 'hosting_accounts', fk: 'entity_id' },
-    ],
+    // Removed children configuration since we now use many-to-many relationships
   },
   contacts: {
     label: 'Contacts',

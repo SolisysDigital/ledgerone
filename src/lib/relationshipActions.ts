@@ -122,10 +122,19 @@ export async function getAvailableRecords(typeOfRecord: string, entityId: string
 
     // If there are existing relationships, filter them out
     if (existingIds.length > 0) {
-      // Use a different approach - filter out existing IDs one by one
-      for (const existingId of existingIds) {
-        query = query.neq('id', existingId);
+      // Use a simpler approach - get all records and filter in JavaScript
+      const { data: allRecords, error: allRecordsError } = await query;
+      
+      if (allRecordsError) {
+        await AppLogger.error('relationshipActions', 'getAvailableRecords', 'Failed to fetch all records', allRecordsError, { typeOfRecord, entityId });
+        throw allRecordsError;
       }
+
+      // Filter out existing records in JavaScript
+      const availableRecords = (allRecords || []).filter(record => !existingIds.includes(record.id));
+      
+      await AppLogger.info('relationshipActions', 'getAvailableRecords', 'Successfully fetched available records', { typeOfRecord, entityId, count: availableRecords?.length });
+      return availableRecords;
     }
 
     const { data, error } = await query;
