@@ -122,7 +122,7 @@ export async function getAvailableRecords(typeOfRecord: string, entityId: string
 
     // If there are existing relationships, filter them out
     if (existingIds.length > 0) {
-      query = query.not('id', 'in', `(${existingIds.map(id => `'${id}'`).join(',')})`);
+      query = query.not('id', 'in', `(${existingIds.join(',')})`);
     }
 
     const { data, error } = await query;
