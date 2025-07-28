@@ -3,11 +3,12 @@ import { supabase } from "@/lib/supabase";
 import EditForm from "@/app/[table]/[id]/edit/EditForm";
 import { notFound } from "next/navigation";
 
-export default async function EditContactPage({ params }: { params: { id: string } }) {
+export default async function EditContactPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const { data: contact, error } = await supabase
     .from('contacts')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (error || !contact) {

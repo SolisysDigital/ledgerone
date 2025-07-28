@@ -7,11 +7,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Edit, ArrowLeft } from "lucide-react";
 
-export default async function ContactDetailPage({ params }: { params: { id: string } }) {
+export default async function ContactDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const { data: contact, error } = await supabase
     .from('contacts')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (error || !contact) {
@@ -27,7 +28,7 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
       relationship_description,
       entities!inner(name)
     `)
-    .eq('related_data_id', params.id)
+    .eq('related_data_id', id)
     .eq('type_of_record', 'contacts');
 
   return (
@@ -45,7 +46,7 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
               <p className="text-xl text-gray-600 mt-2">{contact.title}</p>
             )}
           </div>
-          <Link href={`/contacts/${params.id}/edit`}>
+          <Link href={`/contacts/${id}/edit`}>
             <Button>
               <Edit className="w-4 h-4 mr-2" />
               Edit Contact
