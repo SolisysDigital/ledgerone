@@ -82,39 +82,32 @@ export const tableConfigs: Record<string, TableConfig> = {
   contacts: {
     label: 'Contacts',
     fields: [
-      { name: 'entity_id', type: 'fk', refTable: 'entities', displayField: 'name' },
       { name: 'name', type: 'text' },
       { name: 'title', type: 'text' },
       { name: 'email', type: 'text' },
       { name: 'phone', type: 'text' },
       { name: 'description', type: 'textarea' },
     ],
-    parent: { table: 'entities', fk: 'entity_id' },
   },
   emails: {
     label: 'Emails',
     fields: [
-      { name: 'entity_id', type: 'fk', refTable: 'entities', displayField: 'name' },
       { name: 'email', type: 'text' },
       { name: 'label', type: 'text' },
       { name: 'description', type: 'textarea' },
     ],
-    parent: { table: 'entities', fk: 'entity_id' },
   },
   phones: {
     label: 'Phones',
     fields: [
-      { name: 'entity_id', type: 'fk', refTable: 'entities', displayField: 'name' },
       { name: 'phone', type: 'text' },
       { name: 'label', type: 'text' },
       { name: 'description', type: 'textarea' },
     ],
-    parent: { table: 'entities', fk: 'entity_id' },
   },
   bank_accounts: {
     label: 'Bank Accounts',
     fields: [
-      { name: 'entity_id', type: 'fk', refTable: 'entities', displayField: 'name' },
       { name: 'bank_name', type: 'text' },
       { name: 'account_number', type: 'text' },
       { name: 'routing_number', type: 'text' },
@@ -123,12 +116,10 @@ export const tableConfigs: Record<string, TableConfig> = {
       { name: 'last_balance', type: 'number' },
       { name: 'description', type: 'textarea' },
     ],
-    parent: { table: 'entities', fk: 'entity_id' },
   },
   investment_accounts: {
     label: 'Investment Accounts',
     fields: [
-      { name: 'entity_id', type: 'fk', refTable: 'entities', displayField: 'name' },
       { name: 'provider', type: 'text' },
       { name: 'account_type', type: 'text' },
       { name: 'account_number', type: 'text' },
@@ -137,7 +128,6 @@ export const tableConfigs: Record<string, TableConfig> = {
       { name: 'last_balance', type: 'number' },
       { name: 'description', type: 'textarea' },
     ],
-    parent: { table: 'entities', fk: 'entity_id' },
     children: [
       { table: 'securities_held', fk: 'investment_account_id' },
     ],
@@ -158,7 +148,6 @@ export const tableConfigs: Record<string, TableConfig> = {
   crypto_accounts: {
     label: 'Crypto Accounts',
     fields: [
-      { name: 'entity_id', type: 'fk', refTable: 'entities', displayField: 'name' },
       { name: 'platform', type: 'text' },
       { name: 'account_number', type: 'text' },
       { name: 'wallet_address', type: 'text' },
@@ -167,12 +156,10 @@ export const tableConfigs: Record<string, TableConfig> = {
       { name: 'last_balance', type: 'number' },
       { name: 'description', type: 'textarea' },
     ],
-    parent: { table: 'entities', fk: 'entity_id' },
   },
   credit_cards: {
     label: 'Credit Cards',
     fields: [
-      { name: 'entity_id', type: 'fk', refTable: 'entities', displayField: 'name' },
       { name: 'cardholder_name', type: 'text' },
       { name: 'card_number', type: 'text' },
       { name: 'issuer', type: 'text' },
@@ -182,29 +169,24 @@ export const tableConfigs: Record<string, TableConfig> = {
       { name: 'last_balance', type: 'number' },
       { name: 'description', type: 'textarea' },
     ],
-    parent: { table: 'entities', fk: 'entity_id' },
   },
   websites: {
     label: 'Websites',
     fields: [
-      { name: 'entity_id', type: 'fk', refTable: 'entities', displayField: 'name' },
       { name: 'url', type: 'text' },
       { name: 'label', type: 'text' },
       { name: 'description', type: 'textarea' },
     ],
-    parent: { table: 'entities', fk: 'entity_id' },
   },
   hosting_accounts: {
     label: 'Hosting Accounts',
     fields: [
-      { name: 'entity_id', type: 'fk', refTable: 'entities', displayField: 'name' },
       { name: 'provider', type: 'text' },
       { name: 'login_url', type: 'text' },
       { name: 'username', type: 'text' },
       { name: 'password', type: 'text' },
       { name: 'description', type: 'textarea' },
     ],
-    parent: { table: 'entities', fk: 'entity_id' },
   },
   entity_relationships: {
     label: 'Entity Relationships',
@@ -213,6 +195,19 @@ export const tableConfigs: Record<string, TableConfig> = {
       { name: 'to_entity_id', type: 'fk', refTable: 'entities', displayField: 'name' },
       { name: 'relationship_type', type: 'text' },
       { name: 'description', type: 'textarea' },
+    ],
+  },
+  entity_related_data: {
+    label: 'Entity Related Data',
+    fields: [
+      { name: 'entity_id', type: 'fk', refTable: 'entities', displayField: 'name' },
+      { name: 'related_data_id', type: 'text' },
+      { name: 'type_of_record', type: 'select', options: [
+        'contacts', 'emails', 'phones', 'bank_accounts', 
+        'investment_accounts', 'crypto_accounts', 'credit_cards', 
+        'websites', 'hosting_accounts'
+      ]},
+      { name: 'relationship_description', type: 'textarea' },
     ],
   },
 };
