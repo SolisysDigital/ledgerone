@@ -2,10 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { getEntityRelationships, deleteRelationship } from "@/lib/relationshipActions";
 
@@ -25,22 +23,31 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
   const router = useRouter();
   const [relationships, setRelationships] = useState<Relationship[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadRelationships = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+      console.log('Loading relationships for entity:', entityId);
+      
       const data = await getEntityRelationships(entityId);
+      console.log('Relationships loaded:', data);
+      
       setRelationships(data || []);
     } catch (error) {
       console.error('Error loading relationships:', error);
+      setError('Failed to load relationships. Please try again.');
     } finally {
       setLoading(false);
     }
   }, [entityId]);
 
   useEffect(() => {
-    loadRelationships();
-  }, [loadRelationships]);
+    if (entityId) {
+      loadRelationships();
+    }
+  }, [loadRelationships, entityId]);
 
   const handleAddRelationship = (type: string) => {
     router.push(`/entities/${entityId}/relationships/${type}/add`);
@@ -98,6 +105,21 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
       <Card>
         <CardContent className="p-6">
           <div className="text-center">Loading relationships...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center text-red-600">
+            <p className="mb-4">{error}</p>
+            <Button onClick={loadRelationships} variant="outline">
+              Try Again
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );

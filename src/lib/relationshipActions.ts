@@ -5,6 +5,8 @@ import { AppLogger } from "@/lib/logger";
 
 export async function getEntityRelationships(entityId: string) {
   try {
+    console.log('getEntityRelationships called with entityId:', entityId);
+    
     // First get the relationships
     const { data: relationships, error: relationshipsError } = await supabase
       .from('entity_related_data')
@@ -18,9 +20,12 @@ export async function getEntityRelationships(entityId: string) {
       .order('type_of_record', { ascending: true });
 
     if (relationshipsError) {
+      console.error('Error fetching relationships:', relationshipsError);
       await AppLogger.error('relationshipActions', 'getEntityRelationships', 'Failed to fetch relationships', relationshipsError, { entityId });
       throw relationshipsError;
     }
+
+    console.log('Raw relationships fetched:', relationships);
 
     // Get the display field mapping
     const getDisplayField = (type: string) => {
@@ -43,6 +48,8 @@ export async function getEntityRelationships(entityId: string) {
       (relationships || []).map(async (relationship) => {
         try {
           const displayField = getDisplayField(relationship.type_of_record);
+          console.log(`Fetching ${relationship.type_of_record} data for ID: ${relationship.related_data_id}`);
+          
           const { data: relatedData, error: relatedDataError } = await supabase
             .from(relationship.type_of_record)
             .select(displayField)
@@ -57,9 +64,12 @@ export async function getEntityRelationships(entityId: string) {
             };
           }
 
+          const displayName = (relatedData as any)?.[displayField] || 'Unnamed Record';
+          console.log(`Display name for ${relationship.type_of_record}:`, displayName);
+          
           return {
             ...relationship,
-            related_data_display_name: (relatedData as any)?.[displayField] || 'Unnamed Record'
+            related_data_display_name: displayName
           };
         } catch (error) {
           console.error(`Error processing relationship ${relationship.id}:`, error);
@@ -71,9 +81,11 @@ export async function getEntityRelationships(entityId: string) {
       })
     );
 
+    console.log('Enriched relationships:', enrichedRelationships);
     await AppLogger.info('relationshipActions', 'getEntityRelationships', 'Successfully fetched relationships', { entityId, count: enrichedRelationships?.length });
     return enrichedRelationships;
   } catch (error) {
+    console.error('Exception in getEntityRelationships:', error);
     await AppLogger.error('relationshipActions', 'getEntityRelationships', 'Exception in getEntityRelationships', error, { entityId });
     throw error;
   }
