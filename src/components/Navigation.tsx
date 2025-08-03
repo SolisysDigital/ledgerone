@@ -47,18 +47,18 @@ export default function Navigation() {
   );
 
   return (
-    <nav className="w-64 bg-gradient-to-b from-background to-muted/20 border-r border-border/50 h-screen overflow-y-auto">
+    <nav className="w-64 bg-white/80 backdrop-blur-md border-r border-white/20 h-screen overflow-y-auto shadow-xl">
       {/* Enhanced Header */}
-      <div className="p-6 border-b border-border/50 bg-gradient-to-r from-primary/5 to-secondary/5">
+      <div className="p-6 border-b border-white/30 bg-gradient-to-r from-white/40 to-white/20">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
-            <Database className="h-6 w-6 text-primary-foreground" />
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+            <Database className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               LedgerOne
             </h1>
-            <p className="text-xs text-muted-foreground">Data Management</p>
+            <p className="text-xs text-slate-600">Data Management</p>
           </div>
         </div>
       </div>
@@ -71,15 +71,15 @@ export default function Navigation() {
           variant={pathname === "/" ? "default" : "ghost"}
           className={`w-full justify-start h-12 px-4 rounded-xl transition-all duration-200 ${
             pathname === "/"
-              ? "bg-primary text-primary-foreground shadow-md"
-              : "hover:bg-muted/60 hover:shadow-sm"
+              ? "bg-blue-600 text-white shadow-md"
+              : "hover:bg-white/60 hover:shadow-sm text-slate-700"
           }`}
         >
           <Link href="/">
             <Home className="h-5 w-5 mr-3" />
             <span className="font-medium">Home</span>
             {pathname === "/" && (
-              <Badge variant="secondary" className="ml-auto bg-primary-foreground/20 text-primary-foreground">
+              <Badge variant="secondary" className="ml-auto bg-white/20 text-white">
                 Active
               </Badge>
             )}
@@ -89,7 +89,7 @@ export default function Navigation() {
         {/* Data Tables */}
         <div className="space-y-1">
           <div className="px-3 py-2">
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
               Data Management
             </h3>
           </div>
@@ -105,15 +105,15 @@ export default function Navigation() {
                 variant={isActive ? "default" : "ghost"}
                 className={`w-full justify-start h-11 px-4 rounded-lg transition-all duration-200 ${
                   isActive
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "hover:bg-muted/60 hover:shadow-sm"
+                    ? "bg-blue-600 text-white shadow-md"
+                    : "hover:bg-white/60 hover:shadow-sm text-slate-700"
                 }`}
               >
                 <Link href={`/${key}`}>
                   <Icon className="h-4 w-4 mr-3" />
                   <span className="font-medium">{config.label}</span>
                   {isActive && (
-                    <Badge variant="secondary" className="ml-auto bg-primary-foreground/20 text-primary-foreground">
+                    <Badge variant="secondary" className="ml-auto bg-white/20 text-white">
                       Active
                     </Badge>
                   )}
@@ -126,7 +126,7 @@ export default function Navigation() {
         {/* Settings Section */}
         <div className="pt-4 space-y-1">
           <div className="px-3 py-2">
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-2">
               <Settings className="h-3 w-3" />
               Settings
             </h3>
@@ -138,15 +138,15 @@ export default function Navigation() {
             variant={pathname === "/entity_relationships" ? "default" : "ghost"}
             className={`w-full justify-start h-11 px-4 rounded-lg transition-all duration-200 ${
               pathname === "/entity_relationships"
-                ? "bg-primary text-primary-foreground shadow-md"
-                : "hover:bg-muted/60 hover:shadow-sm"
+                ? "bg-blue-600 text-white shadow-md"
+                : "hover:bg-white/60 hover:shadow-sm text-slate-700"
             }`}
           >
             <Link href="/entity_relationships">
               <LinkIcon className="h-4 w-4 mr-3" />
               <span className="font-medium">Entity Relationships</span>
               {pathname === "/entity_relationships" && (
-                <Badge variant="secondary" className="ml-auto bg-primary-foreground/20 text-primary-foreground">
+                <Badge variant="secondary" className="ml-auto bg-white/20 text-white">
                   Active
                 </Badge>
               )}
@@ -159,15 +159,15 @@ export default function Navigation() {
             variant={pathname === "/admin/logs" ? "default" : "ghost"}
             className={`w-full justify-start h-11 px-4 rounded-lg transition-all duration-200 ${
               pathname === "/admin/logs"
-                ? "bg-primary text-primary-foreground shadow-md"
-                : "hover:bg-muted/60 hover:shadow-sm"
+                ? "bg-blue-600 text-white shadow-md"
+                : "hover:bg-white/60 hover:shadow-sm text-slate-700"
             }`}
           >
             <Link href="/admin/logs">
               <Zap className="h-4 w-4 mr-3" />
               <span className="font-medium">Admin Logs</span>
               {pathname === "/admin/logs" && (
-                <Badge variant="secondary" className="ml-auto bg-primary-foreground/20 text-primary-foreground">
+                <Badge variant="secondary" className="ml-auto bg-white/20 text-white">
                   Active
                 </Badge>
               )}
@@ -177,12 +177,12 @@ export default function Navigation() {
       </div>
 
       {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border/50 bg-gradient-to-r from-muted/30 to-muted/10">
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/30 bg-gradient-to-r from-white/40 to-white/20">
         <div className="text-center">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-slate-600">
             LedgerOne v1.0
           </p>
-          <p className="text-xs text-muted-foreground/60">
+          <p className="text-xs text-slate-500">
             Data Management System
           </p>
         </div>

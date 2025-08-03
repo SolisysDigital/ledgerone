@@ -20,13 +20,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={montserrat.variable}>
-      <body className={`${montserrat.className} antialiased bg-background`}>
-        <div className="flex h-screen bg-gradient-to-br from-background via-background to-muted/10">
+      <body className={`${montserrat.className} antialiased`}>
+        {/* Wallpaper Background */}
+        <div className="fixed inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 z-0"></div>
+        
+        {/* Main Application Layer */}
+        <div className="relative z-10 flex h-screen">
           {/* Enhanced Navigation Sidebar */}
           <Navigation />
           
           {/* Main Content Area */}
-          <main className="flex-1 overflow-auto bg-gradient-to-br from-background to-muted/5">
+          <main className="flex-1 overflow-auto">
             <div className="min-h-full">
               {children}
             </div>
