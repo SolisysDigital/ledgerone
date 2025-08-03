@@ -7,20 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Building2, Users, Mail, Phone, CreditCard, Globe, Server, Bitcoin, TrendingUp, BarChart3, FileText, Sparkles } from "lucide-react";
+import { Search, Building2, Users, Mail, Phone, CreditCard, Globe, Server, Bitcoin, TrendingUp, BarChart3, FileText, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 interface SearchResult {
   table: string;
   id: string;
-  displayName: string;
+  name: string;
   description?: string;
-  icon: React.ComponentType<any>;
+  type?: string;
 }
 
 const tableIcons: Record<string, React.ComponentType<any>> = {
   entities: Building2,
-  legal_information: FileText,
   contacts: Users,
   emails: Mail,
   phones: Phone,
@@ -31,204 +30,169 @@ const tableIcons: Record<string, React.ComponentType<any>> = {
   websites: Globe,
   hosting_accounts: Server,
   securities_held: BarChart3,
-  entity_relationships: FileText,
 };
 
-export default function HomePage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
+export default async function HomePage() {
+  const searchResults: SearchResult[] = [];
 
-  const searchAllTables = async (query: string) => {
-    if (!query.trim()) {
-      setResults([]);
-      setHasSearched(false);
-      return;
+  // Search across all tables
+  for (const [tableName, config] of Object.entries(tableConfigs)) {
+    if (tableName === 'entity_related_data') continue;
+    
+    const { data } = await supabase
+      .from(tableName)
+      .select('*')
+      .limit(3);
+
+    if (data) {
+      data.forEach((item: any) => {
+        searchResults.push({
+          table: tableName,
+          id: item.id,
+          name: item.name || item.email || item.phone || item.url || item.account_name || 'Unnamed',
+          description: item.description || item.short_description,
+          type: item.type,
+        });
+      });
     }
-
-    setIsSearching(true);
-    setHasSearched(true);
-    const searchResults: SearchResult[] = [];
-
-    try {
-      for (const [tableName, config] of Object.entries(tableConfigs)) {
-        // Build search query based on table fields
-        const searchableFields = config.fields
-          .filter(field => field.type === 'text' || field.type === 'textarea')
-          .map(field => field.name);
-
-        if (searchableFields.length === 0) continue;
-
-        // Create OR conditions for all searchable fields
-        const searchConditions = searchableFields.map(field => 
-          `${field}.ilike.%${query}%`
-        ).join(',');
-
-        const { data, error } = await supabase
-          .from(tableName)
-          .select('*')
-          .or(searchConditions)
-          .limit(10);
-
-        if (!error && data) {
-          data.forEach((item: any) => {
-            const displayName = item.name || item[config.fields[0]?.name] || `ID: ${item.id}`;
-            const description = item.description || item[config.fields.find(f => f.name === 'description')?.name || ''];
-            
-            searchResults.push({
-              table: tableName,
-              id: item.id,
-              displayName,
-              description,
-              icon: tableIcons[tableName] || Building2,
-            });
-          });
-        }
-      }
-
-      setResults(searchResults);
-    } catch (error) {
-      console.error('Search error:', error);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    searchAllTables(searchTerm);
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      searchAllTables(searchTerm);
-    }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* Enhanced Logo and Title */}
-        <div className="text-center mb-16">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center shadow-lg">
-              <Sparkles className="h-8 w-8 text-primary-foreground" />
-            </div>
-            <h1 className="text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              LedgerOne
-            </h1>
-          </div>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Search across all your entities and relationships with our powerful unified search
-          </p>
-        </div>
-
-        {/* Enhanced Search Box */}
-        <div className="w-full max-w-3xl mx-auto mb-12">
-          <form onSubmit={handleSearch}>
-            <div className="relative">
-              <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 h-6 w-6 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search for entities, contacts, accounts, relationships..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="h-16 pl-16 pr-24 text-lg border-2 focus:border-primary rounded-xl shadow-lg bg-card/50 backdrop-blur-sm"
-              />
-              <Button 
-                type="submit" 
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-12 px-6 shadow-md hover:shadow-lg transition-shadow"
-                disabled={isSearching}
-              >
-                {isSearching ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                ) : (
-                  "Search"
-                )}
-              </Button>
-            </div>
-          </form>
-        </div>
-
-        {/* Enhanced Search Results */}
-        {hasSearched && (
-          <div className="w-full max-w-5xl mx-auto">
-            {isSearching ? (
-              <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/95">
-                <CardContent className="p-12 text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-6"></div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Searching across all tables...</h3>
-                  <p className="text-muted-foreground">Please wait while we find your results</p>
-                </CardContent>
-              </Card>
-            ) : results.length > 0 ? (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-1 h-8 bg-primary rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-foreground">
-                    Found {results.length} result{results.length !== 1 ? 's' : ''} for &quot;{searchTerm}&quot;
-                  </h2>
-                </div>
-                <div className="grid gap-4">
-                  {results.map((result) => {
-                    const Icon = result.icon;
-                    return (
-                      <Link
-                        key={`${result.table}-${result.id}`}
-                        href={`/${result.table}/${result.id}`}
-                      >
-                        <Card className="shadow-md hover:shadow-lg transition-all duration-200 border-border/50 hover:border-border bg-gradient-to-r from-card to-card/95 group">
-                          <CardContent className="p-6">
-                            <div className="flex items-center space-x-6">
-                              <div className="w-12 h-12 bg-muted/30 rounded-xl flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                                <Icon className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center space-x-4 mb-2">
-                                  <h3 className="font-semibold text-lg truncate cursor-help group-hover:text-primary transition-colors" title={`ID: ${result.id}`}>
-                                    {result.displayName}
-                                  </h3>
-                                  <Badge variant="secondary" className="bg-secondary/50 text-secondary-foreground">
-                                    {tableConfigs[result.table]?.label}
-                                  </Badge>
-                                </div>
-                                {result.description && (
-                                  <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                                    {result.description}
-                                  </p>
-                                )}
-                                <p className="text-xs text-muted-foreground mt-2 opacity-75">
-                                  Hover over name to see ID • Click to view details
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    );
-                  })}
-                </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/5">
+      {/* Enhanced Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5"></div>
+        <div className="relative max-w-7xl mx-auto px-6 py-16">
+          <div className="text-center space-y-8">
+            {/* Enhanced Logo and Title */}
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center shadow-2xl">
+                <Sparkles className="h-8 w-8 text-primary-foreground" />
               </div>
-            ) : (
-              <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/95">
-                <CardContent className="p-12 text-center">
-                  <div className="w-20 h-20 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Search className="h-10 w-10 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">
-                    No results found for &quot;{searchTerm}&quot;
-                  </h3>
-                  <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
-                    Try searching with different keywords or check your spelling. You can search for entity names, contact information, account details, and more.
-                  </p>
+              <div className="text-left">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                  LedgerOne
+                </h1>
+                <p className="text-lg text-muted-foreground font-medium">
+                  Data Management System
+                </p>
+              </div>
+            </div>
+            
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Comprehensive data management for entities, contacts, and related information. 
+              Search across all your data with powerful tools and intuitive navigation.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Search Section */}
+      <div className="max-w-7xl mx-auto px-6 pb-16">
+        <div className="max-w-3xl mx-auto">
+          <Card className="shadow-2xl border-0 bg-gradient-to-br from-card to-card/95 backdrop-blur-sm">
+            <CardContent className="p-8">
+              <div className="flex items-center gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input 
+                    placeholder="Search across all data..." 
+                    className="w-full h-16 pl-12 pr-24 text-lg rounded-xl shadow-lg bg-card/50 backdrop-blur-sm border-border/50 focus:border-primary/50 transition-all duration-200"
+                  />
+                </div>
+                <Button 
+                  size="lg" 
+                  className="h-16 px-8 rounded-xl shadow-lg bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary transition-all duration-200"
+                >
+                  <Search className="h-5 w-5 mr-2" />
+                  Search
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Enhanced Quick Access Section */}
+      <div className="max-w-7xl mx-auto px-6 pb-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-foreground mb-4">Quick Access</h2>
+          <p className="text-muted-foreground text-lg">Navigate to your most important data</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Object.entries(tableConfigs).slice(0, 6).map(([tableName, config]) => {
+            const Icon = tableIcons[tableName] || Building2;
+            return (
+              <Card key={tableName} className="group hover:shadow-xl transition-all duration-300 border-border/50 hover:border-primary/30 bg-gradient-to-br from-card to-card/95">
+                <CardContent className="p-6">
+                  <Link href={`/${tableName}`} className="block">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                        <Icon className="h-6 w-6 text-primary" />
+                      </div>
+                      <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-200">
+                      {config.label}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Manage your {config.label.toLowerCase()} data
+                    </p>
+                  </Link>
                 </CardContent>
               </Card>
-            )}
-          </div>
-        )}
+            );
+          })}
+        </div>
       </div>
+
+      {/* Enhanced Recent Data Section */}
+      {searchResults.length > 0 && (
+        <div className="max-w-7xl mx-auto px-6 pb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-4">Recent Data</h2>
+            <p className="text-muted-foreground text-lg">Your most recent entries across all tables</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {searchResults.slice(0, 6).map((result, index) => {
+              const Icon = tableIcons[result.table] || Building2;
+              const config = tableConfigs[result.table as keyof typeof tableConfigs];
+              
+              return (
+                <Card key={`${result.table}-${result.id}`} className="group hover:shadow-xl transition-all duration-300 border-border/50 hover:border-primary/30 bg-gradient-to-br from-card to-card/95">
+                  <CardContent className="p-6">
+                    <Link href={`/${result.table}/${result.id}`} className="block">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="w-10 h-10 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg flex items-center justify-center">
+                          <Icon className="h-5 w-5 text-primary" />
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          {config?.label || result.table}
+                        </Badge>
+                      </div>
+                      <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-200">
+                        {result.name}
+                      </h3>
+                      {result.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {result.description}
+                        </p>
+                      )}
+                      {result.type && (
+                        <Badge variant="outline" className="mt-2 text-xs">
+                          {result.type}
+                        </Badge>
+                      )}
+                    </Link>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

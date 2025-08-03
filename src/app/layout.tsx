@@ -3,36 +3,34 @@ import { Montserrat } from "next/font/google";
 import "./global.css";
 import Navigation from "@/components/Navigation";
 
-const montserrat = Montserrat({ subsets: ["latin"] });
+const montserrat = Montserrat({ 
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+});
 
 export const metadata: Metadata = {
-  title: "LedgerOne",
-  description: "Entity relationship management system",
+  title: "LedgerOne - Data Management System",
+  description: "Comprehensive data management system for entities, contacts, and related information",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body className={montserrat.className}>
-        <div className="min-h-screen bg-background">
-          <div className="flex">
-            {/* Sidebar */}
-            <div className="w-64 min-h-screen bg-card border-r p-4 space-y-4">
-              <div>
-                <h1 className="text-xl font-bold mb-4">LedgerOne</h1>
-              </div>
-              <Navigation />
-            </div>
-            
-            {/* Main Content */}
-            <div className="flex-1 p-6">
+    <html lang="en" className={montserrat.variable}>
+      <body className={`${montserrat.className} antialiased bg-background`}>
+        <div className="flex h-screen bg-gradient-to-br from-background via-background to-muted/10">
+          {/* Enhanced Navigation Sidebar */}
+          <Navigation />
+          
+          {/* Main Content Area */}
+          <main className="flex-1 overflow-auto bg-gradient-to-br from-background to-muted/5">
+            <div className="min-h-full">
               {children}
             </div>
-          </div>
+          </main>
         </div>
       </body>
     </html>
