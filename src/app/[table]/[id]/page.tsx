@@ -124,7 +124,7 @@ export default async function DetailPage({
           </CardHeader>
           <CardContent className="p-0">
             <Tabs defaultValue="information" className="w-full">
-              <div className="border-b border-border/50 bg-muted/20">
+              <div className="border-b border-border/50 bg-muted/50">
                 <TabsList className="grid w-full grid-cols-2 h-12 bg-transparent border-0">
                   <TabsTrigger value="information" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200">
                     <FileText className="h-4 w-4 mr-2" />

@@ -132,7 +132,7 @@
   }
   
   .table-modern tr:nth-child(even) {
-    @apply bg-muted/20;
+    @apply bg-muted/60;
   }
   
   .table-modern tr:nth-child(odd) {
@@ -140,7 +140,7 @@
   }
   
   .table-modern tr:hover {
-    @apply bg-muted/30 transition-colors duration-150;
+    @apply bg-muted/80 transition-colors duration-150;
   }
   
   /* Modern Badge Styles */
