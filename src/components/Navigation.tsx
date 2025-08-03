@@ -110,7 +110,7 @@ export default function Navigation() {
         {/* Entity Related */}
         <Button
           asChild
-          variant={pathname.includes("/entities") ? "default" : "ghost"}
+          variant={pathname === "/entities" ? "default" : "ghost"}
           className="w-full justify-start h-auto p-2 text-sm"
         >
           <Link href="/entities">
@@ -118,7 +118,7 @@ export default function Navigation() {
             <span className="text-xs font-medium truncate">
               Entity Related
             </span>
-            {pathname.includes("/entities") && (
+            {pathname === "/entities" && (
               <Badge variant="secondary" className="ml-auto text-xs">
                 Active
               </Badge>
@@ -129,7 +129,7 @@ export default function Navigation() {
         {/* Entity Relationships */}
         <Button
           asChild
-          variant={pathname.includes("/entity_relationships") ? "default" : "ghost"}
+          variant={pathname === "/entity_relationships" ? "default" : "ghost"}
           className="w-full justify-start h-auto p-2 text-sm"
         >
           <Link href="/entity_relationships">
@@ -137,7 +137,7 @@ export default function Navigation() {
             <span className="text-xs font-medium truncate">
               Entity Relationships
             </span>
-            {pathname.includes("/entity_relationships") && (
+            {pathname === "/entity_relationships" && (
               <Badge variant="secondary" className="ml-auto text-xs">
                 Active
               </Badge>
@@ -148,7 +148,7 @@ export default function Navigation() {
         {/* Admin Logs */}
         <Button
           asChild
-          variant={pathname.includes("/admin/logs") ? "default" : "ghost"}
+          variant={pathname === "/admin/logs" ? "default" : "ghost"}
           className="w-full justify-start h-auto p-2 text-sm"
         >
           <Link href="/admin/logs">
@@ -156,7 +156,7 @@ export default function Navigation() {
             <span className="text-xs font-medium truncate">
               Admin Logs
             </span>
-            {pathname.includes("/admin/logs") && (
+            {pathname === "/admin/logs" && (
               <Badge variant="secondary" className="ml-auto text-xs">
                 Active
               </Badge>
