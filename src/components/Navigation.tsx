@@ -47,15 +47,15 @@ export default function Navigation() {
   );
 
   return (
-    <nav className="w-64 bg-white/80 backdrop-blur-md border-r border-white/20 h-screen overflow-y-auto shadow-xl">
+    <nav className="w-64 bg-white/85 backdrop-blur-md border-r border-white/30 h-screen overflow-y-auto shadow-xl">
       {/* Enhanced Header */}
-      <div className="p-6 border-b border-white/30 bg-gradient-to-r from-white/40 to-white/20">
+      <div className="p-6 border-b border-white/40 bg-gradient-to-r from-white/50 to-white/30">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
             <Database className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
               LedgerOne
             </h1>
             <p className="text-xs text-slate-600">Data Management</p>
@@ -71,8 +71,8 @@ export default function Navigation() {
           variant={pathname === "/" ? "default" : "ghost"}
           className={`w-full justify-start h-12 px-4 rounded-xl transition-all duration-200 ${
             pathname === "/"
-              ? "bg-blue-600 text-white shadow-md"
-              : "hover:bg-white/60 hover:shadow-sm text-slate-700"
+              ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md"
+              : "hover:bg-white/70 hover:shadow-sm text-slate-700"
           }`}
         >
           <Link href="/">
@@ -105,8 +105,8 @@ export default function Navigation() {
                 variant={isActive ? "default" : "ghost"}
                 className={`w-full justify-start h-11 px-4 rounded-lg transition-all duration-200 ${
                   isActive
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "hover:bg-white/60 hover:shadow-sm text-slate-700"
+                    ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md"
+                    : "hover:bg-white/70 hover:shadow-sm text-slate-700"
                 }`}
               >
                 <Link href={`/${key}`}>
@@ -138,8 +138,8 @@ export default function Navigation() {
             variant={pathname === "/entity_relationships" ? "default" : "ghost"}
             className={`w-full justify-start h-11 px-4 rounded-lg transition-all duration-200 ${
               pathname === "/entity_relationships"
-                ? "bg-blue-600 text-white shadow-md"
-                : "hover:bg-white/60 hover:shadow-sm text-slate-700"
+                ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md"
+                : "hover:bg-white/70 hover:shadow-sm text-slate-700"
             }`}
           >
             <Link href="/entity_relationships">
@@ -159,8 +159,8 @@ export default function Navigation() {
             variant={pathname === "/admin/logs" ? "default" : "ghost"}
             className={`w-full justify-start h-11 px-4 rounded-lg transition-all duration-200 ${
               pathname === "/admin/logs"
-                ? "bg-blue-600 text-white shadow-md"
-                : "hover:bg-white/60 hover:shadow-sm text-slate-700"
+                ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md"
+                : "hover:bg-white/70 hover:shadow-sm text-slate-700"
             }`}
           >
             <Link href="/admin/logs">
@@ -177,7 +177,7 @@ export default function Navigation() {
       </div>
 
       {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/30 bg-gradient-to-r from-white/40 to-white/20">
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/40 bg-gradient-to-r from-white/50 to-white/30">
         <div className="text-center">
           <p className="text-xs text-slate-600">
             LedgerOne v1.0

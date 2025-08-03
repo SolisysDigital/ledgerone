@@ -21,8 +21,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={montserrat.variable}>
       <body className={`${montserrat.className} antialiased`}>
-        {/* Wallpaper Background */}
-        <div className="fixed inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 z-0"></div>
+        {/* Wallpaper Background - Inspired by the uploaded photo */}
+        <div className="fixed inset-0 bg-gradient-to-br from-orange-50 via-pink-50 via-blue-50 to-purple-100 z-0"></div>
         
         {/* Main Application Layer */}
         <div className="relative z-10 flex h-screen">
