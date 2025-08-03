@@ -90,7 +90,10 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
         setTimeout(() => reject(new Error('Request timeout')), 10000)
       );
       
-      const fetchPromise = fetch(`/api/available-records?type=${type}&entityId=${entityId}`);
+      const url = `/api/available-records?type=${type}&entityId=${entityId}`;
+      console.log('AddRelationshipPage: Fetching from URL:', url);
+      
+      const fetchPromise = fetch(url);
       
       const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
       
@@ -104,6 +107,7 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
       
       const data = await response.json();
       console.log('AddRelationshipPage: Available records loaded successfully:', data);
+      console.log('AddRelationshipPage: Number of available records:', data?.length || 0);
       setAvailableRecords(data || []);
     } catch (error) {
       console.error('AddRelationshipPage: Error loading available records:', error);
@@ -253,21 +257,27 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
               <Select
                 value={selectedRecordId}
                 onValueChange={setSelectedRecordId}
-                disabled={loadingRecords}
+                disabled={loadingRecords || availableRecords.length === 0}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={`Choose a ${typeInfo.label.toLowerCase()}`} />
+                  <SelectValue placeholder={
+                    loadingRecords 
+                      ? `Loading ${typeInfo.label.toLowerCase()}s...` 
+                      : availableRecords.length === 0 
+                        ? `No available ${typeInfo.label.toLowerCase()}s` 
+                        : `Choose a ${typeInfo.label.toLowerCase()}`
+                  } />
                 </SelectTrigger>
                 <SelectContent>
                   {loadingRecords ? (
-                    <SelectItem value="" disabled>
+                    <SelectItem value="loading" disabled>
                       <div className="flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin" />
                         Loading {typeInfo.label.toLowerCase()}s...
                       </div>
                     </SelectItem>
                   ) : availableRecords.length === 0 ? (
-                    <SelectItem value="" disabled>
+                    <SelectItem value="no-records" disabled>
                       No available {typeInfo.label.toLowerCase()}s found
                     </SelectItem>
                   ) : (
