@@ -5,15 +5,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { 
   Search, 
   Plus, 
   Filter, 
-  ArrowRight,
   Eye,
   Edit,
-  Trash2,
   ChevronLeft,
   ChevronRight,
   Loader2
@@ -39,20 +36,19 @@ export default function TablePage({ params }: TablePageProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
-  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   const tableName = params.table;
   const config = tableConfigs[tableName as keyof typeof tableConfigs];
 
-  if (!config) {
-    return <div className="p-6">Table not found</div>;
-  }
-
   useEffect(() => {
-    fetchRecords();
-  }, [tableName, currentPage, searchQuery]);
+    if (config) {
+      fetchRecords();
+    }
+  }, [tableName, currentPage, searchQuery, config]);
 
   const fetchRecords = async () => {
+    if (!config) return;
+    
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -75,23 +71,6 @@ export default function TablePage({ params }: TablePageProps) {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    setIsDeleting(id);
-    try {
-      const response = await fetch(`/api/${tableName}/${id}`, {
-        method: "DELETE",
-      });
-      if (response.ok) {
-        setRecords(records.filter(record => record.id !== id));
-        setTotalRecords(prev => prev - 1);
-      }
-    } catch (error) {
-      console.error("Error deleting record:", error);
-    } finally {
-      setIsDeleting(null);
-    }
-  };
-
   const getDisplayValue = (record: Record, fieldName: string) => {
     const value = record[fieldName];
     if (value === null || value === undefined) return "-";
@@ -102,12 +81,16 @@ export default function TablePage({ params }: TablePageProps) {
     // Try to find a good display field
     const displayFields = ['name', 'title', 'email', 'phone', 'url', 'bank_name', 'provider', 'platform', 'cardholder_name'];
     for (const field of displayFields) {
-      if (config.fields.some(f => f.name === field)) {
+      if (config?.fields.some(f => f.name === field)) {
         return field;
       }
     }
-    return config.fields[0]?.name || 'id';
+    return config?.fields[0]?.name || 'id';
   };
+
+  if (!config) {
+    return <div className="p-6">Table not found</div>;
+  }
 
   const primaryField = getPrimaryField();
 
