@@ -19,7 +19,10 @@ import {
   Bitcoin,
   TrendingUp,
   BarChart3,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Settings,
+  Database,
+  Activity
 } from "lucide-react";
 
 const tableIcons: Record<string, React.ComponentType<any>> = {
@@ -43,7 +46,10 @@ export default function Navigation() {
   const currentTable = pathname.split('/')[1];
 
   // Filter out legal_information as it's an extension of entities
-  const filteredTables = Object.entries(tableConfigs).filter(([tableName]) => tableName !== 'legal_information');
+  const filteredTables = Object.entries(tableConfigs).filter(([tableName]) => 
+    tableName !== 'legal_information' && 
+    tableName !== 'entity_relationships'
+  );
 
   return (
     <div className="space-y-1">
@@ -92,6 +98,72 @@ export default function Navigation() {
           </Button>
         );
       })}
+
+      {/* Settings Section */}
+      <div className="pt-4">
+        <div className="px-3 py-2">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Settings
+          </h3>
+        </div>
+        
+        {/* Entity Related */}
+        <Button
+          asChild
+          variant={pathname.includes("/entities") ? "default" : "ghost"}
+          className="w-full justify-start h-auto p-2 text-sm"
+        >
+          <Link href="/entities">
+            <Database className="h-4 w-4 mr-2 flex-shrink-0" />
+            <span className="text-xs font-medium truncate">
+              Entity Related
+            </span>
+            {pathname.includes("/entities") && (
+              <Badge variant="secondary" className="ml-auto text-xs">
+                Active
+              </Badge>
+            )}
+          </Link>
+        </Button>
+
+        {/* Entity Relationships */}
+        <Button
+          asChild
+          variant={pathname.includes("/entity_relationships") ? "default" : "ghost"}
+          className="w-full justify-start h-auto p-2 text-sm"
+        >
+          <Link href="/entity_relationships">
+            <LinkIcon className="h-4 w-4 mr-2 flex-shrink-0" />
+            <span className="text-xs font-medium truncate">
+              Entity Relationships
+            </span>
+            {pathname.includes("/entity_relationships") && (
+              <Badge variant="secondary" className="ml-auto text-xs">
+                Active
+              </Badge>
+            )}
+          </Link>
+        </Button>
+
+        {/* Admin Logs */}
+        <Button
+          asChild
+          variant={pathname.includes("/admin/logs") ? "default" : "ghost"}
+          className="w-full justify-start h-auto p-2 text-sm"
+        >
+          <Link href="/admin/logs">
+            <Activity className="h-4 w-4 mr-2 flex-shrink-0" />
+            <span className="text-xs font-medium truncate">
+              Admin Logs
+            </span>
+            {pathname.includes("/admin/logs") && (
+              <Badge variant="secondary" className="ml-auto text-xs">
+                Active
+              </Badge>
+            )}
+          </Link>
+        </Button>
+      </div>
     </div>
   );
 } 
