@@ -105,8 +105,13 @@ export default async function ListPage({ params }: { params: Promise<{ table: st
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data?.map((row: any) => (
-                    <TableRow key={row.id} className="hover:bg-muted/30 transition-colors duration-150">
+                  {data?.map((row: any, index: number) => (
+                    <TableRow 
+                      key={row.id} 
+                      className={`hover:bg-muted/30 transition-colors duration-150 ${
+                        index % 2 === 0 ? 'bg-white' : 'bg-muted/20'
+                      }`}
+                    >
                       {columns.slice(0, 5).map((col) => (
                         <TableCell key={col.name} className="py-4">
                           {col.name === 'name' ? (
