@@ -40,53 +40,105 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
 
   const loadRelationships = useCallback(async () => {
     try {
+      console.log('RelationshipTabs: Starting to load relationships for entityId:', entityId);
       setLoading(true);
       setError(null);
       
-      // For now, we'll use a simple fetch approach
-      const response = await fetch(`/api/relationships?entityId=${entityId}`);
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const fetchPromise = fetch(`/api/relationships?entityId=${entityId}`);
+      
+      const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
+      
+      console.log('RelationshipTabs: Fetch response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Failed to load relationships');
+        const errorText = await response.text();
+        console.error('RelationshipTabs: API error response:', errorText);
+        throw new Error(`Failed to load relationships: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
+      console.log('RelationshipTabs: Relationships loaded successfully:', data);
+      
       setRelationships(data || []);
     } catch (error) {
-      console.error('Error loading relationships:', error);
-      setError('Failed to load relationships. Please try again.');
+      console.error('RelationshipTabs: Error loading relationships:', error);
+      setError(`Failed to load relationships: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
   }, [entityId]);
 
   useEffect(() => {
+    console.log('RelationshipTabs: useEffect triggered with entityId:', entityId);
+    
+    // Add error boundary for React errors
+    const handleError = (error: ErrorEvent) => {
+      console.error('RelationshipTabs: React error caught:', error);
+      setError(`React Error: ${error.message}`);
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('RelationshipTabs: Unhandled promise rejection:', event.reason);
+      setError(`Promise Rejection: ${event.reason}`);
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    // Load relationships
     loadRelationships();
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
   }, [loadRelationships]);
 
   const handleAddRelationship = (type: string) => {
-    router.push(`/entities/${entityId}/relationships/${type}/add`);
+    try {
+      console.log('RelationshipTabs: Adding relationship for type:', type);
+      router.push(`/entities/${entityId}/relationships/${type}/add`);
+    } catch (error) {
+      console.error('RelationshipTabs: Error navigating to add relationship:', error);
+      alert('Error navigating to add relationship page');
+    }
   };
 
   const handleEditRelationship = (relationshipId: string, type: string) => {
-    router.push(`/entities/${entityId}/relationships/${type}/${relationshipId}/edit`);
+    try {
+      console.log('RelationshipTabs: Editing relationship:', relationshipId, 'for type:', type);
+      router.push(`/entities/${entityId}/relationships/${type}/${relationshipId}/edit`);
+    } catch (error) {
+      console.error('RelationshipTabs: Error navigating to edit relationship:', error);
+      alert('Error navigating to edit relationship page');
+    }
   };
 
   const handleDeleteRelationship = async (relationshipId: string) => {
-    if (!confirm('Are you sure you want to remove this relationship?')) return;
-
     try {
+      if (!confirm('Are you sure you want to remove this relationship?')) return;
+
+      console.log('RelationshipTabs: Deleting relationship:', relationshipId);
+      
       const response = await fetch(`/api/relationships/${relationshipId}`, {
         method: 'DELETE',
       });
       
       if (!response.ok) {
-        throw new Error('Failed to delete relationship');
+        const errorText = await response.text();
+        throw new Error(`Failed to delete relationship: ${response.status} ${response.statusText}`);
       }
       
+      console.log('RelationshipTabs: Relationship deleted successfully');
       await loadRelationships(); // Reload the relationships
     } catch (error) {
-      console.error('Error deleting relationship:', error);
-      alert('Error removing relationship. Please try again.');
+      console.error('RelationshipTabs: Error deleting relationship:', error);
+      alert(`Error removing relationship: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -94,11 +146,16 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
     return relationships.filter(r => r.type_of_record === type);
   };
 
+  console.log('RelationshipTabs: Rendering component with state:', { loading, error, relationshipsCount: relationships.length });
+
   if (loading) {
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="text-center">Loading relationships...</div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+            <p>Loading relationships...</p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -109,7 +166,8 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
       <Card>
         <CardContent className="p-6">
           <div className="text-center text-red-600">
-            <p className="mb-4">{error}</p>
+            <h3 className="text-lg font-semibold mb-2">Error Loading Relationships</h3>
+            <p className="mb-4 text-sm">{error}</p>
             <Button onClick={loadRelationships} variant="outline">
               Try Again
             </Button>

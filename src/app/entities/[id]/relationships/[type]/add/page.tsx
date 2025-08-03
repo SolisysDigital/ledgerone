@@ -42,35 +42,72 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
   ];
 
   useEffect(() => {
+    console.log('AddRelationshipPage: Component mounted');
+    
+    // Add error boundary for React errors
+    const handleError = (error: ErrorEvent) => {
+      console.error('AddRelationshipPage: React error caught:', error);
+      setError(`React Error: ${error.message}`);
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('AddRelationshipPage: Unhandled promise rejection:', event.reason);
+      setError(`Promise Rejection: ${event.reason}`);
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
     const resolveParams = async () => {
       try {
+        console.log('AddRelationshipPage: Starting to resolve params');
         const { id, type } = await params;
+        console.log('AddRelationshipPage: Params resolved', { id, type });
         setResolvedParams({ id, type });
         await loadAvailableRecords(id, type);
       } catch (error) {
-        console.error('Error resolving params:', error);
-        setError('Failed to load page data. Please try again.');
+        console.error('AddRelationshipPage: Error resolving params:', error);
+        setError(`Failed to load page data: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     };
 
     resolveParams();
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
   }, [params]);
 
   const loadAvailableRecords = async (entityId: string, type: string) => {
     try {
+      console.log('AddRelationshipPage: Loading available records for type:', type, 'entityId:', entityId);
       setLoadingRecords(true);
       setError(null);
       
-      const response = await fetch(`/api/available-records?type=${type}&entityId=${entityId}`);
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const fetchPromise = fetch(`/api/available-records?type=${type}&entityId=${entityId}`);
+      
+      const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
+      
+      console.log('AddRelationshipPage: Fetch response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Failed to load available records');
+        const errorText = await response.text();
+        console.error('AddRelationshipPage: API error response:', errorText);
+        throw new Error(`Failed to load available records: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
+      console.log('AddRelationshipPage: Available records loaded successfully:', data);
       setAvailableRecords(data || []);
     } catch (error) {
-      console.error('Error loading available records:', error);
-      setError('Failed to load available records. Please try again.');
+      console.error('AddRelationshipPage: Error loading available records:', error);
+      setError(`Failed to load available records: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoadingRecords(false);
     }
@@ -104,9 +141,21 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
     }
 
     try {
+      console.log('AddRelationshipPage: Creating relationship:', {
+        entityId: resolvedParams.id,
+        relatedDataId: selectedRecordId,
+        typeOfRecord: resolvedParams.type,
+        relationshipDescription
+      });
+      
       setLoading(true);
       
-      const response = await fetch('/api/relationships', {
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const fetchPromise = fetch('/api/relationships', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,25 +168,38 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
         }),
       });
       
+      const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
+      
       if (!response.ok) {
-        throw new Error('Failed to create relationship');
+        const errorText = await response.text();
+        throw new Error(`Failed to create relationship: ${response.status} ${response.statusText}`);
       }
       
+      console.log('AddRelationshipPage: Relationship created successfully');
       // Redirect back to entity detail page
       router.push(`/entities/${resolvedParams.id}`);
     } catch (error) {
-      console.error('Error creating relationship:', error);
-      alert('Error creating relationship. Please try again.');
+      console.error('AddRelationshipPage: Error creating relationship:', error);
+      alert(`Error creating relationship: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
   };
 
+  console.log('AddRelationshipPage: Rendering with state:', { 
+    resolvedParams, 
+    loading, 
+    loadingRecords, 
+    error, 
+    availableRecordsCount: availableRecords.length 
+  });
+
   if (error) {
     return (
       <div className="container mx-auto p-6">
         <div className="text-center text-red-600">
-          <p className="mb-4">{error}</p>
+          <h1 className="text-2xl font-bold mb-4">Error Loading Page</h1>
+          <p className="mb-4 text-sm">{error}</p>
           <Button onClick={() => window.location.reload()} variant="outline">
             Try Again
           </Button>
