@@ -48,14 +48,14 @@ export default function Navigation() {
 
   return (
     <nav className="w-64 bg-white/85 backdrop-blur-md border-r border-white/30 h-screen overflow-y-auto shadow-xl">
-      {/* Enhanced Header */}
+      {/* Enhanced Header with Animation */}
       <div className="p-6 border-b border-white/40 bg-gradient-to-r from-white/50 to-white/30">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-            <Database className="h-6 w-6 text-white" />
+        <div className="flex items-center gap-3 group">
+          <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:rotate-3">
+            <Database className="h-6 w-6 text-white transition-transform duration-300 group-hover:scale-110" />
           </div>
           <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 className="text-lg font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105">
               LedgerOne
             </h1>
             <p className="text-xs text-slate-600">Data Management</p>
@@ -69,17 +69,17 @@ export default function Navigation() {
         <Button
           asChild
           variant={pathname === "/" ? "default" : "ghost"}
-          className={`w-full justify-start h-12 px-4 rounded-xl transition-all duration-200 ${
+          className={`w-full justify-start h-11 px-4 rounded-xl transition-all duration-300 text-sm ${
             pathname === "/"
-              ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md"
-              : "hover:bg-white/70 hover:shadow-sm text-slate-700"
+              ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md hover:shadow-lg hover:scale-[1.02]"
+              : "hover:bg-white/70 hover:shadow-sm text-slate-700 hover:scale-[1.02] hover:translate-x-1"
           }`}
         >
           <Link href="/">
-            <Home className="h-5 w-5 mr-3" />
+            <Home className="h-4 w-4 mr-3 transition-transform duration-300 group-hover:rotate-12" />
             <span className="font-medium">Home</span>
             {pathname === "/" && (
-              <Badge variant="secondary" className="ml-auto bg-white/20 text-white">
+              <Badge variant="secondary" className="ml-auto bg-white/20 text-white animate-pulse">
                 Active
               </Badge>
             )}
@@ -103,17 +103,17 @@ export default function Navigation() {
                 key={key}
                 asChild
                 variant={isActive ? "default" : "ghost"}
-                className={`w-full justify-start h-11 px-4 rounded-lg transition-all duration-200 ${
+                className={`w-full justify-start h-10 px-4 rounded-lg transition-all duration-300 text-sm group ${
                   isActive
-                    ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md"
-                    : "hover:bg-white/70 hover:shadow-sm text-slate-700"
+                    ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md hover:shadow-lg hover:scale-[1.02]"
+                    : "hover:bg-white/70 hover:shadow-sm text-slate-700 hover:scale-[1.02] hover:translate-x-1"
                 }`}
               >
                 <Link href={`/${key}`}>
-                  <Icon className="h-4 w-4 mr-3" />
+                  <Icon className="h-4 w-4 mr-3 transition-all duration-300 group-hover:rotate-12 group-hover:scale-110" />
                   <span className="font-medium">{config.label}</span>
                   {isActive && (
-                    <Badge variant="secondary" className="ml-auto bg-white/20 text-white">
+                    <Badge variant="secondary" className="ml-auto bg-white/20 text-white animate-pulse">
                       Active
                     </Badge>
                   )}
@@ -136,17 +136,17 @@ export default function Navigation() {
           <Button
             asChild
             variant={pathname === "/entity_relationships" ? "default" : "ghost"}
-            className={`w-full justify-start h-11 px-4 rounded-lg transition-all duration-200 ${
+            className={`w-full justify-start h-10 px-4 rounded-lg transition-all duration-300 text-sm group ${
               pathname === "/entity_relationships"
-                ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md"
-                : "hover:bg-white/70 hover:shadow-sm text-slate-700"
+                ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md hover:shadow-lg hover:scale-[1.02]"
+                : "hover:bg-white/70 hover:shadow-sm text-slate-700 hover:scale-[1.02] hover:translate-x-1"
             }`}
           >
             <Link href="/entity_relationships">
-              <LinkIcon className="h-4 w-4 mr-3" />
+              <LinkIcon className="h-4 w-4 mr-3 transition-all duration-300 group-hover:rotate-12 group-hover:scale-110" />
               <span className="font-medium">Entity Relationships</span>
               {pathname === "/entity_relationships" && (
-                <Badge variant="secondary" className="ml-auto bg-white/20 text-white">
+                <Badge variant="secondary" className="ml-auto bg-white/20 text-white animate-pulse">
                   Active
                 </Badge>
               )}
@@ -157,17 +157,17 @@ export default function Navigation() {
           <Button
             asChild
             variant={pathname === "/admin/logs" ? "default" : "ghost"}
-            className={`w-full justify-start h-11 px-4 rounded-lg transition-all duration-200 ${
+            className={`w-full justify-start h-10 px-4 rounded-lg transition-all duration-300 text-sm group ${
               pathname === "/admin/logs"
-                ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md"
-                : "hover:bg-white/70 hover:shadow-sm text-slate-700"
+                ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md hover:shadow-lg hover:scale-[1.02]"
+                : "hover:bg-white/70 hover:shadow-sm text-slate-700 hover:scale-[1.02] hover:translate-x-1"
             }`}
           >
             <Link href="/admin/logs">
-              <Zap className="h-4 w-4 mr-3" />
+              <Zap className="h-4 w-4 mr-3 transition-all duration-300 group-hover:rotate-12 group-hover:scale-110" />
               <span className="font-medium">Admin Logs</span>
               {pathname === "/admin/logs" && (
-                <Badge variant="secondary" className="ml-auto bg-white/20 text-white">
+                <Badge variant="secondary" className="ml-auto bg-white/20 text-white animate-pulse">
                   Active
                 </Badge>
               )}
@@ -176,9 +176,9 @@ export default function Navigation() {
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer with Animation */}
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/40 bg-gradient-to-r from-white/50 to-white/30">
-        <div className="text-center">
+        <div className="text-center transition-all duration-300 hover:scale-105">
           <p className="text-xs text-slate-600">
             LedgerOne v1.0
           </p>

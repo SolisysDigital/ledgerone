@@ -1,157 +1,295 @@
-import { supabase } from "@/lib/supabase";
-import { tableConfigs } from "@/lib/tableConfigs";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Eye, Edit, Search, Database, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Search, 
+  Plus, 
+  Filter, 
+  ArrowRight,
+  Eye,
+  Edit,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Loader2
+} from "lucide-react";
+import { tableConfigs } from "@/lib/tableConfigs";
 import DeleteButton from "@/components/DeleteButton";
 
-export default async function ListPage({ params }: { params: Promise<{ table: string }> }) {
-  const resolvedParams = await params;
-  const table = resolvedParams.table;
-  const config = tableConfigs[table as keyof typeof tableConfigs];
-  if (!config) return <div>Table not found</div>;
+interface Record {
+  id: string;
+  [key: string]: any;
+}
 
-  const { data, error } = await supabase.from(table).select("*");
+interface TablePageProps {
+  params: {
+    table: string;
+  };
+}
 
-  if (error) return <div>Error: {error.message}</div>;
+export default function TablePage({ params }: TablePageProps) {
+  const [records, setRecords] = useState<Record[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  const columns = config.fields;
+  const tableName = params.table;
+  const config = tableConfigs[tableName as keyof typeof tableConfigs];
+
+  if (!config) {
+    return <div className="p-6">Table not found</div>;
+  }
+
+  useEffect(() => {
+    fetchRecords();
+  }, [tableName, currentPage, searchQuery]);
+
+  const fetchRecords = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: "10",
+        search: searchQuery,
+      });
+
+      const response = await fetch(`/api/${tableName}?${params}`);
+      if (response.ok) {
+        const data = await response.json();
+        setRecords(data.records || []);
+        setTotalPages(data.totalPages || 1);
+        setTotalRecords(data.totalRecords || 0);
+      }
+    } catch (error) {
+      console.error("Error fetching records:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    setIsDeleting(id);
+    try {
+      const response = await fetch(`/api/${tableName}/${id}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setRecords(records.filter(record => record.id !== id));
+        setTotalRecords(prev => prev - 1);
+      }
+    } catch (error) {
+      console.error("Error deleting record:", error);
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  const getDisplayValue = (record: Record, fieldName: string) => {
+    const value = record[fieldName];
+    if (value === null || value === undefined) return "-";
+    return String(value);
+  };
+
+  const getPrimaryField = () => {
+    // Try to find a good display field
+    const displayFields = ['name', 'title', 'email', 'phone', 'url', 'bank_name', 'provider', 'platform', 'cardholder_name'];
+    for (const field of displayFields) {
+      if (config.fields.some(f => f.name === field)) {
+        return field;
+      }
+    }
+    return config.fields[0]?.name || 'id';
+  };
+
+  const primaryField = getPrimaryField();
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 p-6">
-      {/* Enhanced Header */}
-      <div className="flex justify-between items-center bg-white/80 backdrop-blur-md rounded-xl p-6 border border-white/20 shadow-xl">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <Database className="h-6 w-6 text-blue-600" />
-            <h1 className="text-2xl font-bold text-slate-800">{config.label}</h1>
-          </div>
-          <p className="text-sm text-slate-600">
-            Manage your {config.label.toLowerCase()} records
+    <div className="p-6 space-y-6 animate-fade-in-up">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
+            {config.label}
+          </h1>
+          <p className="text-slate-600 mt-2">
+            Manage your {config.label.toLowerCase()} data
           </p>
         </div>
-        <Button asChild className="shadow-sm hover:shadow-md transition-shadow bg-blue-600 hover:bg-blue-700">
-          <Link href={`/${table}/new`}>
+        
+        <Button asChild className="btn-animate hover-glow">
+          <Link href={`/${tableName}/new`}>
             <Plus className="h-4 w-4 mr-2" />
-            Create New
+            Add New {config.label.slice(0, -1)}
           </Link>
         </Button>
       </div>
 
-      {/* Enhanced Search and Filters */}
-      <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-md">
-        <CardHeader className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white/50">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
-            <Search className="h-5 w-5 text-blue-600" />
+      {/* Search and Filter Section */}
+      <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5 text-orange-600" />
             Search & Filter
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <div className="flex-1 w-full">
-              <Input 
-                placeholder="Search records..." 
-                className="w-full bg-white/80 border-slate-200 focus:border-blue-500"
+        <CardContent>
+          <div className="flex gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+              <Input
+                placeholder={`Search ${config.label.toLowerCase()}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 input-animate focus-ring"
               />
             </div>
-            <Button variant="secondary" className="shadow-sm hover:shadow-md transition-shadow flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700">
-              <Filter className="h-4 w-4" />
+            <Button variant="outline" className="btn-animate">
+              <Filter className="h-4 w-4 mr-2" />
               Filter
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Enhanced Data Table */}
-      <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-md">
-        <CardHeader className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white/50">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
-            <Database className="h-5 w-5 text-blue-600" />
-            Records ({data?.length || 0})
+      {/* Records Section */}
+      <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-orange-600" />
+              Records ({totalRecords})
+            </span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
-          {data?.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 px-6">
-              <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-6">
-                <Database className="h-10 w-10 text-slate-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">No {config.label.toLowerCase()} found</h3>
-              <p className="text-slate-600 text-center mb-6 max-w-md">
-                Get started by creating your first {config.label.toLowerCase()} record.
-              </p>
-              <Button asChild className="shadow-sm hover:shadow-md transition-shadow bg-blue-600 hover:bg-blue-700">
-                <Link href={`/${table}/new`}>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
+              <span className="ml-2 text-slate-600">Loading records...</span>
+            </div>
+          ) : records.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-slate-400 mb-4">No records found</div>
+              <Button asChild className="btn-animate">
+                <Link href={`/${tableName}/new`}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Create First {config.label}
+                  Create First Record
                 </Link>
               </Button>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-lg">
-              <Table className="table-modern">
-                <TableHeader>
-                  <TableRow>
-                    {columns.slice(0, 5).map((col) => (
-                      <TableHead key={col.name} className="font-semibold text-xs uppercase tracking-wider bg-slate-100 text-slate-700">
-                        {col.name === 'name' ? 'Name' : col.name.replace(/_/g, ' ')}
-                      </TableHead>
+            <div className="space-y-4">
+              {/* Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-100">
+                      <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider text-slate-700">
+                        {config.fields.find(f => f.name === primaryField)?.label || primaryField}
+                      </th>
+                      {config.fields.slice(0, 3).map(field => 
+                        field.name !== primaryField && (
+                          <th key={field.name} className="text-left p-4 font-semibold text-xs uppercase tracking-wider text-slate-700">
+                            {field.label || field.name}
+                          </th>
+                        )
+                      )}
+                      <th className="text-right p-4 font-semibold text-xs uppercase tracking-wider text-slate-700">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="stagger-animate">
+                    {records.map((record, index) => (
+                      <tr 
+                        key={record.id} 
+                        className={`table-row-animate border-b border-slate-200 ${
+                          index % 2 === 0 ? 'bg-white' : 'bg-slate-50'
+                        }`}
+                      >
+                        <td className="p-4 text-teal-800 font-medium">
+                          {getDisplayValue(record, primaryField)}
+                        </td>
+                        {config.fields.slice(0, 3).map(field => 
+                          field.name !== primaryField && (
+                            <td key={field.name} className="p-4 text-teal-800">
+                              {getDisplayValue(record, field.name)}
+                            </td>
+                          )
+                        )}
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              asChild
+                              className="btn-animate hover-glow"
+                            >
+                              <Link href={`/${tableName}/${record.id}`}>
+                                <Eye className="h-4 w-4" />
+                              </Link>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              asChild
+                              className="btn-animate hover-glow"
+                            >
+                              <Link href={`/${tableName}/${record.id}/edit`}>
+                                <Edit className="h-4 w-4" />
+                              </Link>
+                            </Button>
+                            <DeleteButton
+                              table={tableName}
+                              id={record.id}
+                            />
+                          </div>
+                        </td>
+                      </tr>
                     ))}
-                    <TableHead className="font-semibold text-xs uppercase tracking-wider bg-slate-100 text-slate-700">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data?.map((row: any, index: number) => (
-                    <TableRow 
-                      key={row.id} 
-                      className={`hover:bg-slate-50 transition-colors duration-150 ${
-                        index % 2 === 0 ? 'bg-white' : 'bg-slate-50'
-                      }`}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between pt-4">
+                  <div className="text-sm text-slate-600">
+                    Showing {((currentPage - 1) * 10) + 1} to {Math.min(currentPage * 10, totalRecords)} of {totalRecords} results
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="btn-animate"
                     >
-                      {columns.slice(0, 5).map((col) => (
-                        <TableCell key={col.name} className="py-4">
-                          {col.name === 'name' ? (
-                            <div title={`ID: ${row.id}`} className="cursor-help font-medium text-slate-800">
-                              {row[col.name] || '-'}
-                            </div>
-                          ) : col.type === "select" ? (
-                            <Badge variant="secondary" className="bg-blue-100 text-blue-700">{row[col.name]}</Badge>
-                          ) : col.type === "fk" ? (
-                            <span className="font-medium text-slate-800">{row[col.name]}</span>
-                          ) : col.type === "date" ? (
-                            <span className="font-medium text-slate-800">
-                              {row[col.name] ? new Date(row[col.name]).toLocaleDateString() : '-'}
-                            </span>
-                          ) : col.type === "number" ? (
-                            <span className="font-medium text-slate-800">{row[col.name]?.toLocaleString() || '-'}</span>
-                          ) : (
-                            <span className="font-medium text-slate-800">{row[col.name] || '-'}</span>
-                          )}
-                        </TableCell>
-                      ))}
-                      <TableCell className="py-4">
-                        <div className="flex space-x-2">
-                          <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow border-slate-200 hover:border-blue-300">
-                            <Link href={`/${table}/${row.id}`}>
-                              <Eye className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                          <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow border-slate-200 hover:border-blue-300">
-                            <Link href={`/${table}/${row.id}/edit`}>
-                              <Edit className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                          <DeleteButton table={table} id={row.id} />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm text-slate-600">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                      className="btn-animate"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
