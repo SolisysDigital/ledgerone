@@ -7,21 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import ClientRelationshipTabs from "@/components/relationships/ClientRelationshipTabs";
 import Link from "next/link";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordian";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Suspense } from "react";
-import dynamic from "next/dynamic";
-
-// Dynamically import the client component to avoid hydration issues
-const ClientRelationshipTabs = dynamic(
-  () => import("@/components/relationships/ClientRelationshipTabs"),
-  {
-    ssr: false,
-    loading: () => <div className="text-center py-8">Loading relationships...</div>
-  }
-);
 
 export default async function DetailPage({ 
   params 
