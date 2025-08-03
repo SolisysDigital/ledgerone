@@ -107,25 +107,6 @@ export default function Navigation() {
           </h3>
         </div>
         
-        {/* Entity Related */}
-        <Button
-          asChild
-          variant={pathname === "/entities" ? "default" : "ghost"}
-          className="w-full justify-start h-auto p-2 text-sm"
-        >
-          <Link href="/entities">
-            <Database className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span className="text-xs font-medium truncate">
-              Entity Related
-            </span>
-            {pathname === "/entities" && (
-              <Badge variant="secondary" className="ml-auto text-xs">
-                Active
-              </Badge>
-            )}
-          </Link>
-        </Button>
-
         {/* Entity Relationships */}
         <Button
           asChild
