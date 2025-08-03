@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import ClientRelationshipTabs from "@/components/relationships/ClientRelationshipTabs";
 import Link from "next/link";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordian";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Suspense } from "react";
 
@@ -156,21 +155,79 @@ export default async function DetailPage({
                   })}
                 </div>
                 
-                {/* Legal Info Accordion */}
+                {/* Legal Info Section */}
                 {table === 'entities' && (
-                  <Accordion type="single" collapsible className="w-full mt-8">
-                    <AccordionItem value="legal-info">
-                      <AccordionTrigger className="bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg">
-                        Legal Information for the entity
-                      </AccordionTrigger>
-                      <AccordionContent className="bg-gray-100 p-4 rounded-lg mt-4">
+                  <div className="mt-8">
+                    <div className="font-semibold mb-4 text-lg">Legal Information</div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {config.fields.filter((f) => legalInfoFields.includes(f.name)).map((field) => {
+                        const value = (data as any)[field.name];
+                        if (!value && value !== 0) return null;
+                        return (
+                          <div key={field.name} className="space-y-1">
+                            <Label className="text-sm font-medium text-muted-foreground capitalize underline">
+                              {field.label || field.name.replace(/_/g, ' ')}
+                            </Label>
+                            <div className="text-sm">
+                              {field.type === "select" ? (
+                                <Badge variant="secondary" className="text-teal-800">{value}</Badge>
+                              ) : field.type === "textarea" ? (
+                                <p className="whitespace-pre-wrap text-teal-800">{value}</p>
+                              ) : field.type === "date" ? (
+                                <span className="text-teal-800">{value ? new Date(value).toLocaleDateString() : '-'}</span>
+                              ) : field.type === "number" ? (
+                                <span className="text-teal-800">{value?.toLocaleString() || '-'}</span>
+                              ) : (
+                                <span className="text-teal-800">{value}</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {/* Officer Section */}
+                    <div className="mt-8">
+                      <div className="font-semibold mb-2">Officers (up to 4)</div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {officerFields.map((fields, idx) => {
+                          const hasOfficer = fields.some(fname => data[fname]);
+                          if (!hasOfficer) return null;
+                          return (
+                            <div key={idx} className="border rounded p-3 mb-2">
+                              <div className="font-medium mb-1">Officer {idx + 1}</div>
+                              {fields.map((fname) => {
+                                const field = config.fields.find(f => f.name === fname);
+                                if (!field) return null;
+                                const value = data[fname];
+                                if (!value && value !== 0) return null;
+                                return (
+                                  <div key={fname} className="space-y-1">
+                                    <Label className="text-sm font-medium text-muted-foreground capitalize">
+                                      {field.label || field.name.replace(/_/g, ' ')}
+                                    </Label>
+                                    <div className="text-sm"><span className="text-teal-800">{value}</span></div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    {/* Texas-specific fields */}
+                    {stateOfFormation === 'Texas' && (
+                      <div className="mt-8">
+                        <div className="font-semibold mb-2 flex items-center gap-2">Texas-Specific Info
+                          <a href="https://security.app.cpa.state.tx.us/Public/create-account" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Webfile Portal</a>
+                          <a href="https://mycpa.cpa.state.tx.us/coa/search.do" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Entity Search</a>
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {config.fields.filter((f) => legalInfoFields.includes(f.name)).map((field) => {
+                          {config.fields.filter((f) => texasFields.includes(f.name)).map((field) => {
                             const value = (data as any)[field.name];
-                            if (!value && value !== 0) return null;
+                            if (!value) return null;
                             return (
                               <div key={field.name} className="space-y-1">
-                                <Label className="text-sm font-medium text-muted-foreground capitalize underline">
+                                <Label className="text-sm font-medium text-muted-foreground capitalize">
                                   {field.label || field.name.replace(/_/g, ' ')}
                                 </Label>
                                 <div className="text-sm">
@@ -190,73 +247,9 @@ export default async function DetailPage({
                             );
                           })}
                         </div>
-                        {/* Officer Section */}
-                        <div className="mt-8">
-                          <div className="font-semibold mb-2">Officers (up to 4)</div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {officerFields.map((fields, idx) => {
-                              const hasOfficer = fields.some(fname => data[fname]);
-                              if (!hasOfficer) return null;
-                              return (
-                                <div key={idx} className="border rounded p-3 mb-2">
-                                  <div className="font-medium mb-1">Officer {idx + 1}</div>
-                                  {fields.map((fname) => {
-                                    const field = config.fields.find(f => f.name === fname);
-                                    if (!field) return null;
-                                    const value = data[fname];
-                                    if (!value && value !== 0) return null;
-                                    return (
-                                      <div key={fname} className="space-y-1">
-                                        <Label className="text-sm font-medium text-muted-foreground capitalize">
-                                          {field.label || field.name.replace(/_/g, ' ')}
-                                        </Label>
-                                        <div className="text-sm"><span className="text-teal-800">{value}</span></div>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                        {/* Texas-specific fields */}
-                        {stateOfFormation === 'Texas' && (
-                          <div className="mt-8">
-                            <div className="font-semibold mb-2 flex items-center gap-2">Texas-Specific Info
-                              <a href="https://security.app.cpa.state.tx.us/Public/create-account" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Webfile Portal</a>
-                              <a href="https://mycpa.cpa.state.tx.us/coa/search.do" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600">Entity Search</a>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {config.fields.filter((f) => texasFields.includes(f.name)).map((field) => {
-                                const value = (data as any)[field.name];
-                                if (!value) return null;
-                                return (
-                                  <div key={field.name} className="space-y-1">
-                                    <Label className="text-sm font-medium text-muted-foreground capitalize">
-                                      {field.label || field.name.replace(/_/g, ' ')}
-                                    </Label>
-                                    <div className="text-sm">
-                                      {field.type === "select" ? (
-                                        <Badge variant="secondary" className="text-teal-800">{value}</Badge>
-                                      ) : field.type === "textarea" ? (
-                                        <p className="whitespace-pre-wrap text-teal-800">{value}</p>
-                                      ) : field.type === "date" ? (
-                                        <span className="text-teal-800">{value ? new Date(value).toLocaleDateString() : '-'}</span>
-                                      ) : field.type === "number" ? (
-                                        <span className="text-teal-800">{value?.toLocaleString() || '-'}</span>
-                                      ) : (
-                                        <span className="text-teal-800">{value}</span>
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
+                      </div>
+                    )}
+                  </div>
                 )}
               </TabsContent>
               
