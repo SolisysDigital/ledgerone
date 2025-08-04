@@ -160,18 +160,18 @@ export default function ContactsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-100">
-                      <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider text-slate-700">
+                    <tr className="border-b border-slate-200 bg-slate-500">
+                      <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider text-white">
                         {config.fields.find((f: any) => f.name === primaryField)?.label || primaryField}
                       </th>
                       {config.fields.slice(0, 3).map((field: any) => 
                         field.name !== primaryField && (
-                          <th key={field.name} className="text-left p-4 font-semibold text-xs uppercase tracking-wider text-slate-700">
+                          <th key={field.name} className="text-left p-4 font-semibold text-xs uppercase tracking-wider text-white">
                             {field.label || field.name}
                           </th>
                         )
                       )}
-                      <th className="text-right p-4 font-semibold text-xs uppercase tracking-wider text-slate-700">
+                      <th className="text-right p-4 font-semibold text-xs uppercase tracking-wider text-white">
                         Actions
                       </th>
                     </tr>
