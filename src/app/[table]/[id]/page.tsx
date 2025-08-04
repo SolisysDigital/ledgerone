@@ -88,8 +88,8 @@ export default async function DetailPage({
     if (table !== 'entities') {
       return (
         <div className="max-w-7xl mx-auto space-y-8 p-6">
-          {/* Enhanced Header */}
-          <div className="flex items-center justify-between bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl p-6 border border-border/50">
+          {/* Simple Header without box */}
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6">
               <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
                 <Link href={`/${table}`}>
