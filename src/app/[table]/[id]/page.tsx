@@ -127,7 +127,7 @@ export default async function DetailPage({
           <CardContent className="p-0">
             <Tabs defaultValue="information" className="w-full">
               <div className="border-b border-border/50 bg-muted/50">
-                <TabsList className="grid w-full grid-cols-2 h-14 bg-transparent border-0 gap-1 p-1">
+                <TabsList className={`grid w-full ${table === 'entities' ? 'grid-cols-2' : 'grid-cols-1'} h-14 bg-transparent border-0 gap-1 p-1`}>
                   <TabsTrigger 
                     value="information" 
                     className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-t-lg transition-all duration-200 hover:bg-white/50"
@@ -135,13 +135,15 @@ export default async function DetailPage({
                     <FileText className="h-4 w-4 mr-2" />
                     Information
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="related-data" 
-                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-t-lg transition-all duration-200 hover:bg-white/50"
-                  >
-                    <Users className="h-4 w-4 mr-2" />
-                    Related Data
-                  </TabsTrigger>
+                  {table === 'entities' && (
+                    <TabsTrigger 
+                      value="related-data" 
+                      className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-t-lg transition-all duration-200 hover:bg-white/50"
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      Related Data
+                    </TabsTrigger>
+                  )}
                 </TabsList>
               </div>
               
@@ -157,7 +159,7 @@ export default async function DetailPage({
                       const value = (data as any)[field.name];
                       if (!value && value !== 0) return null;
                       return (
-                        <div key={field.name} className="bg-muted/20 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                        <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
                           <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                             {field.label || field.name.replace(/_/g, ' ')}
                           </Label>
@@ -192,7 +194,7 @@ export default async function DetailPage({
                         const value = (data as any)[field.name];
                         if (!value && value !== 0) return null;
                         return (
-                          <div key={field.name} className="bg-muted/20 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                          <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
                             <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                               {field.label || field.name.replace(/_/g, ' ')}
                             </Label>
