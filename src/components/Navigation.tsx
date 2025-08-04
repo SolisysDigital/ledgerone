@@ -55,7 +55,7 @@ export default function Navigation() {
             <Database className="h-6 w-6 text-white transition-transform duration-300 group-hover:scale-110" />
           </div>
           <div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105">
+            <h1 className="text-base font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105">
               LedgerOne
             </h1>
             <p className="text-xs text-slate-600">Data Management</p>
@@ -69,7 +69,7 @@ export default function Navigation() {
         <Button
           asChild
           variant={pathname === "/" ? "default" : "ghost"}
-          className={`w-full justify-start h-11 px-4 rounded-xl transition-all duration-300 text-sm ${
+          className={`w-full justify-start h-10 px-4 rounded-xl transition-all duration-300 text-xs ${
             pathname === "/"
               ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md hover:shadow-lg hover:scale-[1.02]"
               : "hover:bg-white/70 hover:shadow-sm text-slate-700 hover:scale-[1.02] hover:translate-x-1"
@@ -103,7 +103,7 @@ export default function Navigation() {
                 key={key}
                 asChild
                 variant={isActive ? "default" : "ghost"}
-                className={`w-full justify-start h-10 px-4 rounded-lg transition-all duration-300 text-sm group ${
+                className={`w-full justify-start h-9 px-4 rounded-lg transition-all duration-300 text-xs group ${
                   isActive
                     ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md hover:shadow-lg hover:scale-[1.02]"
                     : "hover:bg-white/70 hover:shadow-sm text-slate-700 hover:scale-[1.02] hover:translate-x-1"
@@ -136,7 +136,7 @@ export default function Navigation() {
           <Button
             asChild
             variant={pathname === "/entity_relationships" ? "default" : "ghost"}
-            className={`w-full justify-start h-10 px-4 rounded-lg transition-all duration-300 text-sm group ${
+            className={`w-full justify-start h-9 px-4 rounded-lg transition-all duration-300 text-xs group ${
               pathname === "/entity_relationships"
                 ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md hover:shadow-lg hover:scale-[1.02]"
                 : "hover:bg-white/70 hover:shadow-sm text-slate-700 hover:scale-[1.02] hover:translate-x-1"
@@ -157,7 +157,7 @@ export default function Navigation() {
           <Button
             asChild
             variant={pathname === "/admin/logs" ? "default" : "ghost"}
-            className={`w-full justify-start h-10 px-4 rounded-lg transition-all duration-300 text-sm group ${
+            className={`w-full justify-start h-9 px-4 rounded-lg transition-all duration-300 text-xs group ${
               pathname === "/admin/logs"
                 ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md hover:shadow-lg hover:scale-[1.02]"
                 : "hover:bg-white/70 hover:shadow-sm text-slate-700 hover:scale-[1.02] hover:translate-x-1"
