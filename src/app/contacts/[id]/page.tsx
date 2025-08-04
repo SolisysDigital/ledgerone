@@ -3,9 +3,10 @@ import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Edit, ArrowLeft } from "lucide-react";
+import { Edit, ArrowLeft, Trash2 } from "lucide-react";
 
 export default async function ContactDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -32,91 +33,132 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
     .eq('type_of_record', 'contacts');
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <Link href="/contacts" className="inline-flex items-center text-gray-600 hover:text-gray-800 mb-4">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Contacts
-        </Link>
-        
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold">{contact.name}</h1>
-            {contact.title && (
-              <p className="text-xl text-gray-600 mt-2">{contact.title}</p>
-            )}
+    <div className="max-w-7xl mx-auto space-y-8 p-6">
+      {/* Enhanced Header */}
+      <div className="flex items-center justify-between bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl p-6 border border-border/50">
+        <div className="flex items-center space-x-6">
+          <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
+            <Link href="/contacts">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to List
+            </Link>
+          </Button>
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold text-foreground">Contact Details</h1>
+            <p className="text-sm text-muted-foreground">ID: {id}</p>
           </div>
-          <Link href={`/contacts/${id}/edit`}>
-            <Button>
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Contact
-            </Button>
-          </Link>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
+            <Link href={`/contacts/${id}/edit`}>
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow text-destructive hover:text-destructive">
+            <Link href={`/contacts/${id}/delete`}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </Link>
+          </Button>
         </div>
       </div>
 
-      <div className="grid gap-6">
-        {/* Contact Information */}
-        <Card>
+      <div className="space-y-6">
+        {/* Basic Information Section */}
+        <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
           <CardHeader>
-            <CardTitle>Contact Information</CardTitle>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1 h-6 bg-primary rounded-full"></div>
+              <h3 className="text-lg font-semibold">Basic Information</h3>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {contact.name && (
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                  <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                    Name
+                  </Label>
+                  <div className="text-sm">
+                    <span className="text-teal-800 font-medium">{contact.name}</span>
+                  </div>
+                </div>
+              )}
+              {contact.title && (
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                  <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                    Title
+                  </Label>
+                  <div className="text-sm">
+                    <span className="text-teal-800 font-medium">{contact.title}</span>
+                  </div>
+                </div>
+              )}
               {contact.email && (
-                <div>
-                  <span className="font-medium text-gray-700">Email:</span>
-                  <p className="text-teal-800">{contact.email}</p>
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                  <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                    Email
+                  </Label>
+                  <div className="text-sm">
+                    <span className="text-teal-800 font-medium">{contact.email}</span>
+                  </div>
                 </div>
               )}
               {contact.phone && (
-                <div>
-                  <span className="font-medium text-gray-700">Phone:</span>
-                  <p className="text-teal-800">{contact.phone}</p>
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                  <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                    Phone
+                  </Label>
+                  <div className="text-sm">
+                    <span className="text-teal-800 font-medium">{contact.phone}</span>
+                  </div>
                 </div>
               )}
               {contact.description && (
-                <div className="md:col-span-2">
-                  <span className="font-medium text-gray-700">Description:</span>
-                  <p className="text-teal-800">{contact.description}</p>
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors md:col-span-2">
+                  <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                    Description
+                  </Label>
+                  <div className="text-sm">
+                    <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{contact.description}</p>
+                  </div>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Entity Relationships */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Entity Relationships</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {relationships && relationships.length > 0 ? (
+        {/* Related Entities Section */}
+        {relationships && relationships.length > 0 && (
+          <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+            <CardHeader>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-6 bg-secondary rounded-full"></div>
+                <h3 className="text-lg font-semibold">Related Entities</h3>
+              </div>
+            </CardHeader>
+            <CardContent>
               <div className="space-y-4">
                 {relationships.map((relationship: any) => (
-                  <div key={relationship.id} className="flex justify-between items-center p-4 border rounded-lg">
+                  <div key={relationship.id} className="flex justify-between items-center p-4 border rounded-lg bg-muted/10 hover:bg-muted/20 transition-colors">
                     <div>
-                      <h3 className="font-medium">{relationship.entities.name}</h3>
+                      <h3 className="font-medium text-teal-800">{relationship.entities.name}</h3>
                       {relationship.relationship_description && (
-                        <p className="text-sm text-teal-800 mt-1">
-                          {relationship.relationship_description}
-                        </p>
+                        <p className="text-sm text-teal-800 mt-1">{relationship.relationship_description}</p>
                       )}
                     </div>
-                    <Badge variant="outline">Related Entity</Badge>
+                    <Link href={`/entities/${relationship.entity_id}`}>
+                      <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
+                        View Entity
+                      </Button>
+                    </Link>
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500 mb-4">This contact is not related to any entities yet</p>
-                <p className="text-sm text-gray-400">
-                  You can relate this contact to entities from the entity detail pages
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

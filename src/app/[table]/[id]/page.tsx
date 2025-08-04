@@ -84,6 +84,84 @@ export default async function DetailPage({
 
     console.log('DetailPage: Rendering component');
 
+    // For non-entity pages, use the new design pattern
+    if (table !== 'entities') {
+      return (
+        <div className="max-w-7xl mx-auto space-y-8 p-6">
+          {/* Enhanced Header */}
+          <div className="flex items-center justify-between bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl p-6 border border-border/50">
+            <div className="flex items-center space-x-6">
+              <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
+                <Link href={`/${table}`}>
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to List
+                </Link>
+              </Button>
+              <div className="space-y-1">
+                <h1 className="text-2xl font-bold text-foreground">{config.label} Details</h1>
+                <p className="text-sm text-muted-foreground">ID: {id}</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
+                <Link href={`/${table}/${id}/edit`}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow text-destructive hover:text-destructive">
+                <Link href={`/${table}/${id}/delete`}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {/* Basic Information Section */}
+            <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+              <CardHeader>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-1 h-6 bg-primary rounded-full"></div>
+                  <h3 className="text-lg font-semibold">Basic Information</h3>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {config.fields.map((field) => {
+                    const value = (data as any)[field.name];
+                    if (!value && value !== 0) return null;
+                    return (
+                      <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                        <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                          {field.label || field.name.replace(/_/g, ' ')}
+                        </Label>
+                        <div className="text-sm">
+                          {field.type === "select" ? (
+                            <Badge variant="secondary" className="text-teal-800 bg-secondary/50">{value}</Badge>
+                          ) : field.type === "textarea" ? (
+                            <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{value}</p>
+                          ) : field.type === "date" ? (
+                            <span className="text-teal-800 font-medium">{value ? new Date(value).toLocaleDateString() : '-'}</span>
+                          ) : field.type === "number" ? (
+                            <span className="text-teal-800 font-medium">{value?.toLocaleString() || '-'}</span>
+                          ) : (
+                            <span className="text-teal-800 font-medium">{value}</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      );
+    }
+
+    // For entities, use the existing tab-based structure
     return (
       <div className="max-w-7xl mx-auto space-y-8 p-6">
         {/* Enhanced Header */}
@@ -100,14 +178,14 @@ export default async function DetailPage({
               <p className="text-sm text-muted-foreground">ID: {id}</p>
             </div>
           </div>
-          <div className="flex space-x-3">
-            <Button asChild variant="outline" className="shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center space-x-2">
+            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
               <Link href={`/${table}/${id}/edit`}>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Link>
             </Button>
-            <Button asChild variant="destructive" className="shadow-sm hover:shadow-md transition-shadow">
+            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow text-destructive hover:text-destructive">
               <Link href={`/${table}/${id}/delete`}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
@@ -116,18 +194,11 @@ export default async function DetailPage({
           </div>
         </div>
 
-        {/* Enhanced Main Data with Tabs */}
-        <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/95">
-          <CardHeader className="border-b border-border/50 bg-gradient-to-r from-muted/30 to-muted/10">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-primary" />
-              Entity Details
-            </CardTitle>
-          </CardHeader>
+        <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
           <CardContent className="p-0">
             <Tabs defaultValue="information" className="w-full">
-              <div className="border-b border-border/50 bg-muted/50">
-                <TabsList className={`grid w-full ${table === 'entities' ? 'grid-cols-2' : 'grid-cols-1'} h-14 bg-transparent border-0 gap-1 p-1`}>
+              <div className="border-b border-border/50 bg-muted/20 rounded-t-lg">
+                <TabsList className="grid w-full grid-cols-2 h-14 bg-transparent border-0 gap-1 p-1">
                   <TabsTrigger 
                     value="information" 
                     className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-t-lg transition-all duration-200 hover:bg-white/50"
@@ -135,15 +206,13 @@ export default async function DetailPage({
                     <FileText className="h-4 w-4 mr-2" />
                     Information
                   </TabsTrigger>
-                  {table === 'entities' && (
-                    <TabsTrigger 
-                      value="related-data" 
-                      className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-t-lg transition-all duration-200 hover:bg-white/50"
-                    >
-                      <Users className="h-4 w-4 mr-2" />
-                      Related Data
-                    </TabsTrigger>
-                  )}
+                  <TabsTrigger 
+                    value="related-data" 
+                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-t-lg transition-all duration-200 hover:bg-white/50"
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Related Data
+                  </TabsTrigger>
                 </TabsList>
               </div>
               
@@ -183,135 +252,131 @@ export default async function DetailPage({
                 </div>
                 
                 {/* Enhanced Legal Info Section */}
-                {table === 'entities' && (
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-1 h-6 bg-secondary rounded-full"></div>
-                      <h3 className="text-lg font-semibold">Legal Information</h3>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {config.fields.filter((f) => legalInfoFields.includes(f.name)).map((field) => {
-                        const value = (data as any)[field.name];
-                        if (!value && value !== 0) return null;
-                        return (
-                          <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
-                            <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                              {field.label || field.name.replace(/_/g, ' ')}
-                            </Label>
-                            <div className="text-sm">
-                              {field.type === "select" ? (
-                                <Badge variant="secondary" className="text-teal-800 bg-secondary/50">{value}</Badge>
-                              ) : field.type === "textarea" ? (
-                                <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{value}</p>
-                              ) : field.type === "date" ? (
-                                <span className="text-teal-800 font-medium">{value ? new Date(value).toLocaleDateString() : '-'}</span>
-                              ) : field.type === "number" ? (
-                                <span className="text-teal-800 font-medium">{value?.toLocaleString() || '-'}</span>
-                              ) : (
-                                <span className="text-teal-800 font-medium">{value}</span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    
-                    {/* Enhanced Officers Section */}
-                    {officerFields.some(([nameField]) => (data as any)[nameField]) && (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className="w-1 h-6 bg-accent rounded-full"></div>
-                          <h3 className="text-lg font-semibold">Officers (up to 4)</h3>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {officerFields.map(([nameField, titleField, ownershipField]) => {
-                            const name = (data as any)[nameField];
-                            const title = (data as any)[titleField];
-                            const ownership = (data as any)[ownershipField];
-                            
-                            if (!name) return null;
-                            
-                            return (
-                              <Card key={nameField} className="bg-accent/5 border-accent/20">
-                                <CardContent className="p-4 space-y-2">
-                                  {config.fields.filter((f) => [nameField, titleField, ownershipField].includes(f.name)).map((field) => {
-                                    const value = (data as any)[field.name];
-                                    if (!value && value !== 0) return null;
-                                    return (
-                                      <div key={field.name} className="space-y-1">
-                                        <Label className="text-xs font-medium text-muted-foreground capitalize">
-                                          {field.label || field.name.replace(/_/g, ' ')}
-                                        </Label>
-                                        <div className="text-sm">
-                                          <span className="text-teal-800 font-medium">{value}</span>
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
-                                </CardContent>
-                              </Card>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Enhanced Texas-specific fields */}
-                    {stateOfFormation === 'Texas' && (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className="w-1 h-6 bg-warning rounded-full"></div>
-                          <h3 className="text-lg font-semibold">Texas-Specific Information</h3>
-                          <div className="flex gap-2 ml-auto">
-                            <a href="https://security.app.cpa.state.tx.us/Public/create-account" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600 hover:text-blue-800 transition-colors">Webfile Portal</a>
-                            <a href="https://mycpa.cpa.state.tx.us/coa/search.do" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600 hover:text-blue-800 transition-colors">Entity Search</a>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {config.fields.filter((f) => texasFields.includes(f.name)).map((field) => {
-                            const value = (data as any)[field.name];
-                            if (!value) return null;
-                            return (
-                              <div key={field.name} className="bg-warning/5 rounded-lg p-4 border border-warning/20 hover:border-warning/30 transition-colors">
-                                <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                                  {field.label || field.name.replace(/_/g, ' ')}
-                                </Label>
-                                <div className="text-sm">
-                                  {field.type === "select" ? (
-                                    <Badge variant="secondary" className="text-teal-800 bg-secondary/50">{value}</Badge>
-                                  ) : field.type === "textarea" ? (
-                                    <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{value}</p>
-                                  ) : field.type === "date" ? (
-                                    <span className="text-teal-800 font-medium">{value ? new Date(value).toLocaleDateString() : '-'}</span>
-                                  ) : field.type === "number" ? (
-                                    <span className="text-teal-800 font-medium">{value?.toLocaleString() || '-'}</span>
-                                  ) : (
-                                    <span className="text-teal-800 font-medium">{value}</span>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-1 h-6 bg-secondary rounded-full"></div>
+                    <h3 className="text-lg font-semibold">Legal Information</h3>
                   </div>
-                )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {config.fields.filter((f) => legalInfoFields.includes(f.name)).map((field) => {
+                      const value = (data as any)[field.name];
+                      if (!value && value !== 0) return null;
+                      return (
+                        <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                          <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                            {field.label || field.name.replace(/_/g, ' ')}
+                          </Label>
+                          <div className="text-sm">
+                            {field.type === "select" ? (
+                              <Badge variant="secondary" className="text-teal-800 bg-secondary/50">{value}</Badge>
+                            ) : field.type === "textarea" ? (
+                              <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{value}</p>
+                            ) : field.type === "date" ? (
+                              <span className="text-teal-800 font-medium">{value ? new Date(value).toLocaleDateString() : '-'}</span>
+                            ) : field.type === "number" ? (
+                              <span className="text-teal-800 font-medium">{value?.toLocaleString() || '-'}</span>
+                            ) : (
+                              <span className="text-teal-800 font-medium">{value}</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  
+                  {/* Enhanced Officers Section */}
+                  {officerFields.some(([nameField]) => (data as any)[nameField]) && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-1 h-6 bg-accent rounded-full"></div>
+                        <h3 className="text-lg font-semibold">Officers (up to 4)</h3>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {officerFields.map(([nameField, titleField, ownershipField]) => {
+                          const name = (data as any)[nameField];
+                          const title = (data as any)[titleField];
+                          const ownership = (data as any)[ownershipField];
+                          
+                          if (!name) return null;
+                          
+                          return (
+                            <Card key={nameField} className="bg-accent/5 border-accent/20">
+                              <CardContent className="p-4 space-y-2">
+                                {config.fields.filter((f) => [nameField, titleField, ownershipField].includes(f.name)).map((field) => {
+                                  const value = (data as any)[field.name];
+                                  if (!value && value !== 0) return null;
+                                  return (
+                                    <div key={field.name} className="space-y-1">
+                                      <Label className="text-xs font-medium text-muted-foreground capitalize">
+                                        {field.label || field.name.replace(/_/g, ' ')}
+                                      </Label>
+                                      <div className="text-sm">
+                                        <span className="text-teal-800 font-medium">{value}</span>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Enhanced Texas-specific fields */}
+                  {stateOfFormation === 'Texas' && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-1 h-6 bg-warning rounded-full"></div>
+                        <h3 className="text-lg font-semibold">Texas-Specific Information</h3>
+                        <div className="flex gap-2 ml-auto">
+                          <a href="https://security.app.cpa.state.tx.us/Public/create-account" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600 hover:text-blue-800 transition-colors">Webfile Portal</a>
+                          <a href="https://mycpa.cpa.state.tx.us/coa/search.do" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600 hover:text-blue-800 transition-colors">Entity Search</a>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {config.fields.filter((f) => texasFields.includes(f.name)).map((field) => {
+                          const value = (data as any)[field.name];
+                          if (!value) return null;
+                          return (
+                            <div key={field.name} className="bg-warning/5 rounded-lg p-4 border border-warning/20 hover:border-warning/30 transition-colors">
+                              <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                                {field.label || field.name.replace(/_/g, ' ')}
+                              </Label>
+                              <div className="text-sm">
+                                {field.type === "select" ? (
+                                  <Badge variant="secondary" className="text-teal-800 bg-secondary/50">{value}</Badge>
+                                ) : field.type === "textarea" ? (
+                                  <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{value}</p>
+                                ) : field.type === "date" ? (
+                                  <span className="text-teal-800 font-medium">{value ? new Date(value).toLocaleDateString() : '-'}</span>
+                                ) : field.type === "number" ? (
+                                  <span className="text-teal-800 font-medium">{value?.toLocaleString() || '-'}</span>
+                                ) : (
+                                  <span className="text-teal-800 font-medium">{value}</span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </TabsContent>
               
               <TabsContent value="related-data" className="p-8">
-                {table === 'entities' && (
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center py-12">
-                      <div className="text-center space-y-4">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                        <p className="text-muted-foreground">Loading relationships...</p>
-                      </div>
+                <Suspense fallback={
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-center space-y-4">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                      <p className="text-muted-foreground">Loading relationships...</p>
                     </div>
-                  }>
-                    <ClientRelationshipTabs entityId={id} />
-                  </Suspense>
-                )}
+                  </div>
+                }>
+                  <ClientRelationshipTabs entityId={id} />
+                </Suspense>
               </TabsContent>
             </Tabs>
           </CardContent>

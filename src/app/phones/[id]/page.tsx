@@ -2,9 +2,10 @@ import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
+import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 
 interface PhoneDetailPageProps {
   params: Promise<{ id: string }>;
@@ -36,66 +37,112 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
     .eq('type_of_record', 'phones');
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Phone Details</h1>
-        <div className="flex space-x-2">
-          <Link href="/phones">
-            <Button variant="outline">Back to Phones</Button>
-          </Link>
-          <Link href={`/phones/${id}/edit`}>
-            <Button>Edit Phone</Button>
-          </Link>
+    <div className="max-w-7xl mx-auto space-y-8 p-6">
+      {/* Enhanced Header */}
+      <div className="flex items-center justify-between bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl p-6 border border-border/50">
+        <div className="flex items-center space-x-6">
+          <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
+            <Link href="/phones">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to List
+            </Link>
+          </Button>
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold text-foreground">Phone Details</h1>
+            <p className="text-sm text-muted-foreground">ID: {id}</p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
+            <Link href={`/phones/${id}/edit`}>
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow text-destructive hover:text-destructive">
+            <Link href={`/phones/${id}/delete`}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </Link>
+          </Button>
         </div>
       </div>
 
-      <div className="grid gap-6">
-        <Card>
+      <div className="space-y-6">
+        {/* Basic Information Section */}
+        <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
           <CardHeader>
-            <CardTitle>Phone Information</CardTitle>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1 h-6 bg-primary rounded-full"></div>
+              <h3 className="text-lg font-semibold">Basic Information</h3>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Phone Number</label>
-              <p className="text-teal-800 mt-1">{phone.phone}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Label</label>
-              <p className="text-teal-800 mt-1">{phone.label}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Description</label>
-              <p className="text-teal-800 mt-1">{phone.description}</p>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {phone.phone && (
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                  <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                    Phone Number
+                  </Label>
+                  <div className="text-sm">
+                    <span className="text-teal-800 font-medium">{phone.phone}</span>
+                  </div>
+                </div>
+              )}
+              {phone.label && (
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                  <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                    Label
+                  </Label>
+                  <div className="text-sm">
+                    <span className="text-teal-800 font-medium">{phone.label}</span>
+                  </div>
+                </div>
+              )}
+              {phone.description && (
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors md:col-span-2">
+                  <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                    Description
+                  </Label>
+                  <div className="text-sm">
+                    <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{phone.description}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Related Entities</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {relationships && relationships.length > 0 ? (
+        {/* Related Entities Section */}
+        {relationships && relationships.length > 0 && (
+          <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+            <CardHeader>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-6 bg-secondary rounded-full"></div>
+                <h3 className="text-lg font-semibold">Related Entities</h3>
+              </div>
+            </CardHeader>
+            <CardContent>
               <div className="space-y-4">
                 {relationships.map((relationship: any) => (
-                  <div key={relationship.id} className="flex justify-between items-center p-4 border rounded-lg">
+                  <div key={relationship.id} className="flex justify-between items-center p-4 border rounded-lg bg-muted/10 hover:bg-muted/20 transition-colors">
                     <div>
                       <h3 className="font-medium text-teal-800">{relationship.entities.name}</h3>
-                      <p className="text-sm text-teal-800">{relationship.relationship_description}</p>
+                      {relationship.relationship_description && (
+                        <p className="text-sm text-teal-800 mt-1">{relationship.relationship_description}</p>
+                      )}
                     </div>
                     <Link href={`/entities/${relationship.entity_id}`}>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
                         View Entity
                       </Button>
                     </Link>
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-gray-500">This phone is not related to any entities yet.</p>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
