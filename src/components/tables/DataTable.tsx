@@ -47,7 +47,7 @@ export function DataTable({
     if (column.key === 'name' || column.key === 'email' || column.key === 'phone_number') {
       return (
         <div className="space-y-1">
-          <div className="font-medium text-foreground">{value}</div>
+          <div className="font-medium text-teal-800">{value}</div>
           <div className="text-xs text-muted-foreground">ID: {record.id}</div>
         </div>
       );
@@ -56,7 +56,7 @@ export function DataTable({
     if (column.key === 'description' || column.key === 'label') {
       return (
         <div className="max-w-md">
-          <p className="font-medium text-foreground mb-1">{value}</p>
+          <p className="font-medium text-teal-800 mb-1">{value}</p>
           {record.description && record.description !== value && (
             <p className="text-xs text-muted-foreground">{record.description}</p>
           )}
@@ -67,7 +67,7 @@ export function DataTable({
     if (column.key === 'created_at' || column.key === 'updated_at') {
       return (
         <div className="space-y-1">
-          <div className="text-sm font-medium">{value}</div>
+          <div className="text-sm font-medium text-teal-800">{value}</div>
           <div className="text-xs text-muted-foreground flex items-center gap-1">
             <Clock className="h-3 w-3" />
             {value}
@@ -82,7 +82,7 @@ export function DataTable({
         <div className="w-6 h-6 bg-muted/30 rounded flex items-center justify-center">
           <User className="h-3 w-3 text-muted-foreground" />
         </div>
-        <span className="text-sm font-medium">{value}</span>
+        <span className="text-sm font-medium text-teal-800">{value}</span>
       </div>
     );
   };

@@ -98,7 +98,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
                     <div>
                       <h3 className="font-medium">{relationship.entities.name}</h3>
                       {relationship.relationship_description && (
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm text-teal-800 mt-1">
                           {relationship.relationship_description}
                         </p>
                       )}

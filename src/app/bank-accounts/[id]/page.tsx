@@ -84,7 +84,7 @@ export default async function BankAccountDetailPage({ params }: BankAccountDetai
                   <div key={relationship.id} className="flex justify-between items-center p-4 border rounded-lg">
                     <div>
                       <h3 className="font-medium text-teal-800">{relationship.entities.name}</h3>
-                      <p className="text-sm text-gray-600">{relationship.relationship_description}</p>
+                      <p className="text-sm text-teal-800">{relationship.relationship_description}</p>
                     </div>
                     <Link href={`/entities/${relationship.entity_id}`}>
                       <Button variant="outline" size="sm">

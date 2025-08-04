@@ -57,7 +57,7 @@ export default function RelationshipTable({
                     {relationship.related_data_display_name}
                   </h3>
                   {relationship.relationship_description && (
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-teal-800 mt-1">
                       {relationship.relationship_description}
                     </p>
                   )}

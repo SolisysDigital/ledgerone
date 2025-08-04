@@ -264,7 +264,7 @@ export default function LogsPage() {
                           </TableCell>
                           <TableCell className="py-4">
                             <div className="max-w-md">
-                              <p className="font-medium text-foreground mb-1">{log.message}</p>
+                              <p className="font-medium text-teal-800 mb-1">{log.message}</p>
                               {log.action && (
                                 <p className="text-xs text-muted-foreground">Action: {log.action}</p>
                               )}
