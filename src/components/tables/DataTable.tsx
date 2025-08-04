@@ -78,7 +78,7 @@ export function DataTable({
           {data.map((record, index) => (
             <tr 
               key={record.id} 
-              className={`${STYLES.TABLES.DATA_ROW} border-b border-slate-200 ${
+              className={`${STYLES.TABLES.DATA_ROW} ${
                 index % 2 === 0 ? 'bg-white' : 'bg-slate-50'
               }`}
             >
