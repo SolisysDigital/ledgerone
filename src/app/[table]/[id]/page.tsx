@@ -107,9 +107,11 @@ export default async function DetailPage({
                 Edit
               </Link>
             </Button>
-            <Button variant="destructive" className="shadow-sm hover:shadow-md transition-shadow">
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
+            <Button asChild variant="destructive" className="shadow-sm hover:shadow-md transition-shadow">
+              <Link href={`/${table}/${id}/delete`}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Link>
             </Button>
           </div>
         </div>
@@ -206,44 +208,45 @@ export default async function DetailPage({
                       })}
                     </div>
                     
-                    {/* Enhanced Officer Section */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="w-1 h-6 bg-accent rounded-full"></div>
-                        <h3 className="text-lg font-semibold">Officers (up to 4)</h3>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {officerFields.map((fields, idx) => {
-                          const hasOfficer = fields.some(fname => data[fname]);
-                          if (!hasOfficer) return null;
-                          return (
-                            <Card key={idx} className="shadow-sm hover:shadow-md transition-shadow border-border/50">
-                              <CardHeader className="pb-3">
-                                <CardTitle className="text-base font-semibold text-primary">Officer {idx + 1}</CardTitle>
-                              </CardHeader>
-                              <CardContent className="space-y-3">
-                                {fields.map((fname) => {
-                                  const field = config.fields.find(f => f.name === fname);
-                                  if (!field) return null;
-                                  const value = data[fname];
-                                  if (!value && value !== 0) return null;
-                                  return (
-                                    <div key={fname} className="space-y-1">
-                                      <Label className="text-xs font-medium text-muted-foreground capitalize">
-                                        {field.label || field.name.replace(/_/g, ' ')}
-                                      </Label>
-                                      <div className="text-sm">
-                                        <span className="text-teal-800 font-medium">{value}</span>
+                    {/* Enhanced Officers Section */}
+                    {officerFields.some(([nameField]) => (data as any)[nameField]) && (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="w-1 h-6 bg-accent rounded-full"></div>
+                          <h3 className="text-lg font-semibold">Officers (up to 4)</h3>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {officerFields.map(([nameField, titleField, ownershipField]) => {
+                            const name = (data as any)[nameField];
+                            const title = (data as any)[titleField];
+                            const ownership = (data as any)[ownershipField];
+                            
+                            if (!name) return null;
+                            
+                            return (
+                              <Card key={nameField} className="bg-accent/5 border-accent/20">
+                                <CardContent className="p-4 space-y-2">
+                                  {config.fields.filter((f) => [nameField, titleField, ownershipField].includes(f.name)).map((field) => {
+                                    const value = (data as any)[field.name];
+                                    if (!value && value !== 0) return null;
+                                    return (
+                                      <div key={field.name} className="space-y-1">
+                                        <Label className="text-xs font-medium text-muted-foreground capitalize">
+                                          {field.label || field.name.replace(/_/g, ' ')}
+                                        </Label>
+                                        <div className="text-sm">
+                                          <span className="text-teal-800 font-medium">{value}</span>
+                                        </div>
                                       </div>
-                                    </div>
-                                  );
-                                })}
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
+                                    );
+                                  })}
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
+                    )}
                     
                     {/* Enhanced Texas-specific fields */}
                     {stateOfFormation === 'Texas' && (
@@ -318,8 +321,8 @@ export default async function DetailPage({
             </div>
             <h1 className="text-2xl font-bold text-foreground">Error Loading Page</h1>
             <p className="text-muted-foreground">An unexpected error occurred while loading this page.</p>
-            <Button onClick={() => window.location.reload()} variant="outline" className="mt-4">
-              Try Again
+            <Button asChild variant="outline" className="mt-4">
+              <Link href="/">Go Home</Link>
             </Button>
           </CardContent>
         </Card>
