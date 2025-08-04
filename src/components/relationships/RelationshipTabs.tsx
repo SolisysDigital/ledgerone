@@ -222,7 +222,7 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                       </TableHeader>
                       <TableBody>
                         {typeRelationships.map((relationship) => (
-                          <TableRow key={relationship.id} className="hover:bg-muted/30 transition-colors duration-150 border-b border-slate-200">
+                          <TableRow key={relationship.id} className="hover:bg-muted/30 transition-colors duration-150 border-b border-teal-300">
                             <TableCell className="py-4">
                               <div className="flex items-center gap-3">
                                 <div className={`w-8 h-8 ${typeInfo.bgColor} rounded-lg flex items-center justify-center`}>

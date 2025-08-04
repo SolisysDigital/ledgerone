@@ -253,7 +253,7 @@ export default function LogsPage() {
                     </TableHeader>
                     <TableBody>
                       {filteredLogs.map((log) => (
-                        <TableRow key={log.id} className="hover:bg-muted/30 transition-colors duration-150 border-b border-slate-200">
+                        <TableRow key={log.id} className="hover:bg-muted/30 transition-colors duration-150 border-b border-teal-300">
                           <TableCell className="py-4">
                             <div className="flex items-center gap-2">
                               <Badge className={getLevelColor(log.level)}>

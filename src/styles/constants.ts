@@ -37,7 +37,7 @@ export const STYLES = {
     STANDARD: 'w-full',
     HEADER_ROW: 'border-b border-slate-200 bg-slate-500',
     HEADER_CELL: 'text-left p-4 font-semibold text-xs uppercase tracking-wider text-white',
-    DATA_ROW: 'table-row-animate border-b-1 border-slate-200',
+    DATA_ROW: 'table-row-animate border-b-1 border-teal-300',
     DATA_CELL: 'p-4 text-teal-800',
     DATA_CELL_RIGHT: 'p-4 text-teal-800 text-right',
     ACTIONS_CELL: 'p-4 text-right',
