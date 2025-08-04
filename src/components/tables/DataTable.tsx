@@ -79,7 +79,7 @@ export function DataTable({
             <tr 
               key={record.id} 
               className={`${STYLES.TABLES.DATA_ROW} ${
-                index % 2 === 0 ? 'bg-white' : 'bg-slate-50'
+                index % 2 === 0 ? 'bg-white' : 'bg-slate-100'
               }`}
             >
               {columns.map((column) => (

@@ -11,8 +11,8 @@
   --card-border: rgba(255, 255, 255, 0.5);
   --table-header-bg: #64748b; /* bg-slate-500 */
   --table-header-text: #ffffff;
-  --table-row-alt: #f8fafc;
-  --table-row-hover: rgba(251, 146, 60, 0.05);
+  --table-row-alt:#d4eded /* #f8fafc; was bg-slate-50*/
+  --table-row-hover: rgba(251, 173, 103, 0.05);
   
   /* Text Colors */
   --text-primary: #115e59; /* text-teal-800 */
