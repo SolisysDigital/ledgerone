@@ -201,7 +201,7 @@ export default function LogsPage() {
         </CardHeader>
         <CardContent className="p-0">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <div className="border-b border-border/50 bg-muted/20">
+            <div className="border-b border-border/50 bg-muted/20 rounded-t-lg">
               <TabsList className="grid w-full grid-cols-5 h-12 bg-transparent border-0">
                 <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200">
                   All ({stats.total})
@@ -294,7 +294,7 @@ export default function LogsPage() {
                                   <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
                                     Details
                                   </summary>
-                                  <pre className="mt-2 p-2 bg-muted/20 rounded text-xs overflow-x-auto">
+                                  <pre className="mt-2 p-2 bg-muted/20 rounded-lg text-xs overflow-x-auto">
                                     {JSON.stringify(log.details, null, 2)}
                                   </pre>
                                 </details>
