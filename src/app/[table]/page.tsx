@@ -24,9 +24,9 @@ interface Record {
 }
 
 interface TablePageProps {
-  params: {
+  params: Promise<{
     table: string;
-  };
+  }>;
 }
 
 export default function TablePage({ params }: TablePageProps) {
@@ -36,18 +36,30 @@ export default function TablePage({ params }: TablePageProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
-
-  const tableName = params.table;
-  const config = tableConfigs[tableName as keyof typeof tableConfigs];
+  const [tableName, setTableName] = useState<string>("");
+  const [config, setConfig] = useState<any>(null);
 
   useEffect(() => {
-    if (config) {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      const table = resolvedParams.table;
+      const tableConfig = tableConfigs[table as keyof typeof tableConfigs];
+      
+      setTableName(table);
+      setConfig(tableConfig);
+    };
+    
+    resolveParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (config && tableName) {
       fetchRecords();
     }
   }, [tableName, currentPage, searchQuery, config]);
 
   const fetchRecords = async () => {
-    if (!config) return;
+    if (!config || !tableName) return;
     
     setLoading(true);
     try {
@@ -78,14 +90,16 @@ export default function TablePage({ params }: TablePageProps) {
   };
 
   const getPrimaryField = () => {
+    if (!config) return 'id';
+    
     // Try to find a good display field
     const displayFields = ['name', 'title', 'email', 'phone', 'url', 'bank_name', 'provider', 'platform', 'cardholder_name'];
     for (const field of displayFields) {
-      if (config?.fields.some(f => f.name === field)) {
+      if (config.fields.some((f: any) => f.name === field)) {
         return field;
       }
     }
-    return config?.fields[0]?.name || 'id';
+    return config.fields[0]?.name || 'id';
   };
 
   if (!config) {
@@ -176,9 +190,9 @@ export default function TablePage({ params }: TablePageProps) {
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-100">
                       <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider text-slate-700">
-                        {config.fields.find(f => f.name === primaryField)?.label || primaryField}
+                        {config.fields.find((f: any) => f.name === primaryField)?.label || primaryField}
                       </th>
-                      {config.fields.slice(0, 3).map(field => 
+                      {config.fields.slice(0, 3).map((field: any) => 
                         field.name !== primaryField && (
                           <th key={field.name} className="text-left p-4 font-semibold text-xs uppercase tracking-wider text-slate-700">
                             {field.label || field.name}
@@ -201,7 +215,7 @@ export default function TablePage({ params }: TablePageProps) {
                         <td className="p-4 text-teal-800 font-medium">
                           {getDisplayValue(record, primaryField)}
                         </td>
-                        {config.fields.slice(0, 3).map(field => 
+                        {config.fields.slice(0, 3).map((field: any) => 
                           field.name !== primaryField && (
                             <td key={field.name} className="p-4 text-teal-800">
                               {getDisplayValue(record, field.name)}
