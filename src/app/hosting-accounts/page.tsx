@@ -45,7 +45,7 @@ export default async function HostingAccountsPage() {
             </TableHeader>
             <TableBody>
               {hostingAccounts?.map((account) => (
-                <TableRow key={account.id}>
+                <TableRow key={account.id} className="border-b border-slate-200">
                   <TableCell className="text-teal-800">{account.provider}</TableCell>
                   <TableCell className="text-teal-800">{account.account_id}</TableCell>
                   <TableCell className="text-teal-800">{account.description}</TableCell>

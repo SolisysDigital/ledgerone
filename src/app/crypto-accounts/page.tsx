@@ -45,7 +45,7 @@ export default async function CryptoAccountsPage() {
             </TableHeader>
             <TableBody>
               {cryptoAccounts?.map((account) => (
-                <TableRow key={account.id}>
+                <TableRow key={account.id} className="border-b border-slate-200">
                   <TableCell className="text-teal-800">{account.platform}</TableCell>
                   <TableCell className="text-teal-800">{account.wallet_address}</TableCell>
                   <TableCell className="text-teal-800">{account.description}</TableCell>

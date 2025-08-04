@@ -46,7 +46,7 @@ export default async function CreditCardsPage() {
             </TableHeader>
             <TableBody>
               {creditCards?.map((card) => (
-                <TableRow key={card.id}>
+                <TableRow key={card.id} className="border-b border-slate-200">
                   <TableCell className="text-teal-800">{card.cardholder_name}</TableCell>
                   <TableCell className="text-teal-800">{card.card_number}</TableCell>
                   <TableCell className="text-teal-800">{card.expiry_date}</TableCell>

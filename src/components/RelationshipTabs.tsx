@@ -154,7 +154,7 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                         </TableHeader>
                         <TableBody>
                           {relatedData[child.table].map((item: any) => (
-                            <TableRow key={item.id}>
+                            <TableRow key={item.id} className="border-b border-slate-200">
                               <TableCell className="text-xs">
                                 <div title={`ID: ${item.id}`} className="cursor-help text-teal-800">
                                   {item.name || item[tableConfigs[child.table]?.fields.find(f => f.name === 'name')?.name || 'id']}
