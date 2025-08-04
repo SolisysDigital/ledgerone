@@ -127,12 +127,18 @@ export default async function DetailPage({
           <CardContent className="p-0">
             <Tabs defaultValue="information" className="w-full">
               <div className="border-b border-border/50 bg-muted/50">
-                <TabsList className="grid w-full grid-cols-2 h-12 bg-transparent border-0">
-                  <TabsTrigger value="information" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200">
+                <TabsList className="grid w-full grid-cols-2 h-14 bg-transparent border-0 gap-1 p-1">
+                  <TabsTrigger 
+                    value="information" 
+                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-t-lg transition-all duration-200 hover:bg-white/50"
+                  >
                     <FileText className="h-4 w-4 mr-2" />
                     Information
                   </TabsTrigger>
-                  <TabsTrigger value="related-data" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200">
+                  <TabsTrigger 
+                    value="related-data" 
+                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-t-lg transition-all duration-200 hover:bg-white/50"
+                  >
                     <Users className="h-4 w-4 mr-2" />
                     Related Data
                   </TabsTrigger>
@@ -152,7 +158,7 @@ export default async function DetailPage({
                       if (!value && value !== 0) return null;
                       return (
                         <div key={field.name} className="bg-muted/20 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
-                          <Label className="text-sm font-medium text-muted-foreground capitalize underline mb-2 block">
+                          <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                             {field.label || field.name.replace(/_/g, ' ')}
                           </Label>
                           <div className="text-sm">
@@ -187,7 +193,7 @@ export default async function DetailPage({
                         if (!value && value !== 0) return null;
                         return (
                           <div key={field.name} className="bg-muted/20 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
-                            <Label className="text-sm font-medium text-muted-foreground capitalize underline mb-2 block">
+                            <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                               {field.label || field.name.replace(/_/g, ' ')}
                             </Label>
                             <div className="text-sm">
@@ -265,7 +271,7 @@ export default async function DetailPage({
                             if (!value) return null;
                             return (
                               <div key={field.name} className="bg-warning/5 rounded-lg p-4 border border-warning/20 hover:border-warning/30 transition-colors">
-                                <Label className="text-sm font-medium text-muted-foreground capitalize underline mb-2 block">
+                                <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                                   {field.label || field.name.replace(/_/g, ' ')}
                                 </Label>
                                 <div className="text-sm">

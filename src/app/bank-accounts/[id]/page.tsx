@@ -55,19 +55,19 @@ export default async function BankAccountDetailPage({ params }: BankAccountDetai
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="text-sm font-medium border-b border-gray-300 pb-1">Bank Name</label>
+              <label className="text-sm font-medium">Bank Name</label>
               <p className="text-teal-800 mt-1">{account.bank_name}</p>
             </div>
             <div>
-              <label className="text-sm font-medium border-b border-gray-300 pb-1">Account Number</label>
+              <label className="text-sm font-medium">Account Number</label>
               <p className="text-teal-800 mt-1">{account.account_number}</p>
             </div>
             <div>
-              <label className="text-sm font-medium border-b border-gray-300 pb-1">Account Type</label>
+              <label className="text-sm font-medium">Account Type</label>
               <p className="text-teal-800 mt-1">{account.account_type}</p>
             </div>
             <div>
-              <label className="text-sm font-medium border-b border-gray-300 pb-1">Description</label>
+              <label className="text-sm font-medium">Description</label>
               <p className="text-teal-800 mt-1">{account.description}</p>
             </div>
           </CardContent>

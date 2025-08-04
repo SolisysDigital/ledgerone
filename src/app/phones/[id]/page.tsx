@@ -56,15 +56,15 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="text-sm font-medium border-b border-gray-300 pb-1">Phone Number</label>
+              <label className="text-sm font-medium">Phone Number</label>
               <p className="text-teal-800 mt-1">{phone.phone}</p>
             </div>
             <div>
-              <label className="text-sm font-medium border-b border-gray-300 pb-1">Label</label>
+              <label className="text-sm font-medium">Label</label>
               <p className="text-teal-800 mt-1">{phone.label}</p>
             </div>
             <div>
-              <label className="text-sm font-medium border-b border-gray-300 pb-1">Description</label>
+              <label className="text-sm font-medium">Description</label>
               <p className="text-teal-800 mt-1">{phone.description}</p>
             </div>
           </CardContent>
