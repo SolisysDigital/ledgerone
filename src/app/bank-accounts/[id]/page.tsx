@@ -80,7 +80,7 @@ export default async function BankAccountDetailPage({ params }: BankAccountDetai
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {account.bank_name && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Bank Name
                   </Label>
@@ -90,7 +90,7 @@ export default async function BankAccountDetailPage({ params }: BankAccountDetai
                 </div>
               )}
               {account.account_number && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Account Number
                   </Label>
@@ -100,7 +100,7 @@ export default async function BankAccountDetailPage({ params }: BankAccountDetai
                 </div>
               )}
               {account.routing_number && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Routing Number
                   </Label>
@@ -110,7 +110,7 @@ export default async function BankAccountDetailPage({ params }: BankAccountDetai
                 </div>
               )}
               {account.institution_held_at && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Institution Held At
                   </Label>
@@ -120,7 +120,7 @@ export default async function BankAccountDetailPage({ params }: BankAccountDetai
                 </div>
               )}
               {account.purpose && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Purpose
                   </Label>
@@ -130,7 +130,7 @@ export default async function BankAccountDetailPage({ params }: BankAccountDetai
                 </div>
               )}
               {account.last_balance && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Last Balance
                   </Label>
@@ -150,7 +150,7 @@ export default async function BankAccountDetailPage({ params }: BankAccountDetai
                 </div>
               )}
               {account.description && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors md:col-span-2">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors md:col-span-2" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Description
                   </Label>

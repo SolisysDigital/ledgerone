@@ -76,7 +76,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {contact.name && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Name
                   </Label>
@@ -86,7 +86,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
                 </div>
               )}
               {contact.title && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Title
                   </Label>
@@ -96,7 +96,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
                 </div>
               )}
               {contact.email && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Email
                   </Label>
@@ -106,7 +106,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
                 </div>
               )}
               {contact.phone && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Phone
                   </Label>
@@ -116,7 +116,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
                 </div>
               )}
               {contact.description && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors md:col-span-2">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors md:col-span-2" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Description
                   </Label>

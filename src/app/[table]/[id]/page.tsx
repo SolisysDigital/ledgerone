@@ -133,7 +133,7 @@ export default async function DetailPage({
                     const value = (data as any)[field.name];
                     if (!value && value !== 0) return null;
                     return (
-                      <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                      <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
                         <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                           {field.label || field.name.replace(/_/g, ' ')}
                         </Label>

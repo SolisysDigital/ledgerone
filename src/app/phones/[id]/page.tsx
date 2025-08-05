@@ -80,7 +80,7 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {phone.phone && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Phone Number
                   </Label>
@@ -90,7 +90,7 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
                 </div>
               )}
               {phone.label && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Label
                   </Label>
@@ -100,7 +100,7 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
                 </div>
               )}
               {phone.description && (
-                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors md:col-span-2">
+                <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors md:col-span-2" style={{ borderRadius: '0.5rem' }}>
                   <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                     Description
                   </Label>
