@@ -197,7 +197,7 @@ export default async function DetailPage({
         <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
           <CardContent className="p-0">
             <Tabs defaultValue="information" className="w-full">
-              <div className="border-b border-gray-200 bg-gray-300 rounded-t-lg">
+              <div className="border-b border-gray-200 bg-gray-100 rounded-t-lg">
                 <TabsList className="grid w-full grid-cols-2 h-16 bg-transparent border-0 gap-1 p-2">
                   <TabsTrigger 
                     value="information" 
