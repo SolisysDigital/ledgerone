@@ -30,22 +30,6 @@ interface TableStats {
   [key: string]: number;
 }
 
-// Icon mapping for each table
-const tableIcons: Record<string, React.ComponentType<any>> = {
-  entities: Building2,
-  contacts: Users,
-  emails: Mail,
-  phones: Phone,
-  bank_accounts: CreditCard,
-  investment_accounts: TrendingUp,
-  crypto_accounts: Bitcoin,
-  credit_cards: CreditCard,
-  websites: Globe,
-  hosting_accounts: Server,
-  entity_relationships: Database,
-  entity_related_data: Database,
-};
-
 export default function HomePage() {
   const [stats, setStats] = useState<TableStats>({});
   const [loading, setLoading] = useState(true);

@@ -26,7 +26,7 @@ interface TablePageProps {
   }>;
 }
 
-export default function TablePage({ params }: TablePageProps) {
+export default function TablePage(_params: TablePageProps) {
   const resolvedParams = useParams();
   const table = Array.isArray(resolvedParams.table) ? resolvedParams.table[0] : resolvedParams.table;
   
@@ -94,7 +94,7 @@ export default function TablePage({ params }: TablePageProps) {
         <main className="flex-1 overflow-auto p-6">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-red-600">Table Not Found</h1>
-            <p className="text-gray-600 mt-2">The table "{table}" is not configured.</p>
+            <p className="text-gray-600 mt-2">The table &quot;{table}&quot; is not configured.</p>
           </div>
         </main>
       </div>
