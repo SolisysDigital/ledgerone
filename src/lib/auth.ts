@@ -22,9 +22,8 @@ export class AuthService {
         throw new Error('Invalid credentials');
       }
 
-      // In a real implementation, you'd verify the password hash here
-      // For now, we'll assume the password is correct for demo purposes
-      if (credentials.password !== 'admin123' && data.username === 'admin') {
+      // Simple password check for demo (in production, use proper password hashing)
+      if (credentials.password !== 'admin123') {
         throw new Error('Invalid credentials');
       }
 
