@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import EditForm from "./EditForm";
+import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 
 export default async function EditPage({ 
   params 
@@ -29,32 +30,34 @@ export default async function EditPage({
   if (error || !data) return notFound();
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/${table}/${id}`}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Details
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-lg font-bold">Edit {config.label}</h1>
-            <p className="text-xs text-muted-foreground">ID: {id}</p>
+    <ClientNavigationWrapper>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/${table}/${id}`}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Details
+              </Link>
+            </Button>
+            <div>
+              <h1 className="text-lg font-bold">Edit {config.label}</h1>
+              <p className="text-xs text-muted-foreground">ID: {id}</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Edit Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Update Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <EditForm table={table} config={config} initialData={data} />
-        </CardContent>
-      </Card>
-    </div>
+        {/* Edit Form */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Update Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <EditForm table={table} config={config} initialData={data} />
+          </CardContent>
+        </Card>
+      </div>
+    </ClientNavigationWrapper>
   );
 } 

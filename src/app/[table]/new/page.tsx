@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import CreateForm from "./CreateForm";
+import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 
 export default async function CreatePage({ 
   params,
@@ -17,7 +18,13 @@ export default async function CreatePage({
   const table = resolvedParams.table;
   const config = tableConfigs[table as keyof typeof tableConfigs];
 
-  if (!config) return <div>Table not found</div>;
+  if (!config) {
+    return (
+      <ClientNavigationWrapper>
+        <div>Table not found</div>
+      </ClientNavigationWrapper>
+    );
+  }
 
   // Get entity name if this is a child table with a foreign key
   let entityName = "";
@@ -38,28 +45,26 @@ export default async function CreatePage({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-sm">
-          {entityName ? (
-            <div className="flex items-center space-x-2">
-              <span>Create {config.label} for</span>
-              <Badge variant="default" className="text-sm font-semibold bg-primary/10 text-primary border-primary/20">
-                {entityName}
+    <ClientNavigationWrapper>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            Create New {config.label.slice(0, -1)}
+            {entityName && (
+              <Badge variant="secondary" className="ml-2">
+                for {entityName}
               </Badge>
-            </div>
-          ) : (
-            `Create ${config.label}`
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <CreateForm 
-          table={table} 
-          config={config} 
-          entityName={entityName}
-        />
-      </CardContent>
-    </Card>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CreateForm 
+            table={table} 
+            config={config} 
+            entityName={entityName}
+          />
+        </CardContent>
+      </Card>
+    </ClientNavigationWrapper>
   );
 }
