@@ -197,18 +197,18 @@ export default async function DetailPage({
         <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
           <CardContent className="p-0">
             <Tabs defaultValue="information" className="w-full">
-              <div className="border-b border-border/50 bg-muted/20 rounded-t-lg">
-                <TabsList className="grid w-full grid-cols-2 h-14 bg-transparent border-0 gap-1 p-1">
+              <div className="border-b border-gray-200 bg-gray-50 rounded-t-lg">
+                <TabsList className="grid w-full grid-cols-2 h-16 bg-transparent border-0 gap-1 p-2">
                   <TabsTrigger 
                     value="information" 
-                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-t-lg transition-all duration-200 hover:bg-white/50"
+                    className="data-[state=active]:bg-white data-[state=active]:text-teal-600 data-[state=active]:shadow-md data-[state=active]:border-b-2 data-[state=active]:border-teal-600 data-[state=active]:rounded-t-lg data-[state=active]:font-semibold rounded-t-md transition-all duration-300 ease-in-out hover:bg-teal-50 hover:border-teal-400 border-b border-gray-200"
                   >
                     <FileText className="h-4 w-4 mr-2" />
                     Information
                   </TabsTrigger>
                   <TabsTrigger 
                     value="related-data" 
-                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-t-lg transition-all duration-200 hover:bg-white/50"
+                    className="data-[state=active]:bg-white data-[state=active]:text-teal-600 data-[state=active]:shadow-md data-[state=active]:border-b-2 data-[state=active]:border-teal-600 data-[state=active]:rounded-t-lg data-[state=active]:font-semibold rounded-t-md transition-all duration-300 ease-in-out hover:bg-teal-50 hover:border-teal-400 border-b border-gray-200"
                   >
                     <Users className="h-4 w-4 mr-2" />
                     Related Data
