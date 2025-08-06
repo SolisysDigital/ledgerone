@@ -1,10 +1,14 @@
 -- ============================================================================
--- LedgerOne User Authentication Tables Setup
+-- LedgerOne User Authentication Tables Setup (Fixed - No RLS)
 -- Run this script in your Supabase SQL Editor
 -- ============================================================================
 
+-- First, drop the tables if they exist to start fresh
+DROP TABLE IF EXISTS user_permissions CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
 -- Create users table
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   username VARCHAR(100) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
@@ -16,7 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- Create user_permissions table
-CREATE TABLE IF NOT EXISTS user_permissions (
+CREATE TABLE user_permissions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   table_name VARCHAR(100) NOT NULL,
@@ -34,6 +38,10 @@ CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
 CREATE INDEX IF NOT EXISTS idx_user_permissions_user_id ON user_permissions(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_permissions_table_name ON user_permissions(table_name);
+
+-- Disable RLS for now (we'll implement our own auth logic)
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE user_permissions DISABLE ROW LEVEL SECURITY;
 
 -- Insert default admin user (password: admin123)
 INSERT INTO users (username, password_hash, full_name, role, status)
@@ -81,4 +89,5 @@ ON CONFLICT (user_id, table_name) DO UPDATE SET
 
 -- Verify the setup
 SELECT 'Users table created' as status, COUNT(*) as user_count FROM users;
-SELECT 'Permissions table created' as status, COUNT(*) as permission_count FROM user_permissions; 
+SELECT 'Permissions table created' as status, COUNT(*) as permission_count FROM user_permissions;
+SELECT 'Admin user details' as info, username, full_name, role, status FROM users WHERE username = 'admin'; 
