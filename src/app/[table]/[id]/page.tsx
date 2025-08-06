@@ -2,6 +2,7 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { tableConfigs } from "@/lib/tableConfigs";
+import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -73,7 +74,7 @@ export default async function DetailPage({
       ['officer3_name', 'officer3_title', 'officer3_ownership_percent'],
       ['officer4_name', 'officer4_title', 'officer4_ownership_percent'],
     ];
-    const texasFields = [
+    const texasSpecificFields = [
       'texas_taxpayer_number',
       'texas_file_number',
       'texas_webfile_number',
@@ -87,8 +88,103 @@ export default async function DetailPage({
     // For non-entity pages, use the new design pattern
     if (table !== 'entities') {
       return (
+        <ClientNavigationWrapper>
+          <div className="max-w-7xl mx-auto space-y-8 p-6">
+            {/* Simple Header without box */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-6">
+                <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
+                  <Link href={`/${table}`}>
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to List
+                  </Link>
+                </Button>
+                <div className="space-y-1">
+                  <h1 className="text-2xl font-bold text-foreground">{config.label} Details</h1>
+                  <p className="text-sm text-muted-foreground">ID: {id}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
+                  <Link href={`/${table}/${id}/edit`}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow text-destructive hover:text-destructive">
+                  <Link href={`/${table}/${id}/delete`}>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {/* Basic Information Section */}
+              <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+                <CardHeader>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-1 h-6 bg-primary rounded-full"></div>
+                    <h3 className="text-lg font-semibold">Basic Information</h3>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {config.fields.map((field) => {
+                      const value = (data as any)[field.name];
+                      if (!value && value !== 0) return null;
+                      return (
+                        <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
+                          <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                            {field.label || field.name.replace(/_/g, ' ')}
+                          </Label>
+                          <div className="text-sm">
+                            {field.type === "select" ? (
+                              <Badge variant="secondary" className="text-teal-800 bg-secondary/50">{value}</Badge>
+                            ) : field.type === "textarea" ? (
+                              <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{value}</p>
+                            ) : field.type === "date" ? (
+                              <span className="text-teal-800 font-medium">{value ? new Date(value).toLocaleDateString() : '-'}</span>
+                            ) : field.type === "number" ? (
+                              <span className="text-teal-800 font-medium">{value?.toLocaleString() || '-'}</span>
+                            ) : (
+                              <span className="text-teal-800 font-medium">{value}</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+              {/* Related Data Section */}
+              <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+                <CardHeader>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-1 h-6 bg-primary rounded-full"></div>
+                    <h3 className="text-lg font-semibold">Related Information</h3>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50" style={{ borderRadius: '0.5rem' }}>
+                    <Suspense fallback={<div>Loading relationships...</div>}>
+                      <ClientRelationshipTabs entityId={id} />
+                    </Suspense>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </ClientNavigationWrapper>
+      );
+    }
+
+    // For entities, use the tabbed structure
+    return (
+      <ClientNavigationWrapper>
         <div className="max-w-7xl mx-auto space-y-8 p-6">
-          {/* Simple Header without box */}
+          {/* Main Header without box */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6">
               <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
@@ -98,7 +194,7 @@ export default async function DetailPage({
                 </Link>
               </Button>
               <div className="space-y-1">
-                <h1 className="text-2xl font-bold text-foreground">{config.label} Details</h1>
+                <h1 className="text-2xl font-bold text-foreground">Entity Details</h1>
                 <p className="text-sm text-muted-foreground">ID: {id}</p>
               </div>
             </div>
@@ -118,240 +214,98 @@ export default async function DetailPage({
             </div>
           </div>
 
-          <div className="space-y-6">
-            {/* Basic Information Section */}
-            <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
-              <CardHeader>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-1 h-6 bg-primary rounded-full"></div>
-                  <h3 className="text-lg font-semibold">Basic Information</h3>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {config.fields.map((field) => {
-                    const value = (data as any)[field.name];
-                    if (!value && value !== 0) return null;
-                    return (
-                      <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                        <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                          {field.label || field.name.replace(/_/g, ' ')}
-                        </Label>
-                        <div className="text-sm">
-                          {field.type === "select" ? (
-                            <Badge variant="secondary" className="text-teal-800 bg-secondary/50">{value}</Badge>
-                          ) : field.type === "textarea" ? (
-                            <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{value}</p>
-                          ) : field.type === "date" ? (
-                            <span className="text-teal-800 font-medium">{value ? new Date(value).toLocaleDateString() : '-'}</span>
-                          ) : field.type === "number" ? (
-                            <span className="text-teal-800 font-medium">{value?.toLocaleString() || '-'}</span>
-                          ) : (
-                            <span className="text-teal-800 font-medium">{value}</span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      );
-    }
-
-    // For entities, use the existing tab-based structure
-    return (
-      <div className="max-w-7xl mx-auto space-y-8 p-6">
-        {/* Simple Header without box */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
-              <Link href={`/${table}`}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to List
-              </Link>
-            </Button>
-            <div className="space-y-1">
-              <h1 className="text-2xl font-bold text-foreground">{config.label} Details</h1>
-              <p className="text-sm text-muted-foreground">ID: {id}</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
-              <Link href={`/${table}/${id}/edit`}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow text-destructive hover:text-destructive">
-              <Link href={`/${table}/${id}/delete`}>
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
-          <CardContent className="p-0">
-            <Tabs defaultValue="information" className="w-full">
-              <div className="border-b border-gray-200 bg-gray-100 rounded-t-lg">
-                <TabsList className="grid w-full grid-cols-2 h-16 bg-transparent border-0 gap-1 p-2">
-                  <TabsTrigger 
-                    value="information" 
-                    className="data-[state=active]:bg-white data-[state=active]:text-teal-600 data-[state=active]:shadow-md data-[state=active]:border-b-2 data-[state=active]:border-teal-600 data-[state=active]:rounded-t-lg data-[state=active]:font-semibold rounded-t-md transition-all duration-300 ease-in-out hover:bg-teal-100 hover:border-teal-400 border-b border-gray-200"
-                  >
+          {/* Tabs Structure */}
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <Tabs defaultValue="information" className="w-full">
+                <TabsList className={`border-b border-gray-200 bg-gray-100 rounded-t-lg h-16 p-2 ${table === 'entities' ? 'grid-cols-2' : 'grid-cols-1'} grid w-full`}>
+                  <TabsTrigger value="information" className="data-[state=active]:bg-white data-[state=active]:text-teal-600 data-[state=active]:shadow-md data-[state=active]:border-b-2 data-[state=active]:border-teal-600 data-[state=active]:rounded-t-lg data-[state=active]:font-semibold rounded-t-md transition-all duration-300 ease-in-out hover:bg-teal-100 hover:border-teal-400 border-b border-gray-200">
                     <FileText className="h-4 w-4 mr-2" />
                     Information
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="related-data" 
-                    className="data-[state=active]:bg-white data-[state=active]:text-teal-600 data-[state=active]:shadow-md data-[state=active]:border-b-2 data-[state=active]:border-teal-600 data-[state=active]:rounded-t-lg data-[state=active]:font-semibold rounded-t-md transition-all duration-300 ease-in-out hover:bg-teal-100 hover:border-teal-400 border-b border-gray-200"
-                  >
-                    <Users className="h-4 w-4 mr-2" />
-                    Related Data
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-              
-              <TabsContent value="information" className="p-8 space-y-8">
-                {/* Enhanced Basic Info */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-1 h-6 bg-primary rounded-full"></div>
-                    <h3 className="text-lg font-semibold">Basic Information</h3>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {config.fields.filter((f) => !legalInfoFields.includes(f.name) && !officerFields.flat().includes(f.name) && !texasFields.includes(f.name)).map((field) => {
-                      const value = (data as any)[field.name];
-                      if (!value && value !== 0) return null;
-                      return (
-                        <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                          <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                            {field.label || field.name.replace(/_/g, ' ')}
-                          </Label>
-                          <div className="text-sm">
-                            {field.type === "select" ? (
-                              <Badge variant="secondary" className="text-teal-800 bg-secondary/50">{value}</Badge>
-                            ) : field.type === "textarea" ? (
-                              <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{value}</p>
-                            ) : field.type === "date" ? (
-                              <span className="text-teal-800 font-medium">{value ? new Date(value).toLocaleDateString() : '-'}</span>
-                            ) : field.type === "number" ? (
-                              <span className="text-teal-800 font-medium">{value?.toLocaleString() || '-'}</span>
-                            ) : (
-                              <span className="text-teal-800 font-medium">{value}</span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-                
-                {/* Enhanced Legal Info Section */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-1 h-6 bg-secondary rounded-full"></div>
-                    <h3 className="text-lg font-semibold">Legal Information</h3>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {config.fields.filter((f) => legalInfoFields.includes(f.name)).map((field) => {
-                      const value = (data as any)[field.name];
-                      if (!value && value !== 0) return null;
-                      return (
-                        <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                          <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                            {field.label || field.name.replace(/_/g, ' ')}
-                          </Label>
-                          <div className="text-sm">
-                            {field.type === "select" ? (
-                              <Badge variant="secondary" className="text-teal-800 bg-secondary/50">{value}</Badge>
-                            ) : field.type === "textarea" ? (
-                              <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{value}</p>
-                            ) : field.type === "date" ? (
-                              <span className="text-teal-800 font-medium">{value ? new Date(value).toLocaleDateString() : '-'}</span>
-                            ) : field.type === "number" ? (
-                              <span className="text-teal-800 font-medium">{value?.toLocaleString() || '-'}</span>
-                            ) : (
-                              <span className="text-teal-800 font-medium">{value}</span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  
-                  {/* Enhanced Officers Section */}
-                  {officerFields.some(([nameField]) => (data as any)[nameField]) && (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="w-1 h-6 bg-accent rounded-full"></div>
-                        <h3 className="text-lg font-semibold">Officers (up to 4)</h3>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {officerFields.map(([nameField, titleField, ownershipField]) => {
-                          const name = (data as any)[nameField];
-                          const title = (data as any)[titleField];
-                          const ownership = (data as any)[ownershipField];
-                          
-                          if (!name) return null;
-                          
-                          return (
-                            <Card key={nameField} className="bg-accent/5 border-accent/20">
-                              <CardContent className="p-4 space-y-2">
-                                {config.fields.filter((f) => [nameField, titleField, ownershipField].includes(f.name)).map((field) => {
-                                  const value = (data as any)[field.name];
-                                  if (!value && value !== 0) return null;
-                                  return (
-                                    <div key={field.name} className="space-y-1">
-                                      <Label className="text-xs font-medium text-muted-foreground capitalize">
-                                        {field.label || field.name.replace(/_/g, ' ')}
-                                      </Label>
-                                      <div className="text-sm">
-                                        <span className="text-teal-800 font-medium">{value}</span>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
-                      </div>
-                    </div>
+                  {table === 'entities' && (
+                    <TabsTrigger value="relationships" className="data-[state=active]:bg-white data-[state=active]:text-teal-600 data-[state=active]:shadow-md data-[state=active]:border-b-2 data-[state=active]:border-teal-600 data-[state=active]:rounded-t-lg data-[state=active]:font-semibold rounded-t-md transition-all duration-300 ease-in-out hover:bg-teal-100 hover:border-teal-400 border-b border-gray-200">
+                      <Users className="h-4 w-4 mr-2" />
+                      Related Data
+                    </TabsTrigger>
                   )}
-                  
-                  {/* Enhanced Texas-specific fields */}
-                  {stateOfFormation === 'Texas' && (
-                    <div className="space-y-4">
+                </TabsList>
+
+                <TabsContent value="information" className="p-6 space-y-8">
+                  {/* Basic Information */}
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-1 h-6 bg-primary rounded-full"></div>
+                      <h3 className="text-lg font-semibold">Basic Information</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {config.fields.filter(field => !legalInfoFields.includes(field.name) && !officerFields.flat().includes(field.name) && !texasSpecificFields.includes(field.name)).map((field) => {
+                        const value = (data as any)[field.name];
+                        if (!value && value !== 0) return null;
+                        return (
+                          <div key={field.name} className="bg-muted/10 p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
+                            <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                              {field.label || field.name.replace(/_/g, ' ')}
+                            </Label>
+                            <div className="text-sm">
+                              {field.type === "select" ? (
+                                <Badge variant="secondary" className="text-teal-800 bg-secondary/50">{value}</Badge>
+                              ) : field.type === "textarea" ? (
+                                <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{value}</p>
+                              ) : field.type === "date" ? (
+                                <span className="text-teal-800 font-medium">{value ? new Date(value).toLocaleDateString() : '-'}</span>
+                              ) : field.type === "number" ? (
+                                <span className="text-teal-800 font-medium">{value?.toLocaleString() || '-'}</span>
+                              ) : (
+                                <span className="text-teal-800 font-medium">{value}</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Legal Information */}
+                  {legalInfoFields.some(field => (data as any)[field]) && (
+                    <div className="space-y-6">
                       <div className="flex items-center gap-2 mb-4">
-                        <div className="w-1 h-6 bg-warning rounded-full"></div>
-                        <h3 className="text-lg font-semibold">Texas-Specific Information</h3>
-                        <div className="flex gap-2 ml-auto">
-                          <a href="https://security.app.cpa.state.tx.us/Public/create-account" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600 hover:text-blue-800 transition-colors">Webfile Portal</a>
-                          <a href="https://mycpa.cpa.state.tx.us/coa/search.do" target="_blank" rel="noopener noreferrer" className="text-xs underline text-blue-600 hover:text-blue-800 transition-colors">Entity Search</a>
-                        </div>
+                        <div className="w-1 h-6 bg-primary rounded-full"></div>
+                        <h3 className="text-lg font-semibold">Legal Information</h3>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {config.fields.filter((f) => texasFields.includes(f.name)).map((field) => {
-                          const value = (data as any)[field.name];
-                          if (!value) return null;
+                        {legalInfoFields.map((fieldName) => {
+                          const value = (data as any)[fieldName];
+                          if (!value && value !== 0) return null;
+                          const field = config.fields.find(f => f.name === fieldName);
+                          if (!field) return null;
                           return (
-                            <div key={field.name} className="bg-warning/5 rounded-lg p-4 border border-warning/20 hover:border-warning/30 transition-colors">
+                            <div key={fieldName} className="bg-muted/10 p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
                               <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                                {field.label || field.name.replace(/_/g, ' ')}
+                                {field.label || fieldName.replace(/_/g, ' ')}
                               </Label>
                               <div className="text-sm">
-                                {field.type === "select" ? (
+                                {fieldName === 'naics_code' ? (
+                                  <div className="space-y-2">
+                                    <span className="text-teal-800 font-medium">{value}</span>
+                                    <div>
+                                      <a 
+                                        href={`https://www.naics.com/naics-code-description/?code=${value}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:text-blue-800 text-xs underline"
+                                      >
+                                        View NAICS Code Details
+                                      </a>
+                                    </div>
+                                  </div>
+                                ) : field && field.type === "select" ? (
                                   <Badge variant="secondary" className="text-teal-800 bg-secondary/50">{value}</Badge>
-                                ) : field.type === "textarea" ? (
+                                ) : field && field.type === "textarea" ? (
                                   <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{value}</p>
-                                ) : field.type === "date" ? (
+                                ) : field && field.type === "date" ? (
                                   <span className="text-teal-800 font-medium">{value ? new Date(value).toLocaleDateString() : '-'}</span>
-                                ) : field.type === "number" ? (
+                                ) : field && field.type === "number" ? (
                                   <span className="text-teal-800 font-medium">{value?.toLocaleString() || '-'}</span>
                                 ) : (
                                   <span className="text-teal-800 font-medium">{value}</span>
@@ -363,43 +317,128 @@ export default async function DetailPage({
                       </div>
                     </div>
                   )}
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="related-data" className="p-8">
-                <Suspense fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <div className="text-center space-y-4">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                      <p className="text-muted-foreground">Loading relationships...</p>
+
+                  {/* Officers Information */}
+                  {officerFields.some(([name]) => (data as any)[name]) && (
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-1 h-6 bg-primary rounded-full"></div>
+                        <h3 className="text-lg font-semibold">Officers</h3>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {officerFields.map(([nameField, titleField, ownershipField], index) => {
+                          const name = (data as any)[nameField];
+                          const title = (data as any)[titleField];
+                          const ownership = (data as any)[ownershipField];
+                          
+                          if (!name) return null;
+
+                          return (
+                            <div key={index} className="bg-muted/10 p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
+                              <Label className="text-sm font-medium text-muted-foreground mb-2 block">
+                                Officer {index + 1}
+                              </Label>
+                              <div className="space-y-3">
+                                <div>
+                                  <span className="text-xs text-muted-foreground block">Name</span>
+                                  <span className="text-sm text-teal-800 font-medium">{name}</span>
+                                </div>
+                                {title && (
+                                  <div>
+                                    <span className="text-xs text-muted-foreground block">Title</span>
+                                    <span className="text-sm text-teal-800 font-medium">{title}</span>
+                                  </div>
+                                )}
+                                {ownership !== null && ownership !== undefined && (
+                                  <div>
+                                    <span className="text-xs text-muted-foreground block">Ownership</span>
+                                    <span className="text-sm text-teal-800 font-medium">{ownership}%</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                }>
-                  <ClientRelationshipTabs entityId={id} />
-                </Suspense>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
+                  )}
+
+                  {/* Texas-specific Information */}
+                  {stateOfFormation === 'Texas' && texasSpecificFields.some(field => (data as any)[field]) && (
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-1 h-6 bg-primary rounded-full"></div>
+                        <h3 className="text-lg font-semibold">Texas-Specific Information</h3>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {texasSpecificFields.map((fieldName) => {
+                          const value = (data as any)[fieldName];
+                          if (!value && value !== 0) return null;
+                          const field = config.fields.find(f => f.name === fieldName);
+                          if (!field) return null;
+
+                          const isWebfileField = fieldName.includes('webfile');
+                          
+                          return (
+                            <div key={fieldName} className="bg-muted/10 p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
+                              <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                                {field.label || fieldName.replace(/_/g, ' ')}
+                              </Label>
+                              <div className="text-sm space-y-2">
+                                <span className="text-teal-800 font-medium">{value}</span>
+                                {isWebfileField && (
+                                  <div>
+                                    <a 
+                                      href="https://mycpa.cpa.state.tx.us/coa/"
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:text-blue-800 text-xs underline"
+                                    >
+                                      Texas Webfile Portal
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+                
+                {table === 'entities' && (
+                  <TabsContent value="relationships" className="p-6">
+                    <Suspense fallback={<div>Loading relationships...</div>}>
+                      <ClientRelationshipTabs entityId={id} />
+                    </Suspense>
+                  </TabsContent>
+                )}
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+      </ClientNavigationWrapper>
     );
   } catch (error) {
     console.error('DetailPage: Unexpected error', error);
     return (
-      <div className="container mx-auto p-6">
-        <Card className="max-w-md mx-auto mt-12">
-          <CardContent className="p-8 text-center space-y-4">
-            <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
-              <Trash2 className="h-8 w-8 text-destructive" />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground">Error Loading Page</h1>
-            <p className="text-muted-foreground">An unexpected error occurred while loading this page.</p>
-            <Button asChild variant="outline" className="mt-4">
-              <Link href="/">Go Home</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <ClientNavigationWrapper>
+        <div className="container mx-auto p-6">
+          <Card className="max-w-md mx-auto mt-12">
+            <CardContent className="p-8 text-center space-y-4">
+              <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
+                <Trash2 className="h-8 w-8 text-destructive" />
+              </div>
+              <h1 className="text-2xl font-bold text-foreground">Error Loading Page</h1>
+              <p className="text-muted-foreground">An unexpected error occurred while loading this page.</p>
+              <Button asChild variant="outline" className="mt-4">
+                <Link href="/">Go Home</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </ClientNavigationWrapper>
     );
   }
 } 
