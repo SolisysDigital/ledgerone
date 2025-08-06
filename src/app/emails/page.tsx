@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";
@@ -33,14 +34,13 @@ export default function EmailsPage() {
   }, [currentPage, searchQuery]);
 
   const fetchRecords = async () => {
-    setLoading(true);
     try {
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: "10",
         search: searchQuery,
       });
-
+      
       const response = await fetch(`/api/${tableName}?${params}`);
       if (response.ok) {
         const data = await response.json();
@@ -56,23 +56,27 @@ export default function EmailsPage() {
   };
 
   const getPrimaryField = () => {
-    const displayFields = ['name', 'title', 'email', 'phone', 'url', 'bank_name', 'provider', 'platform', 'cardholder_name'];
+    const displayFields = ['email', 'email_address', 'contact_name', 'type'];
     for (const field of displayFields) {
-      if (config?.fields.some((f: any) => f.name === field)) {
+      if (config.fields.some((f: any) => f.name === field)) {
         return field;
       }
     }
-    return config?.fields[0]?.name || 'id';
+    return config.fields[0]?.name || 'id';
   };
+
+  if (!config) {
+    return <div className="p-6">Table not found</div>;
+  }
 
   const primaryField = getPrimaryField();
 
   const columns = [
     {
       key: primaryField,
-      label: config?.fields.find((f: any) => f.name === primaryField)?.label || primaryField,
+      label: config.fields.find((f: any) => f.name === primaryField)?.label || primaryField,
     },
-    ...(config?.fields.slice(0, 3)
+    ...(config.fields.slice(0, 3)
       .filter((field: any) => field.name !== primaryField)
       .map((field: any) => ({
         key: field.name,
@@ -89,49 +93,54 @@ export default function EmailsPage() {
   };
 
   return (
-    <PageLayout
-      title={config?.label || "Emails"}
-      subtitle={`Manage your ${config?.label?.toLowerCase() || "emails"} data`}
-      actionButton={
-        <Button asChild className={STYLES.BUTTONS.PRIMARY}>
-          <Link href={`/${tableName}/new`}>
-            <div className={ICONS.PLUS} />
-            Add New {config?.label?.slice(0, -1) || "Email"}
-          </Link>
-        </Button>
-      }
-    >
-      <SearchSection
-        placeholder={`Search ${config?.label?.toLowerCase() || "emails"}...`}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
+    <div className="flex h-screen">
+      <Navigation />
+      <main className="flex-1 overflow-auto">
+        <PageLayout
+          title={config.label}
+          subtitle={`Manage your ${config.label.toLowerCase()} data`}
+          actionButton={
+            <Button asChild className={STYLES.BUTTONS.PRIMARY}>
+              <Link href={`/${tableName}/new`}>
+                <div className={ICONS.PLUS} />
+                Add New {config.label.slice(0, -1)}
+              </Link>
+            </Button>
+          }
+        >
+          <SearchSection
+            placeholder={`Search ${config.label.toLowerCase()}...`}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
 
-      <Card className={STYLES.COLORS.CARD_STANDARD}>
-        <CardHeader>
-          <CardTitle className={STYLES.LAYOUT.CARD_HEADER}>
-            <Eye className={ICONS.EYE} />
-            Records ({totalRecords})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            data={records}
-            columns={columns}
-            tableName={tableName}
-            loading={loading}
-            onView={handleView}
-            onEdit={handleEdit}
-          />
-          
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalRecords={totalRecords}
-            onPageChange={setCurrentPage}
-          />
-        </CardContent>
-      </Card>
-    </PageLayout>
+          <Card className={STYLES.COLORS.CARD_STANDARD}>
+            <CardHeader>
+              <CardTitle className={STYLES.LAYOUT.CARD_HEADER}>
+                <Eye className={ICONS.EYE} />
+                Records ({totalRecords})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DataTable
+                data={records}
+                columns={columns}
+                tableName={tableName}
+                loading={loading}
+                onView={handleView}
+                onEdit={handleEdit}
+              />
+              
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalRecords={totalRecords}
+                onPageChange={setCurrentPage}
+              />
+            </CardContent>
+          </Card>
+        </PageLayout>
+      </main>
+    </div>
   );
 } 
