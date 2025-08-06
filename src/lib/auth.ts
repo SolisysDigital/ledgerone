@@ -9,8 +9,12 @@ const supabase = createClient(
 export class AuthService {
   static async login(credentials: LoginCredentials): Promise<LoginResponse> {
     try {
-      // For now, we'll use a simple approach with direct database query
-      // In production, you'd want to use Supabase Auth or a proper auth service
+      console.log('Attempting login with username:', credentials.username);
+
+      // First, try to ensure the users table exists and has admin user
+      await this.ensureAdminUser();
+
+      // Query for the user
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -18,30 +22,88 @@ export class AuthService {
         .eq('status', 'active')
         .single();
 
-      if (error || !data) {
-        throw new Error('Invalid credentials');
+      console.log('Database query result:', { data, error });
+
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
+
+      if (!data) {
+        console.log('No user found with username:', credentials.username);
+        throw new Error('Invalid credentials - user not found');
       }
 
       // Simple password check for demo (in production, use proper password hashing)
       if (credentials.password !== 'admin123') {
-        throw new Error('Invalid credentials');
+        console.log('Password mismatch');
+        throw new Error('Invalid credentials - wrong password');
       }
 
       // Update last login
-      await supabase
+      const { error: updateError } = await supabase
         .from('users')
         .update({ last_login: new Date().toISOString() })
         .eq('id', data.id);
 
+      if (updateError) {
+        console.warn('Failed to update last login:', updateError);
+      }
+
       // Generate a simple token (in production, use JWT)
       const token = btoa(JSON.stringify({ userId: data.id, timestamp: Date.now() }));
 
+      console.log('Login successful for user:', data.username);
       return {
         user: data as User,
         token
       };
     } catch (error) {
-      throw new Error('Login failed');
+      console.error('Login failed:', error);
+      throw error instanceof Error ? error : new Error('Login failed');
+    }
+  }
+
+  static async ensureAdminUser(): Promise<void> {
+    try {
+      // Check if admin user exists
+      const { data: existingUser, error: checkError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('username', 'admin')
+        .single();
+
+      if (existingUser) {
+        console.log('Admin user already exists');
+        return;
+      }
+
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
+        console.error('Error checking for admin user:', checkError);
+        return;
+      }
+
+      // Create admin user if it doesn't exist
+      console.log('Creating admin user...');
+      const { data: newUser, error: createError } = await supabase
+        .from('users')
+        .insert([{
+          username: 'admin',
+          password_hash: '$2a$10$rQZ9vKzqX8mN3pL2sJ1hA.BCDEFGHIJKLMNOPQRSTUVWXYZabcdef',
+          full_name: 'System Administrator',
+          role: 'admin',
+          status: 'active'
+        }])
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('Failed to create admin user:', createError);
+      } else {
+        console.log('Admin user created successfully:', newUser);
+      }
+    } catch (error) {
+      console.error('Error ensuring admin user:', error);
     }
   }
 

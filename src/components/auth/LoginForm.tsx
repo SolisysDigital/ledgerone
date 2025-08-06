@@ -21,7 +21,12 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit({ username, password });
+    console.log('Form submitted with:', { username, password: password.length > 0 ? '[PROVIDED]' : '[EMPTY]' });
+    try {
+      await onSubmit({ username, password });
+    } catch (err) {
+      console.error('Login form error:', err);
+    }
   };
 
   return (
@@ -43,7 +48,14 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>
+                  {error}
+                  {error.includes('Database error') && (
+                    <div className="mt-2 text-xs">
+                      Check browser console for details
+                    </div>
+                  )}
+                </AlertDescription>
               </Alert>
             )}
             
@@ -104,6 +116,9 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
                 Username: admin | Password: admin123
               </span>
             </p>
+            <div className="mt-2 text-xs text-gray-500">
+              Check browser console for detailed error information
+            </div>
           </div>
         </CardContent>
       </Card>
