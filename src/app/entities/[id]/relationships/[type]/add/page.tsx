@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 
 interface AddRelationshipPageProps {
   params: Promise<{ id: string; type: string }>;
@@ -100,15 +101,12 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
       console.log('AddRelationshipPage: Fetch response status:', response.status);
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('AddRelationshipPage: API error response:', errorText);
-        throw new Error(`Failed to load available records: ${response.status} ${response.statusText}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       
       const data = await response.json();
-      console.log('AddRelationshipPage: Available records loaded successfully:', data);
-      console.log('AddRelationshipPage: Number of available records:', data?.length || 0);
-      setAvailableRecords(data || []);
+      console.log('AddRelationshipPage: Available records loaded:', data.length);
+      setAvailableRecords(data);
     } catch (error) {
       console.error('AddRelationshipPage: Error loading available records:', error);
       setError(`Failed to load available records: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -118,7 +116,7 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
   };
 
   const getTypeInfo = (type: string) => {
-    return relationshipTypes.find(t => t.key === type) || { key: type, label: type, icon: '📄' };
+    return relationshipTypes.find(rt => rt.key === type) || { key: type, label: type, icon: '📄' };
   };
 
   const getDisplayField = (type: string) => {
@@ -139,27 +137,12 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!resolvedParams || !selectedRecordId) {
-      alert('Please select a record');
-      return;
-    }
+    if (!resolvedParams || !selectedRecordId) return;
 
     try {
-      console.log('AddRelationshipPage: Creating relationship:', {
-        entityId: resolvedParams.id,
-        relatedDataId: selectedRecordId,
-        typeOfRecord: resolvedParams.type,
-        relationshipDescription
-      });
-      
       setLoading(true);
       
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 10000)
-      );
-      
-      const fetchPromise = fetch('/api/relationships', {
+      const response = await fetch('/api/relationships', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -168,58 +151,50 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
           entityId: resolvedParams.id,
           relatedDataId: selectedRecordId,
           typeOfRecord: resolvedParams.type,
-          relationshipDescription
+          relationshipDescription: relationshipDescription
         }),
       });
-      
-      const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
-      
+
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to create relationship: ${response.status} ${response.statusText}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
-      console.log('AddRelationshipPage: Relationship created successfully');
+
       // Redirect back to entity detail page
       router.push(`/entities/${resolvedParams.id}`);
     } catch (error) {
       console.error('AddRelationshipPage: Error creating relationship:', error);
-      alert(`Error creating relationship: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert('Error creating relationship. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  console.log('AddRelationshipPage: Rendering with state:', { 
-    resolvedParams, 
-    loading, 
-    loadingRecords, 
-    error, 
-    availableRecordsCount: availableRecords.length 
-  });
-
   if (error) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="text-center text-red-600">
-          <h1 className="text-2xl font-bold mb-4">Error Loading Page</h1>
-          <p className="mb-4 text-sm">{error}</p>
-          <Button onClick={() => window.location.reload()} variant="outline">
-            Try Again
-          </Button>
+      <ClientNavigationWrapper>
+        <div className="container mx-auto p-6">
+          <div className="text-center text-red-600">
+            <h1 className="text-2xl font-bold mb-4">Error Loading Page</h1>
+            <p className="mb-4 text-sm">{error}</p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Try Again
+            </Button>
+          </div>
         </div>
-      </div>
+      </ClientNavigationWrapper>
     );
   }
 
   if (!resolvedParams) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="text-center">
-          <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-          <p>Loading...</p>
+      <ClientNavigationWrapper>
+        <div className="container mx-auto p-6">
+          <div className="text-center">
+            <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+            <p>Loading...</p>
+          </div>
         </div>
-      </div>
+      </ClientNavigationWrapper>
     );
   }
 
@@ -227,115 +202,109 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
   const displayField = getDisplayField(resolvedParams.type);
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <Link 
-          href={`/entities/${resolvedParams.id}`} 
-          className="inline-flex items-center text-gray-600 hover:text-gray-800 mb-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Entity
-        </Link>
-        
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-3xl">{typeInfo.icon}</span>
-          <h1 className="text-3xl font-bold">Add {typeInfo.label} Relationship</h1>
+    <ClientNavigationWrapper>
+      <div className="container mx-auto p-6">
+        <div className="mb-6">
+          <Link 
+            href={`/entities/${resolvedParams.id}`} 
+            className="inline-flex items-center text-gray-600 hover:text-gray-800 mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Entity
+          </Link>
+          
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-3xl">{typeInfo.icon}</span>
+            <h1 className="text-3xl font-bold">Add {typeInfo.label} Relationship</h1>
+          </div>
+          <p className="text-gray-600">
+            Select an existing {typeInfo.label.toLowerCase()} and describe how it relates to this entity
+          </p>
         </div>
-        <p className="text-gray-600">
-          Select an existing {typeInfo.label.toLowerCase()} and describe how it relates to this entity
-        </p>
-      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Add {typeInfo.label} Relationship</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="record">Select {typeInfo.label}</Label>
-              <Select
-                value={selectedRecordId}
-                onValueChange={setSelectedRecordId}
-                disabled={loadingRecords || availableRecords.length === 0}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={
-                    loadingRecords 
-                      ? `Loading ${typeInfo.label.toLowerCase()}s...` 
-                      : availableRecords.length === 0 
-                        ? `No available ${typeInfo.label.toLowerCase()}s` 
-                        : `Choose a ${typeInfo.label.toLowerCase()}`
-                  } />
-                </SelectTrigger>
-                <SelectContent>
-                  {loadingRecords ? (
-                    <SelectItem value="loading" disabled>
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Loading {typeInfo.label.toLowerCase()}s...
-                      </div>
-                    </SelectItem>
-                  ) : availableRecords.length === 0 ? (
-                    <SelectItem value="no-records" disabled>
-                      No available {typeInfo.label.toLowerCase()}s found
-                    </SelectItem>
-                  ) : (
-                    availableRecords.map((record) => (
-                      <SelectItem key={record.id} value={record.id}>
-                        {record[displayField] || record.name || record.email || 'Unnamed Record'}
+        <Card>
+          <CardHeader>
+            <CardTitle>Add {typeInfo.label} Relationship</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="record">Select {typeInfo.label}</Label>
+                <Select
+                  value={selectedRecordId}
+                  onValueChange={setSelectedRecordId}
+                  disabled={loadingRecords || availableRecords.length === 0}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={
+                      loadingRecords 
+                        ? `Loading ${typeInfo.label.toLowerCase()}s...` 
+                        : availableRecords.length === 0 
+                          ? `No available ${typeInfo.label.toLowerCase()}s` 
+                          : `Choose a ${typeInfo.label.toLowerCase()}`
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {loadingRecords ? (
+                      <SelectItem value="loading" disabled>
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Loading {typeInfo.label.toLowerCase()}s...
+                        </div>
                       </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-              {availableRecords.length === 0 && !loadingRecords && (
-                <p className="text-sm text-gray-500">
-                  All {typeInfo.label.toLowerCase()}s are already related to this entity. 
-                  <Link href={`/${resolvedParams.type}/new`} className="text-blue-600 hover:text-blue-800 ml-1">
-                    Create a new {typeInfo.label.toLowerCase()}
-                  </Link>
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Relationship Description</Label>
-              <Textarea
-                id="description"
-                placeholder={`Describe how this ${typeInfo.label.toLowerCase()} relates to the entity (e.g., "Primary Attorney", "Tax Advisor")`}
-                value={relationshipDescription}
-                onChange={(e) => setRelationshipDescription(e.target.value)}
-                rows={3}
-              />
-            </div>
-
-            <div className="flex gap-4">
-              <Button
-                type="submit"
-                disabled={loading || !selectedRecordId || loadingRecords}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  'Create Relationship'
+                    ) : availableRecords.length === 0 ? (
+                      <SelectItem value="no-records" disabled>
+                        No available {typeInfo.label.toLowerCase()}s found
+                      </SelectItem>
+                    ) : (
+                      availableRecords.map((record) => (
+                        <SelectItem key={record.id} value={record.id}>
+                          {record[displayField] || record.name || record.email || 'Unnamed Record'}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                {availableRecords.length === 0 && !loadingRecords && (
+                  <p className="text-sm text-gray-500">
+                    All {typeInfo.label.toLowerCase()}s are already related to this entity. 
+                    <Link href={`/${resolvedParams.type}/new`} className="text-blue-600 hover:text-blue-800 ml-1">
+                      Create a new {typeInfo.label.toLowerCase()}
+                    </Link>
+                  </p>
                 )}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push(`/entities/${resolvedParams.id}`)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Relationship Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder={`Describe how this ${typeInfo.label.toLowerCase()} relates to the entity (e.g., "Primary Attorney", "Tax Advisor")`}
+                  value={relationshipDescription}
+                  onChange={(e) => setRelationshipDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <Button
+                  type="submit"
+                  disabled={loading || !selectedRecordId}
+                >
+                  {loading ? 'Creating...' : 'Create Relationship'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push(`/entities/${resolvedParams.id}`)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </ClientNavigationWrapper>
   );
 } 

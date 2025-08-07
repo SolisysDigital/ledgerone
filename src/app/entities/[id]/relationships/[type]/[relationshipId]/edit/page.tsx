@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { getRelationship, updateRelationship, deleteRelationship } from "@/lib/relationshipActions";
+import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 
 interface EditRelationshipPageProps {
   params: Promise<{ id: string; type: string; relationshipId: string }>;
@@ -95,75 +96,85 @@ export default function EditRelationshipPage({ params }: EditRelationshipPagePro
   };
 
   if (!resolvedParams || loadingRelationship) {
-    return <div>Loading...</div>;
+    return (
+      <ClientNavigationWrapper>
+        <div>Loading...</div>
+      </ClientNavigationWrapper>
+    );
   }
 
   if (!relationship) {
-    return <div>Relationship not found</div>;
+    return (
+      <ClientNavigationWrapper>
+        <div>Relationship not found</div>
+      </ClientNavigationWrapper>
+    );
   }
 
   const typeLabel = getTypeLabel(resolvedParams.type);
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <Link 
-          href={`/entities/${resolvedParams.id}`} 
-          className="inline-flex items-center text-gray-600 hover:text-gray-800 mb-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Entity
-        </Link>
-        
-        <h1 className="text-3xl font-bold">Edit {typeLabel} Relationship</h1>
-        <p className="text-gray-600 mt-2">
-          Update the relationship description for this {typeLabel.toLowerCase()}
-        </p>
+    <ClientNavigationWrapper>
+      <div className="container mx-auto p-6">
+        <div className="mb-6">
+          <Link 
+            href={`/entities/${resolvedParams.id}`} 
+            className="inline-flex items-center text-gray-600 hover:text-gray-800 mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Entity
+          </Link>
+          
+          <h1 className="text-3xl font-bold">Edit {typeLabel} Relationship</h1>
+          <p className="text-gray-600 mt-2">
+            Update the relationship description for this {typeLabel.toLowerCase()}
+          </p>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Edit {typeLabel} Relationship</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleUpdate} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="description">Relationship Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder={`Describe how this ${typeLabel.toLowerCase()} relates to the entity (e.g., "Primary Attorney", "Tax Advisor")`}
+                  value={relationshipDescription}
+                  onChange={(e) => setRelationshipDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? 'Updating...' : 'Update Relationship'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push(`/entities/${resolvedParams.id}`)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={loading}
+                >
+                  {loading ? 'Removing...' : 'Remove Relationship'}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Edit {typeLabel} Relationship</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleUpdate} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="description">Relationship Description</Label>
-              <Textarea
-                id="description"
-                placeholder={`Describe how this ${typeLabel.toLowerCase()} relates to the entity (e.g., "Primary Attorney", "Tax Advisor")`}
-                value={relationshipDescription}
-                onChange={(e) => setRelationshipDescription(e.target.value)}
-                rows={3}
-              />
-            </div>
-
-            <div className="flex gap-4">
-              <Button
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? 'Updating...' : 'Update Relationship'}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push(`/entities/${resolvedParams.id}`)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={loading}
-              >
-                {loading ? 'Removing...' : 'Remove Relationship'}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+    </ClientNavigationWrapper>
   );
 } 

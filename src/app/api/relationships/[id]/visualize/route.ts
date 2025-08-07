@@ -286,4 +286,4 @@ function getCategoryLabel(table: string): string {
   };
 
   return labels[table as keyof typeof labels] || table.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-} 
+}
