@@ -87,6 +87,10 @@ export default function TablePage(_params: TablePageProps) {
     window.location.href = `/${table}/${id}/edit`;
   };
 
+  const handleVisualize = (id: string) => {
+    window.location.href = `/${table}/${id}/visualize`;
+  };
+
   if (!config) {
     return (
       <div className="flex h-screen">
@@ -160,6 +164,7 @@ export default function TablePage(_params: TablePageProps) {
                     loading={false}
                     onView={handleView}
                     onEdit={handleEdit}
+                    onVisualize={handleVisualize}
                   />
                   
                   <Pagination

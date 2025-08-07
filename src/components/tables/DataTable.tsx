@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Eye, Edit, Plus, User, Clock, ExternalLink } from 'lucide-react';
+import { Eye, Edit, Plus, User, Clock, ExternalLink, Network } from 'lucide-react';
 import DeleteButton from '@/components/DeleteButton';
 import { STYLES, ICONS, SPACING } from '@/styles/constants';
 
@@ -19,6 +19,7 @@ interface DataTableProps {
   onView?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onVisualize?: (id: string) => void;
 }
 
 export function DataTable({ 
@@ -28,7 +29,8 @@ export function DataTable({
   loading = false,
   onView, 
   onEdit, 
-  onDelete 
+  onDelete,
+  onVisualize
 }: DataTableProps) {
   const getDisplayValue = (record: any, fieldName: string) => {
     const value = record[fieldName];
@@ -158,6 +160,17 @@ export function DataTable({
                       className="hover:bg-muted/30 transition-colors duration-150"
                     >
                       <Edit className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {onVisualize && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onVisualize(record.id)}
+                      className="hover:bg-purple-50 text-purple-600 transition-colors duration-150"
+                      title="Visualize Relationships"
+                    >
+                      <Network className="h-4 w-4" />
                     </Button>
                   )}
                   {onDelete && (
