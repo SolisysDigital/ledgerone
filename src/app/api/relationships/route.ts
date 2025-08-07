@@ -89,10 +89,70 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { entityId, relatedDataId, typeOfRecord, relationshipDescription } = body;
 
+    console.log('POST /api/relationships - Request body:', body);
+
     if (!entityId || !relatedDataId || !typeOfRecord) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      console.log('POST /api/relationships - Missing required fields:', { entityId, relatedDataId, typeOfRecord });
+      return NextResponse.json({ 
+        error: 'Missing required fields',
+        details: { entityId, relatedDataId, typeOfRecord }
+      }, { status: 400 });
     }
 
+    // Check if the relationship already exists
+    const { data: existingRelationship, error: checkError } = await supabase
+      .from('entity_related_data')
+      .select('id')
+      .eq('entity_id', entityId)
+      .eq('related_data_id', relatedDataId)
+      .eq('type_of_record', typeOfRecord)
+      .single();
+
+    if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "not found" which is expected
+      console.log('POST /api/relationships - Error checking existing relationship:', checkError);
+      await AppLogger.error('api/relationships', 'POST', 'Error checking existing relationship', checkError, body);
+      return NextResponse.json({ error: 'Failed to check existing relationship' }, { status: 500 });
+    }
+
+    if (existingRelationship) {
+      console.log('POST /api/relationships - Relationship already exists:', existingRelationship);
+      return NextResponse.json({ 
+        error: 'This relationship already exists',
+        details: { entityId, relatedDataId, typeOfRecord }
+      }, { status: 409 });
+    }
+
+    // Verify that the entity exists
+    const { data: entity, error: entityError } = await supabase
+      .from('entities')
+      .select('id')
+      .eq('id', entityId)
+      .single();
+
+    if (entityError || !entity) {
+      console.log('POST /api/relationships - Entity not found:', entityError);
+      return NextResponse.json({ 
+        error: 'Entity not found',
+        details: { entityId }
+      }, { status: 404 });
+    }
+
+    // Verify that the related data exists
+    const { data: relatedData, error: relatedDataError } = await supabase
+      .from(typeOfRecord)
+      .select('id')
+      .eq('id', relatedDataId)
+      .single();
+
+    if (relatedDataError || !relatedData) {
+      console.log('POST /api/relationships - Related data not found:', relatedDataError);
+      return NextResponse.json({ 
+        error: `${typeOfRecord} not found`,
+        details: { relatedDataId, typeOfRecord }
+      }, { status: 404 });
+    }
+
+    // Create the relationship
     const { data, error } = await supabase
       .from('entity_related_data')
       .insert({
@@ -105,13 +165,33 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
+      console.log('POST /api/relationships - Database error:', error);
       await AppLogger.error('api/relationships', 'POST', 'Failed to create relationship', error, body);
-      return NextResponse.json({ error: 'Failed to create relationship' }, { status: 500 });
+      
+      // Provide more specific error messages
+      if (error.code === '23505') { // Unique constraint violation
+        return NextResponse.json({ 
+          error: 'This relationship already exists',
+          details: { entityId, relatedDataId, typeOfRecord }
+        }, { status: 409 });
+      } else if (error.code === '23503') { // Foreign key constraint violation
+        return NextResponse.json({ 
+          error: 'Invalid entity or related data reference',
+          details: { entityId, relatedDataId, typeOfRecord }
+        }, { status: 400 });
+      } else {
+        return NextResponse.json({ 
+          error: 'Failed to create relationship',
+          details: error.message
+        }, { status: 500 });
+      }
     }
 
+    console.log('POST /api/relationships - Successfully created relationship:', data);
     await AppLogger.info('api/relationships', 'POST', 'Successfully created relationship', { entityId, relatedDataId, typeOfRecord });
     return NextResponse.json(data);
   } catch (error) {
+    console.log('POST /api/relationships - Exception:', error);
     await AppLogger.error('api/relationships', 'POST', 'Exception in POST relationships', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

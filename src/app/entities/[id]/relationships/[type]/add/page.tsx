@@ -155,15 +155,21 @@ export default function AddRelationshipPage({ params }: AddRelationshipPageProps
         }),
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // Show specific error message from the API
+        const errorMessage = responseData.error || 'Error creating relationship';
+        const details = responseData.details ? ` (${JSON.stringify(responseData.details)})` : '';
+        throw new Error(`${errorMessage}${details}`);
       }
 
       // Redirect back to entity detail page
       router.push(`/entities/${resolvedParams.id}`);
     } catch (error) {
       console.error('AddRelationshipPage: Error creating relationship:', error);
-      alert('Error creating relationship. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Error creating relationship. Please try again.';
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
