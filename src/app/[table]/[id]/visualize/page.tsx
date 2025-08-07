@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Network, ExternalLink } from "lucide-react";
@@ -215,7 +214,7 @@ export default function VisualizePage() {
                       No Relationships Found
                     </h3>
                     <p className="text-gray-600">
-                      This {config.label.slice(0, -1).toLowerCase()} doesn't have any related records yet.
+                      This {config.label.slice(0, -1).toLowerCase()} doesn&apos;t have any related records yet.
                     </p>
                   </div>
                 </CardContent>
