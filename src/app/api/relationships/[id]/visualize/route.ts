@@ -1,18 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-
-const RELATIONSHIP_CATEGORIES = {
-  entities: ['contacts', 'emails', 'phones', 'websites', 'bank_accounts', 'credit_cards', 'investment_accounts', 'crypto_accounts', 'hosting_accounts'],
-  contacts: ['entities'],
-  emails: ['entities', 'contacts'],
-  phones: ['entities', 'contacts'],
-  websites: ['entities'],
-  bank_accounts: ['entities'],
-  credit_cards: ['entities'],
-  investment_accounts: ['entities'],
-  crypto_accounts: ['entities'],
-  hosting_accounts: ['entities']
-};
+import { tableConfigs } from '@/lib/tableConfigs';
 
 const NODE_COLORS = {
   entity: '#14b8a6', // teal-500
@@ -24,20 +12,10 @@ const NODE_COLORS = {
   credit_card: '#ef4444', // red-500
   investment_account: '#f59e0b', // amber-500
   crypto_account: '#06b6d4', // cyan-500
-  hosting_account: '#64748b' // slate-500
-};
-
-const TABLE_LABELS = {
-  entities: 'Entity',
-  contacts: 'Contact',
-  emails: 'Email',
-  phones: 'Phone',
-  websites: 'Website',
-  bank_accounts: 'Bank Account',
-  credit_cards: 'Credit Card',
-  investment_accounts: 'Investment Account',
-  crypto_accounts: 'Crypto Account',
-  hosting_accounts: 'Hosting Account'
+  hosting_account: '#64748b', // slate-500
+  securities_held: '#f97316', // orange-500
+  entity_related_data: '#8b5cf6', // purple-500
+  entity_relationships: '#06b6d4' // cyan-500
 };
 
 export async function GET(
@@ -80,37 +58,173 @@ export async function GET(
       table: table
     };
 
-    // Get relationships based on the table type
+    // Get relationships based on the table configuration
     const relationships: any[] = [];
-    const categories = RELATIONSHIP_CATEGORIES[table as keyof typeof RELATIONSHIP_CATEGORIES] || [];
+    const config = tableConfigs[table as keyof typeof tableConfigs];
 
-    for (const relatedTable of categories) {
+    if (config) {
+      // 1. Get children relationships (direct foreign key relationships)
+      if (config.children) {
+        for (const child of config.children) {
+          try {
+            const { data: childRecords, error: childError } = await supabase
+              .from(child.table)
+              .select('*')
+              .eq(child.fk, id);
+
+            if (!childError && childRecords && childRecords.length > 0) {
+              const primaryField = getPrimaryField(child.table, childRecords[0]);
+              
+              const items = childRecords.map(record => ({
+                id: record.id,
+                label: record[primaryField] || `ID: ${record.id}`,
+                type: child.table,
+                table: child.table
+              }));
+
+              relationships.push({
+                category: getCategoryLabel(child.table),
+                color: NODE_COLORS[child.table as keyof typeof NODE_COLORS] || '#6b7280',
+                items: items
+              });
+            }
+          } catch (error) {
+            console.error(`Error fetching ${child.table} relationships:`, error);
+          }
+        }
+      }
+
+      // 2. Get parent relationships (if this table has a parent)
+      if (config.parent) {
+        try {
+          const { data: parentRecords, error: parentError } = await supabase
+            .from(config.parent.table)
+            .select('*')
+            .eq('id', centralNode[config.parent.fk]);
+
+          if (!parentError && parentRecords && parentRecords.length > 0) {
+            const primaryField = getPrimaryField(config.parent.table, parentRecords[0]);
+            
+            const items = parentRecords.map(record => ({
+              id: record.id,
+              label: record[primaryField] || `ID: ${record.id}`,
+              type: config.parent!.table,
+              table: config.parent!.table
+            }));
+
+            relationships.push({
+              category: getCategoryLabel(config.parent.table),
+              color: NODE_COLORS[config.parent.table as keyof typeof NODE_COLORS] || '#6b7280',
+              items: items
+            });
+          }
+        } catch (error) {
+          console.error(`Error fetching ${config.parent.table} relationships:`, error);
+        }
+      }
+    }
+
+    // 3. Get entity_related_data relationships (many-to-many relationships)
+    if (table === 'entities') {
       try {
-        // Query related records
-        const { data: relatedRecords, error: relatedError } = await supabase
-          .from(relatedTable)
+        const { data: relatedDataRecords, error: relatedDataError } = await supabase
+          .from('entity_related_data')
           .select('*')
-          .eq(`${table}_id`, id);
+          .eq('entity_id', id);
 
-        if (!relatedError && relatedRecords && relatedRecords.length > 0) {
-          const primaryField = getPrimaryField(relatedTable, relatedRecords[0]);
+        if (!relatedDataError && relatedDataRecords && relatedDataRecords.length > 0) {
+          // Group by type_of_record
+          const groupedRecords: Record<string, any[]> = {};
           
-          const items = relatedRecords.map(record => ({
-            id: record.id,
-            label: record[primaryField] || `ID: ${record.id}`,
-            type: relatedTable,
-            table: relatedTable
-          }));
+          for (const record of relatedDataRecords) {
+            const recordType = record.type_of_record;
+            if (!groupedRecords[recordType]) {
+              groupedRecords[recordType] = [];
+            }
+            groupedRecords[recordType].push(record);
+          }
 
-          relationships.push({
-            category: getCategoryLabel(relatedTable),
-            color: NODE_COLORS[relatedTable as keyof typeof NODE_COLORS] || '#6b7280',
-            items: items
-          });
+          // Create relationship branches for each type
+          for (const [recordType, records] of Object.entries(groupedRecords)) {
+            try {
+              // Fetch the actual related records
+              const { data: actualRecords, error: actualError } = await supabase
+                .from(recordType)
+                .select('*')
+                .in('id', records.map(r => r.related_data_id));
+
+              if (!actualError && actualRecords && actualRecords.length > 0) {
+                const primaryField = getPrimaryField(recordType, actualRecords[0]);
+                
+                const items = actualRecords.map(record => ({
+                  id: record.id,
+                  label: record[primaryField] || `ID: ${record.id}`,
+                  type: recordType,
+                  table: recordType
+                }));
+
+                relationships.push({
+                  category: getCategoryLabel(recordType),
+                  color: NODE_COLORS[recordType as keyof typeof NODE_COLORS] || '#6b7280',
+                  items: items
+                });
+              }
+            } catch (error) {
+              console.error(`Error fetching ${recordType} records:`, error);
+            }
+          }
         }
       } catch (error) {
-        console.error(`Error fetching ${relatedTable} relationships:`, error);
-        // Continue with other relationships even if one fails
+        console.error('Error fetching entity_related_data relationships:', error);
+      }
+    }
+
+    // 4. Get entity_relationships (entity-to-entity relationships)
+    if (table === 'entities') {
+      try {
+        // Get relationships where this entity is the source
+        const { data: fromRelationships, error: fromError } = await supabase
+          .from('entity_relationships')
+          .select('*')
+          .eq('from_entity_id', id);
+
+        // Get relationships where this entity is the target
+        const { data: toRelationships, error: toError } = await supabase
+          .from('entity_relationships')
+          .select('*')
+          .eq('to_entity_id', id);
+
+        const allRelationships = [...(fromRelationships || []), ...(toRelationships || [])];
+
+        if (allRelationships.length > 0) {
+          // Get the related entity IDs
+          const relatedEntityIds = allRelationships.map(r => 
+            r.from_entity_id === id ? r.to_entity_id : r.from_entity_id
+          );
+
+          // Fetch the actual entity records
+          const { data: relatedEntities, error: entitiesError } = await supabase
+            .from('entities')
+            .select('*')
+            .in('id', relatedEntityIds);
+
+          if (!entitiesError && relatedEntities && relatedEntities.length > 0) {
+            const items = relatedEntities.map(entity => ({
+              id: entity.id,
+              label: entity.name || `ID: ${entity.id}`,
+              type: 'entity',
+              table: 'entities'
+            }));
+
+            relationships.push({
+              category: 'Related Entities',
+              color: NODE_COLORS.entity,
+              items: items
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching entity_relationships:', error);
       }
     }
 
@@ -139,7 +253,8 @@ function getPrimaryField(table: string, record: any): string {
     credit_cards: ['cardholder_name', 'issuing_bank'],
     investment_accounts: ['provider', 'account_name'],
     crypto_accounts: ['platform', 'account_name'],
-    hosting_accounts: ['provider', 'account_name']
+    hosting_accounts: ['provider', 'account_name'],
+    securities_held: ['symbol', 'name']
   };
 
   const priorityFields = fieldPriority[table as keyof typeof fieldPriority] || ['id'];
@@ -164,7 +279,10 @@ function getCategoryLabel(table: string): string {
     credit_cards: 'Credit Cards',
     investment_accounts: 'Investment Accounts',
     crypto_accounts: 'Crypto Accounts',
-    hosting_accounts: 'Hosting Accounts'
+    hosting_accounts: 'Hosting Accounts',
+    securities_held: 'Securities Held',
+    entity_related_data: 'Related Data',
+    entity_relationships: 'Entity Relationships'
   };
 
   return labels[table as keyof typeof labels] || table.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
