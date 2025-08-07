@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertTriangle, Info, Bug, XCircle, RefreshCw, Activity, Clock, User, FileText } from "lucide-react";
+import Navigation from "@/components/Navigation";
 
 interface LogEntry {
   id: string;
@@ -100,228 +101,171 @@ export default function LogsPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 p-6">
-      {/* Enhanced Header */}
-      <div className="flex justify-between items-center bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl p-6 border border-border/50">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <Activity className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">Application Logs</h1>
+    <div className="flex h-screen">
+      <Navigation />
+      <main className="flex-1 overflow-auto">
+        <div className="container mx-auto py-8">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">Admin Logs</h1>
+            <Button onClick={loadLogs} disabled={loading}>
+              <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Monitor application activity and debug issues
-          </p>
-        </div>
-        <Button onClick={loadLogs} disabled={loading} className="shadow-sm hover:shadow-md transition-shadow">
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          {loading ? 'Loading...' : 'Refresh'}
-        </Button>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <Card className="shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                <Activity className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total</p>
-                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-destructive/10 rounded-lg flex items-center justify-center">
-                <XCircle className="h-5 w-5 text-destructive" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Errors</p>
-                <p className="text-2xl font-bold text-destructive">{stats.errors}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-warning/10 rounded-lg flex items-center justify-center">
-                <AlertTriangle className="h-5 w-5 text-warning" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Warnings</p>
-                <p className="text-2xl font-bold text-warning">{stats.warnings}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                <Info className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Info</p>
-                <p className="text-2xl font-bold text-primary">{stats.info}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
-                <Bug className="h-5 w-5 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Debug</p>
-                <p className="text-2xl font-bold text-muted-foreground">{stats.debug}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Enhanced Tabs */}
-      <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/95">
-        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-muted/30 to-muted/10">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
-            <FileText className="h-5 w-5 text-primary" />
-            Log Entries
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <div className="border-b border-border/50 bg-muted/20 rounded-t-lg">
-              <TabsList className="grid w-full grid-cols-5 h-12 bg-transparent border-0">
-                <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200">
-                  All ({stats.total})
-                </TabsTrigger>
-                <TabsTrigger value="ERROR" className="data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground data-[state=active]:shadow-md transition-all duration-200">
-                  Errors ({stats.errors})
-                </TabsTrigger>
-                <TabsTrigger value="WARNING" className="data-[state=active]:bg-warning data-[state=active]:text-warning-foreground data-[state=active]:shadow-md transition-all duration-200">
-                  Warnings ({stats.warnings})
-                </TabsTrigger>
-                <TabsTrigger value="INFO" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200">
-                  Info ({stats.info})
-                </TabsTrigger>
-                <TabsTrigger value="DEBUG" className="data-[state=active]:bg-muted data-[state=active]:text-muted-foreground data-[state=active]:shadow-md transition-all duration-200">
-                  Debug ({stats.debug})
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            <TabsContent value={activeTab} className="p-6">
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-center space-y-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                    <p className="text-muted-foreground">Loading logs...</p>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <Activity className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total</p>
+                    <p className="text-2xl font-bold">{stats.total}</p>
                   </div>
                 </div>
-              ) : filteredLogs.length === 0 ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-center space-y-4">
-                    <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto">
-                      <FileText className="h-8 w-8 text-muted-foreground" />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <XCircle className="h-5 w-5 text-destructive" />
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Errors</p>
+                    <p className="text-2xl font-bold text-destructive">{stats.errors}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <AlertTriangle className="h-5 w-5 text-warning" />
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Warnings</p>
+                    <p className="text-2xl font-bold text-warning">{stats.warnings}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <Info className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Info</p>
+                    <p className="text-2xl font-bold text-primary">{stats.info}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <Bug className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Debug</p>
+                    <p className="text-2xl font-bold">{stats.debug}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Logs Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>System Logs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="all" className="flex items-center space-x-2">
+                    <Activity className="h-4 w-4" />
+                    <span>All ({stats.total})</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="ERROR" className="flex items-center space-x-2">
+                    <XCircle className="h-4 w-4" />
+                    <span>Errors ({stats.errors})</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="WARNING" className="flex items-center space-x-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>Warnings ({stats.warnings})</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="INFO" className="flex items-center space-x-2">
+                    <Info className="h-4 w-4" />
+                    <span>Info ({stats.info})</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="DEBUG" className="flex items-center space-x-2">
+                    <Bug className="h-4 w-4" />
+                    <span>Debug ({stats.debug})</span>
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value={activeTab} className="mt-6">
+                  {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
                     </div>
-                    <h3 className="text-lg font-semibold text-foreground">No logs found</h3>
-                    <p className="text-muted-foreground">No log entries match the current filter.</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="overflow-hidden rounded-lg">
-                  <Table className="table-modern">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="font-semibold text-xs uppercase tracking-wider">Level</TableHead>
-                        <TableHead className="font-semibold text-xs uppercase tracking-wider">Message</TableHead>
-                        <TableHead className="font-semibold text-xs uppercase tracking-wider">Source</TableHead>
-                        <TableHead className="font-semibold text-xs uppercase tracking-wider">Time</TableHead>
-                        <TableHead className="font-semibold text-xs uppercase tracking-wider">Details</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredLogs.map((log) => (
-                        <TableRow key={log.id} className="hover:bg-muted/30 transition-colors duration-150 border-b border-teal-300">
-                          <TableCell className="py-4">
-                            <div className="flex items-center gap-2">
-                              <Badge className={getLevelColor(log.level)}>
-                                {getLevelIcon(log.level)}
-                                <span className="ml-1">{log.level}</span>
-                              </Badge>
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-4">
-                            <div className="max-w-md">
-                              <p className="font-medium text-teal-800 mb-1">{log.message}</p>
-                              {log.action && (
-                                <p className="text-xs text-muted-foreground">Action: {log.action}</p>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-4">
-                            <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 bg-muted/30 rounded flex items-center justify-center">
-                                <User className="h-3 w-3 text-muted-foreground" />
-                              </div>
-                              <span className="text-sm font-medium">{log.source}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-4">
-                            <div className="space-y-1">
-                              <div className="text-sm font-medium">{formatTimestamp(log.timestamp)}</div>
-                              <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {getTimeAgo(log.timestamp)}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-4">
-                            <div className="space-y-2">
-                              {log.details && (
-                                <details className="text-xs">
-                                  <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
-                                    Details
-                                  </summary>
-                                  <pre className="mt-2 p-2 bg-muted/20 rounded-lg text-xs overflow-x-auto">
-                                    {JSON.stringify(log.details, null, 2)}
-                                  </pre>
-                                </details>
-                              )}
-                              
-                              {log.stack_trace && (
-                                <details className="text-xs">
-                                  <summary className="cursor-pointer text-destructive hover:text-destructive">
-                                    Stack Trace
-                                  </summary>
-                                  <pre className="mt-2 p-2 bg-destructive/10 rounded text-xs overflow-x-auto text-destructive">
-                                    {log.stack_trace}
-                                  </pre>
-                                </details>
-                              )}
-                            </div>
-                          </TableCell>
+                  ) : filteredLogs.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No logs found</p>
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader className="bg-slate-500">
+                        <TableRow>
+                          <TableHead className="text-white">Level</TableHead>
+                          <TableHead className="text-white">Time</TableHead>
+                          <TableHead className="text-white">Source</TableHead>
+                          <TableHead className="text-white">Action</TableHead>
+                          <TableHead className="text-white">Message</TableHead>
+                          <TableHead className="text-white">Details</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredLogs.map((log) => (
+                          <TableRow key={log.id} className="border-b border-teal-300">
+                            <TableCell>
+                              <Badge className={getLevelColor(log.level)}>
+                                <div className="flex items-center space-x-1">
+                                  {getLevelIcon(log.level)}
+                                  <span>{log.level}</span>
+                                </div>
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-teal-800">
+                              <div className="space-y-1">
+                                <div className="text-sm font-medium">{formatTimestamp(log.timestamp)}</div>
+                                <div className="text-xs text-muted-foreground">{getTimeAgo(log.timestamp)}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-teal-800">{log.source}</TableCell>
+                            <TableCell className="text-teal-800">{log.action}</TableCell>
+                            <TableCell className="text-teal-800 max-w-md">
+                              <div className="truncate" title={log.message}>
+                                {log.message}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {log.details && (
+                                <Button variant="outline" size="sm">
+                                  View
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
     </div>
   );
 } 

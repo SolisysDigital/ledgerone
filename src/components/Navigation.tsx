@@ -21,18 +21,18 @@ import {
 } from 'lucide-react';
 
 const navigationItems = [
-  { name: 'Home', href: '/home', icon: BarChart3 },
-  { name: 'Entities', href: '/entities', icon: Building2 },
-  { name: 'Contacts', href: '/contacts', icon: Users },
-  { name: 'Emails', href: '/emails', icon: Mail },
-  { name: 'Phones', href: '/phones', icon: Phone },
-  { name: 'Websites', href: '/websites', icon: Globe },
-  { name: 'Bank Accounts', href: '/bank-accounts', icon: CreditCard },
-  { name: 'Investment Accounts', href: '/investment-accounts', icon: Wallet },
-  { name: 'Crypto Accounts', href: '/crypto-accounts', icon: Database },
-  { name: 'Credit Cards', href: '/credit-cards', icon: CreditCard },
-  { name: 'Hosting Accounts', href: '/hosting-accounts', icon: Server },
-  { name: 'Admin Logs', href: '/admin/logs', icon: Activity },
+  { name: 'Home', href: '/home', icon: BarChart3, color: 'text-blue-600' },
+  { name: 'Entities', href: '/entities', icon: Building2, color: 'text-teal-600' },
+  { name: 'Contacts', href: '/contacts', icon: Users, color: 'text-green-600' },
+  { name: 'Emails', href: '/emails', icon: Mail, color: 'text-purple-600' },
+  { name: 'Phones', href: '/phones', icon: Phone, color: 'text-orange-600' },
+  { name: 'Websites', href: '/websites', icon: Globe, color: 'text-indigo-600' },
+  { name: 'Bank Accounts', href: '/bank-accounts', icon: CreditCard, color: 'text-emerald-600' },
+  { name: 'Investment Accounts', href: '/investment-accounts', icon: Wallet, color: 'text-amber-600' },
+  { name: 'Crypto Accounts', href: '/crypto-accounts', icon: Database, color: 'text-cyan-600' },
+  { name: 'Credit Cards', href: '/credit-cards', icon: CreditCard, color: 'text-red-600' },
+  { name: 'Hosting Accounts', href: '/hosting-accounts', icon: Server, color: 'text-slate-600' },
+  { name: 'Admin Logs', href: '/admin/logs', icon: Activity, color: 'text-pink-600' },
 ];
 
 export default function Navigation() {
@@ -94,9 +94,9 @@ export default function Navigation() {
             <Link
               key={item.name}
               href={item.href}
-              className="flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
+              className="flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200 group"
             >
-              <Icon className="h-4 w-4" />
+              <Icon className={`h-4 w-4 ${item.color} group-hover:scale-110 transition-transform duration-200`} />
               <span>{item.name}</span>
             </Link>
           );

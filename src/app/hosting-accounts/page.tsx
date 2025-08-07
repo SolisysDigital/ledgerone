@@ -1,85 +1,147 @@
-import React from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { supabase } from "@/lib/supabase";
-import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
+import { Plus, Search } from "lucide-react";
+import { tableConfigs } from "@/lib/tableConfigs";
+import { STYLES, ICONS } from "@/styles/constants";
+import { PageLayout } from "@/components/layout/PageLayout";
+import { SearchSection } from "@/components/layout/SearchSection";
+import { DataTable } from "@/components/tables/DataTable";
+import { Pagination } from "@/components/layout/Pagination";
 
-export default async function HostingAccountsPage() {
-  const { data: hostingAccounts, error } = await supabase
-    .from('hosting_accounts')
-    .select('*')
-    .order('provider', { ascending: true });
+interface Record {
+  id: string;
+  [key: string]: any;
+}
 
-  if (error) {
-    console.error('Error fetching hosting accounts:', error);
-    return (
-      <ClientNavigationWrapper>
-        <div>Error loading hosting accounts</div>
-      </ClientNavigationWrapper>
-    );
+export default function HostingAccountsPage() {
+  const [records, setRecords] = useState<Record[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+
+  const tableName = "hosting_accounts";
+  const config = tableConfigs[tableName as keyof typeof tableConfigs];
+
+  useEffect(() => {
+    fetchRecords();
+  }, [currentPage, searchQuery]);
+
+  const fetchRecords = async () => {
+    try {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: "10",
+        search: searchQuery,
+      });
+      
+      const response = await fetch(`/api/${tableName}?${params}`);
+      if (response.ok) {
+        const data = await response.json();
+        setRecords(data.records || []);
+        setTotalPages(data.totalPages || 1);
+        setTotalRecords(data.totalRecords || 0);
+      }
+    } catch (error) {
+      console.error("Error fetching records:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getPrimaryField = () => {
+    const displayFields = ['provider', 'account_name', 'domain_name'];
+    for (const field of displayFields) {
+      if (config.fields.some((f: any) => f.name === field)) {
+        return field;
+      }
+    }
+    return config.fields[0]?.name || 'id';
+  };
+
+  if (!config) {
+    return <div className="p-6">Table not found</div>;
   }
 
-  return (
-    <ClientNavigationWrapper>
-      <div className="container mx-auto py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Hosting Accounts</h1>
-          <Link href="/hosting-accounts/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Hosting Account
-            </Button>
-          </Link>
-        </div>
+  const primaryField = getPrimaryField();
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Hosting Accounts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {hostingAccounts?.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                No hosting accounts found. Add your first hosting account to get started.
-              </p>
-            ) : (
-              <Table>
-                <TableHeader className="bg-slate-500">
-                  <TableRow>
-                    <TableHead className="text-white">Provider</TableHead>
-                    <TableHead className="text-white">Account Name</TableHead>
-                    <TableHead className="text-white">Domain</TableHead>
-                    <TableHead className="text-white">Plan Type</TableHead>
-                    <TableHead className="text-white">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {hostingAccounts?.map((account) => (
-                    <TableRow key={account.id} className="border-b border-teal-300">
-                      <TableCell className="text-teal-800">{account.provider}</TableCell>
-                      <TableCell className="text-teal-800">{account.account_name}</TableCell>
-                      <TableCell className="text-teal-800">{account.domain_name}</TableCell>
-                      <TableCell className="text-teal-800">{account.plan_type}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Link href={`/hosting-accounts/${account.id}`}>
-                            <Button variant="outline" size="sm">View</Button>
-                          </Link>
-                          <Link href={`/hosting-accounts/${account.id}/edit`}>
-                            <Button variant="outline" size="sm">Edit</Button>
-                          </Link>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </ClientNavigationWrapper>
+  const columns = [
+    {
+      key: primaryField,
+      label: config.fields.find((f: any) => f.name === primaryField)?.label || primaryField,
+    },
+    ...(config.fields.slice(0, 3)
+      .filter((field: any) => field.name !== primaryField)
+      .map((field: any) => ({
+        key: field.name,
+        label: field.label || field.name,
+      })) || [])
+  ];
+
+  const handleView = (id: string) => {
+    window.location.href = `/${tableName}/${id}`;
+  };
+
+  const handleEdit = (id: string) => {
+    window.location.href = `/${tableName}/${id}/edit`;
+  };
+
+  return (
+    <div className="flex h-screen">
+      <Navigation />
+      <main className="flex-1 overflow-auto">
+        <PageLayout
+          title={config.label}
+          subtitle={`Manage your ${config.label.toLowerCase()} data`}
+          actionButton={
+            <Button asChild className={STYLES.BUTTONS.PRIMARY}>
+              <Link href={`/${tableName}/new`}>
+                <div className={ICONS.PLUS} />
+                Add New {config.label.slice(0, -1)}
+              </Link>
+            </Button>
+          }
+        >
+          <SearchSection
+            placeholder={`Search ${config.label.toLowerCase()}...`}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+
+          <Card className={STYLES.COLORS.CARD_STANDARD}>
+            <CardHeader>
+              <CardTitle className={STYLES.LAYOUT.CARD_HEADER}>
+                <Search className={ICONS.SEARCH} />
+                Records ({totalRecords})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DataTable
+                data={records}
+                columns={columns}
+                tableName={tableName}
+                loading={loading}
+                onView={handleView}
+                onEdit={handleEdit}
+              />
+              
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalRecords={totalRecords}
+                onPageChange={setCurrentPage}
+              />
+            </CardContent>
+          </Card>
+        </PageLayout>
+      </main>
+    </div>
   );
 } 
