@@ -1,0 +1,16 @@
+# LedgerOne Environment Variables
+# Copy this file to .env and fill in your actual Supabase credentials
+
+# Supabase Configuration
+# Get these from your Supabase project dashboard: https://supabase.com/dashboard/project/[YOUR-PROJECT-ID]/settings/api
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+
+# Optional: Database URL for direct database access (if needed)
+# DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-ID].supabase.co:5432/postgres
+
+# Optional: Service Role Key (for admin operations - keep secure!)
+# SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
+
+# Optional: JWT Secret (if using custom JWT)
+# JWT_SECRET=your-jwt-secret-here 
