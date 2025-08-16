@@ -236,7 +236,7 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                                         {relationship.related_data_display_name}
                                       </div>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-80 p-4" align="start">
+                                    <PopoverContent className="w-80 p-4 bg-white border-2 border-gray-200 shadow-xl" align="start">
                                       <div className="space-y-3">
                                         <div className="flex items-center gap-2">
                                           <Icon className={`h-4 w-4 ${typeInfo.textColor}`} />
@@ -295,24 +295,24 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                               </div>
                             </TableCell>
                             <TableCell className="py-4">
-                              <div className="flex gap-2">
+                              <div className="flex gap-3">
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleEditRelationship(relationship.id, typeInfo.key)}
-                                  className="shadow-sm hover:shadow-md transition-shadow p-2"
+                                  className="shadow-sm hover:shadow-md transition-all duration-200 p-2.5 border-2 border-gray-300 hover:border-teal-400 hover:bg-teal-50"
                                   title="Edit Relationship"
                                 >
-                                  <Edit className="w-4 h-4" />
+                                  <Edit className="w-5 h-5 text-gray-700 hover:text-teal-700" />
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleDeleteRelationship(relationship.id)}
-                                  className="text-destructive hover:text-destructive hover:bg-destructive/10 shadow-sm hover:shadow-md transition-shadow p-2"
+                                  className="shadow-sm hover:shadow-md transition-all duration-200 p-2.5 border-2 border-gray-300 hover:border-red-400 hover:bg-red-50 text-red-600 hover:text-red-700"
                                   title="Remove Relationship"
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  <Trash2 className="w-5 h-5" />
                                 </Button>
                               </div>
                             </TableCell>

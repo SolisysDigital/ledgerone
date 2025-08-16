@@ -105,13 +105,13 @@ export default async function DetailPage({
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
+                <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all duration-200 p-2.5 border-2 border-gray-300 hover:border-teal-400 hover:bg-teal-50">
                   <Link href={`/${table}/${id}/edit`}>
-                    <Edit className="h-4 w-4 mr-2" />
+                    <Edit className="h-4 w-4 mr-2 text-gray-700 hover:text-teal-700" />
                     Edit
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow text-destructive hover:text-destructive">
+                <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all duration-200 p-2.5 border-2 border-gray-300 hover:border-red-400 hover:bg-red-50 text-red-600 hover:text-red-700">
                   <Link href={`/${table}/${id}/delete`}>
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete
@@ -198,7 +198,7 @@ export default async function DetailPage({
                 <div className="flex items-center gap-3">
                   <p className="text-sm text-muted-foreground">ID: {id}</p>
                   {data.name && (
-                    <span className="text-lg font-semibold text-teal-600 bg-teal-50 px-3 py-1 rounded-lg border border-teal-200">
+                    <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-lg">
                       {data.name}
                     </span>
                   )}
@@ -206,13 +206,13 @@ export default async function DetailPage({
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
+              <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all duration-200 p-2.5 border-2 border-gray-300 hover:border-teal-400 hover:bg-teal-50">
                 <Link href={`/${table}/${id}/edit`}>
-                  <Edit className="h-4 w-4 mr-2" />
+                  <Edit className="h-4 w-4 mr-2 text-gray-700 hover:text-teal-700" />
                   Edit
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow text-destructive hover:text-destructive">
+              <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all duration-200 p-2.5 border-2 border-gray-300 hover:border-red-400 hover:bg-red-50 text-red-600 hover:text-red-700">
                 <Link href={`/${table}/${id}/delete`}>
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete

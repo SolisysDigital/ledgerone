@@ -163,7 +163,7 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                                       {item.name || item[tableConfigs[child.table]?.fields.find(f => f.name === 'name')?.name || 'id']}
                                     </div>
                                   </PopoverTrigger>
-                                  <PopoverContent className="w-80 p-4" align="start">
+                                  <PopoverContent className="w-80 p-4 bg-white border-2 border-gray-200 shadow-xl" align="start">
                                     <div className="space-y-3">
                                       <div className="flex items-center gap-2">
                                         <Building2 className="h-4 w-4 text-teal-600" />
@@ -212,15 +212,15 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                                 </Badge>
                               </TableCell>
                               <TableCell className="text-xs">
-                                <div className="flex space-x-2">
-                                  <Button asChild variant="outline" size="sm" className="p-2" title="View Details">
+                                <div className="flex space-x-3">
+                                  <Button asChild variant="outline" size="sm" className="p-2.5 border-2 border-gray-300 hover:border-teal-400 hover:bg-teal-50 shadow-sm hover:shadow-md transition-all duration-200" title="View Details">
                                     <Link href={`/${child.table}/${item.id}`}>
-                                      <ExternalLink className="h-3 w-3" />
+                                      <ExternalLink className="h-4 w-4 text-gray-700 hover:text-teal-700" />
                                     </Link>
                                   </Button>
-                                  <Button asChild variant="outline" size="sm" className="p-2" title="Edit">
+                                  <Button asChild variant="outline" size="sm" className="p-2.5 border-2 border-gray-300 hover:border-teal-400 hover:bg-teal-50 shadow-sm hover:shadow-md transition-all duration-200" title="Edit">
                                     <Link href={`/${child.table}/${item.id}/edit`}>
-                                      <Edit className="h-3 w-3" />
+                                      <Edit className="h-4 w-4 text-gray-700 hover:text-teal-700" />
                                     </Link>
                                   </Button>
                                 </div>

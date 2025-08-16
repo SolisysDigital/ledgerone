@@ -55,13 +55,13 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
+            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all duration-200 p-2.5 border-2 border-gray-300 hover:border-teal-400 hover:bg-teal-50">
               <Link href={`/phones/${id}/edit`}>
-                <Edit className="h-4 w-4 mr-2" />
+                <Edit className="h-4 w-4 mr-2 text-gray-700 hover:text-teal-700" />
                 Edit
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow text-destructive hover:text-destructive">
+            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all duration-200 p-2.5 border-2 border-gray-300 hover:border-red-400 hover:bg-red-50 text-red-600 hover:text-red-700">
               <Link href={`/phones/${id}/delete`}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
