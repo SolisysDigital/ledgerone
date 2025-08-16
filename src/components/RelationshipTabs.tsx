@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import Link from "next/link";
-import { Plus, ExternalLink, Building2, Users, Mail, Phone, CreditCard, Globe, Server, Bitcoin, TrendingUp, BarChart3, FileText, Edit } from "lucide-react";
+import { Plus, ExternalLink, Building2, Users, Mail, Phone, CreditCard, Globe, Server, Bitcoin, TrendingUp, BarChart3, FileText, Edit, Trash2 } from "lucide-react";
 import { tableConfigs } from "@/lib/tableConfigs";
 
 interface RelationshipTabsProps {
@@ -261,14 +261,19 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                               </TableCell>
                               <TableCell className="text-xs">
                                 <div className="flex space-x-3">
-                                  <Button asChild variant="outline" size="sm" className="p-2.5 border-2 border-gray-300 hover:border-teal-400 hover:bg-teal-50 shadow-sm hover:shadow-md transition-all duration-200" title="View Details">
+                                  <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150" title="View Details">
                                     <Link href={`/${child.table}/${item.id}`}>
-                                      <ExternalLink className="h-4 w-4 text-gray-700 hover:text-teal-700" />
+                                      <ExternalLink className="h-4 w-4" />
                                     </Link>
                                   </Button>
-                                  <Button asChild variant="outline" size="sm" className="p-2.5 border-2 border-gray-300 hover:border-teal-400 hover:bg-teal-50 shadow-sm hover:shadow-md transition-all duration-200" title="Edit">
+                                  <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150" title="Edit">
                                     <Link href={`/${child.table}/${item.id}/edit`}>
-                                      <Edit className="h-4 w-4 text-gray-700 hover:text-teal-700" />
+                                      <Edit className="h-4 w-4" />
+                                    </Link>
+                                  </Button>
+                                  <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150 text-red-600 hover:text-red-700" title="Delete">
+                                    <Link href={`/${child.table}/${item.id}/delete`}>
+                                      <Trash2 className="h-4 w-4" />
                                     </Link>
                                   </Button>
                                 </div>

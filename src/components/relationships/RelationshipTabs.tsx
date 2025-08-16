@@ -353,20 +353,20 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                             <TableCell className="py-4">
                               <div className="flex gap-3">
                                 <Button
-                                  variant="outline"
+                                  variant="ghost"
                                   size="sm"
                                   onClick={() => handleEditRelationship(relationship.id, typeInfo.key)}
-                                  className="shadow-sm hover:shadow-md transition-all duration-200 p-2.5 border-2 border-gray-300 hover:border-teal-400 hover:bg-teal-50"
+                                  className="hover:bg-muted/30 transition-colors duration-150"
                                   title="Edit Relationship"
                                 >
-                                  <Edit className="w-5 h-5 text-gray-700 hover:text-teal-700" />
+                                  <Edit className="w-5 h-5" />
                                 </Button>
                                 <Button
-                                  variant="outline"
+                                  variant="ghost"
                                   size="sm"
                                   onClick={() => handleDeleteRelationship(relationship.id)}
-                                  className="shadow-sm hover:shadow-md transition-all duration-200 p-2.5 border-2 border-gray-300 hover:border-red-400 hover:bg-red-50 text-red-600 hover:text-red-700"
-                                  title="Remove Relationship"
+                                  className="hover:bg-muted/30 transition-colors duration-150 text-red-600 hover:text-red-700"
+                                  title="Delete Relationship"
                                 >
                                   <Trash2 className="w-5 h-5" />
                                 </Button>

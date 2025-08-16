@@ -51,17 +51,24 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
             </Button>
             <div className="space-y-1">
               <h1 className="text-2xl font-bold text-foreground">Phone Details</h1>
-              <p className="text-sm text-muted-foreground">ID: {id}</p>
+              <div className="flex items-center gap-3">
+                <p className="text-sm text-muted-foreground">ID: {id}</p>
+                {phone.name && (
+                  <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-xl">
+                    {phone.name}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all duration-200 p-2.5 border-2 border-gray-300 hover:border-teal-400 hover:bg-teal-50">
+            <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150">
               <Link href={`/phones/${id}/edit`}>
-                <Edit className="h-4 w-4 mr-2 text-gray-700 hover:text-teal-700" />
+                <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all duration-200 p-2.5 border-2 border-gray-300 hover:border-red-400 hover:bg-red-50 text-red-600 hover:text-red-700">
+            <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150 text-red-600 hover:text-red-700">
               <Link href={`/phones/${id}/delete`}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
