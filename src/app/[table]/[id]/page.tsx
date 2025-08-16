@@ -245,26 +245,49 @@ export default async function DetailPage({
                       <div className="w-1 h-6 bg-primary rounded-full"></div>
                       <h3 className="text-lg font-semibold">Basic Information</h3>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {config.fields.filter(field => !legalInfoFields.includes(field.name) && !officerFields.flat().includes(field.name) && !texasSpecificFields.includes(field.name)).map((field) => {
-                        const value = (data as any)[field.name];
-                        if (!value && value !== 0) return null;
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {config.fields.map((field) => {
+                        // Skip certain fields that are handled separately or not needed for display
+                        if (['id', 'created_at', 'updated_at', 'user_id'].includes(field.name)) {
+                          return null;
+                        }
+
+                        // Get the field value from data
+                        const fieldValue = (data as any)[field.name];
+                        
+                        // Skip if field value is null, undefined, or empty string
+                        if (fieldValue === null || fieldValue === undefined || fieldValue === '') {
+                          return null;
+                        }
+
+                        // Format the field label (convert snake_case to Title Case)
+                        const fieldLabel = field.label || field.name
+                          .split('_')
+                          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                          .join(' ');
+
+                        // Format the field value based on field type
+                        let displayValue = fieldValue;
+                        if (field.type === 'number' && typeof fieldValue === 'number') {
+                          displayValue = fieldValue.toLocaleString();
+                        } else if (field.type === 'date' && fieldValue) {
+                          displayValue = new Date(fieldValue).toLocaleDateString();
+                        } else if (field.type === 'textarea' && typeof fieldValue === 'string') {
+                          displayValue = fieldValue.length > 100 ? `${fieldValue.substring(0, 100)}...` : fieldValue;
+                        }
+
                         return (
-                          <div key={field.name} className="bg-muted/10 p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                            <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                              {field.label || field.name.replace(/_/g, ' ')}
-                            </Label>
+                          <div key={field.name} className="space-y-2">
+                            <label className="text-sm font-medium text-muted-foreground">
+                              {fieldLabel}
+                            </label>
                             <div className="text-sm">
-                              {field.type === "select" ? (
-                                <Badge variant="secondary" className="text-teal-800 bg-secondary/50">{value}</Badge>
-                              ) : field.type === "textarea" ? (
-                                <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{value}</p>
-                              ) : field.type === "date" ? (
-                                <span className="text-teal-800 font-medium">{value ? new Date(value).toLocaleDateString() : '-'}</span>
-                              ) : field.type === "number" ? (
-                                <span className="text-teal-800 font-medium">{value?.toLocaleString() || '-'}</span>
-                              ) : (
-                                <span className="text-teal-800 font-medium">{value}</span>
+                              {field.type === 'textarea' ? (
+                                <div className="whitespace-pre-wrap bg-muted p-3 rounded-md">
+                                  {fieldValue as string}
+                                </div>
+                            ) : (
+                                <span className="font-medium">{displayValue as string | number}</span>
                               )}
                             </div>
                           </div>
