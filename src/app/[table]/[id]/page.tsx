@@ -197,9 +197,9 @@ export default async function DetailPage({
                 <h1 className="text-2xl font-bold text-foreground">Entity Details</h1>
                 <div className="flex items-center gap-3">
                   <p className="text-sm text-muted-foreground">ID: {id}</p>
-                  {(data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address || data.platform) && (
+                  {(data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address || data.platform || data.cardholder_name) && (
                     <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-xl">
-                      {data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address || data.platform}
+                      {data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address || data.platform || data.cardholder_name}
                     </span>
                   )}
                 </div>
@@ -255,11 +255,6 @@ export default async function DetailPage({
                         // Get the field value from data
                         const fieldValue = (data as any)[field.name];
                         
-                        // Skip if field value is null, undefined, or empty string
-                        if (fieldValue === null || fieldValue === undefined || fieldValue === '') {
-                          return null;
-                        }
-
                         // Format the field label (convert snake_case to Title Case)
                         const fieldLabel = field.label || field.name
                           .split('_')
@@ -284,10 +279,12 @@ export default async function DetailPage({
                             <div className="text-sm">
                               {field.type === 'textarea' ? (
                                 <div className="whitespace-pre-wrap bg-muted p-3 rounded-md">
-                                  {fieldValue as string}
+                                  {fieldValue ? (fieldValue as string) : 'No description provided'}
                                 </div>
                             ) : (
-                                <span className="font-medium">{displayValue as string | number}</span>
+                                <span className="font-medium">
+                                  {fieldValue ? (displayValue as string | number) : 'Not specified'}
+                                </span>
                               )}
                             </div>
                           </div>

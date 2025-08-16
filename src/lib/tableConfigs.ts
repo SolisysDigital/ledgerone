@@ -157,6 +157,7 @@ export const tableConfigs: Record<string, TableConfig> = {
       { name: 'institution_held_at', type: 'text' },
       { name: 'purpose', type: 'text' },
       { name: 'last_balance', type: 'number' },
+      { name: 'short_description', type: 'text' },
       { name: 'description', type: 'textarea' },
     ],
   },
