@@ -197,9 +197,9 @@ export default async function DetailPage({
                 <h1 className="text-2xl font-bold text-foreground">Entity Details</h1>
                 <div className="flex items-center gap-3">
                   <p className="text-sm text-muted-foreground">ID: {id}</p>
-                  {(data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address) && (
+                  {(data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address || data.platform) && (
                     <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-xl">
-                      {data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address}
+                      {data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address || data.platform}
                     </span>
                   )}
                 </div>
