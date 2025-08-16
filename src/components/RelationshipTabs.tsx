@@ -169,17 +169,22 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                                         <Building2 className="h-4 w-4 text-teal-600" />
                                         <h4 className="font-semibold">{tableConfigs[child.table]?.label || child.table} Details</h4>
                                       </div>
+                                      
+                                      {/* ID Row with Horizontal Line */}
+                                      <div>
+                                        <span className="font-medium text-muted-foreground">ID:</span>
+                                        <span className="ml-2 font-mono text-xs">{item.id}</span>
+                                      </div>
+                                      <hr className="border-gray-200" />
+                                      
+                                      {/* Entity-Specific Fields */}
                                       <div className="space-y-2 text-sm">
-                                        <div>
-                                          <span className="font-medium text-muted-foreground">Name:</span>
-                                          <span className="ml-2">{item.name || item[tableConfigs[child.table]?.fields.find(f => f.name === 'name')?.name || 'id']}</span>
-                                        </div>
-                                        <div>
-                                          <span className="font-medium text-muted-foreground">ID:</span>
-                                          <span className="ml-2 font-mono text-xs">{item.id}</span>
-                                        </div>
                                         {child.table === 'contacts' && (
                                           <>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Name:</span>
+                                              <span className="ml-2">{item.name || 'Not available'}</span>
+                                            </div>
                                             <div>
                                               <span className="font-medium text-muted-foreground">Email:</span>
                                               <span className="ml-2">{item.email || 'Not available'}</span>
@@ -221,8 +226,92 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                                               <span className="ml-2">{item.bank_name || item.name || 'Not available'}</span>
                                             </div>
                                             <div>
+                                              <span className="font-medium text-muted-foreground">Institution Held At:</span>
+                                              <span className="ml-2">{item.institution_held_at || 'Not specified'}</span>
+                                            </div>
+                                            <div>
                                               <span className="font-medium text-muted-foreground">Purpose:</span>
                                               <span className="ml-2">{item.purpose || 'No purpose specified'}</span>
+                                            </div>
+                                          </>
+                                        )}
+                                        {child.table === 'investment_accounts' && (
+                                          <>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Provider:</span>
+                                              <span className="ml-2">{item.provider || item.name || 'Not available'}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Account Type:</span>
+                                              <span className="ml-2">{item.account_type || 'Not specified'}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Account Number:</span>
+                                              <span className="ml-2">{item.account_number || 'Not specified'}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Institution Held At:</span>
+                                              <span className="ml-2">{item.institution_held_at || 'Not specified'}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Purpose:</span>
+                                              <span className="ml-2">{item.purpose || 'No purpose specified'}</span>
+                                            </div>
+                                          </>
+                                        )}
+                                        {child.table === 'crypto_accounts' && (
+                                          <>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Platform:</span>
+                                              <span className="ml-2">{item.platform || item.name || 'Not available'}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Institution Held At:</span>
+                                              <span className="ml-2">{item.institution_held_at || 'Not specified'}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Purpose:</span>
+                                              <span className="ml-2">{item.purpose || 'No purpose specified'}</span>
+                                            </div>
+                                          </>
+                                        )}
+                                        {child.table === 'credit_cards' && (
+                                          <>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Cardholder Name:</span>
+                                              <span className="ml-2">{item.cardholder_name || item.name || 'Not available'}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Issuer:</span>
+                                              <span className="ml-2">{item.issuer || 'Not specified'}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Purpose:</span>
+                                              <span className="ml-2">{item.purpose || 'No purpose specified'}</span>
+                                            </div>
+                                          </>
+                                        )}
+                                        {child.table === 'websites' && (
+                                          <>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">URL:</span>
+                                              <span className="ml-2">{item.url || item.name || 'Not available'}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Label:</span>
+                                              <span className="ml-2">{item.label || 'No label'}</span>
+                                            </div>
+                                          </>
+                                        )}
+                                        {child.table === 'hosting_accounts' && (
+                                          <>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Provider:</span>
+                                              <span className="ml-2">{item.provider || item.name || 'Not available'}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Description:</span>
+                                              <span className="ml-2">{item.description || 'No description'}</span>
                                             </div>
                                           </>
                                         )}

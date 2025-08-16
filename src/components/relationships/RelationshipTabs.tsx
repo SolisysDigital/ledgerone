@@ -12,10 +12,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 
 interface Relationship {
   id: string;
-  related_data_id: string;
   type_of_record: string;
-  relationship_description: string;
+  related_data_id: string;
   related_data_display_name: string;
+  relationship_description?: string;
   email?: string;
   phone?: string;
   email_address?: string;
@@ -24,6 +24,14 @@ interface Relationship {
   label?: string;
   bank_name?: string;
   purpose?: string;
+  institution_held_at?: string;
+  provider?: string;
+  account_type?: string;
+  account_number?: string;
+  url?: string;
+  cardholder_name?: string;
+  issuer?: string;
+  platform?: string;
 }
 
 interface RelationshipTabsProps {
@@ -250,17 +258,22 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                                           <Icon className={`h-4 w-4 ${typeInfo.textColor}`} />
                                           <h4 className="font-semibold">{typeInfo.label.slice(0, -1)} Details</h4>
                                         </div>
+                                        
+                                        {/* ID Row with Horizontal Line */}
+                                        <div>
+                                          <span className="font-medium text-muted-foreground">ID:</span>
+                                          <span className="ml-2 font-mono text-xs">{relationship.related_data_id}</span>
+                                        </div>
+                                        <hr className="border-gray-200" />
+                                        
+                                        {/* Entity-Specific Fields */}
                                         <div className="space-y-2 text-sm">
-                                          <div>
-                                            <span className="font-medium text-muted-foreground">Name:</span>
-                                            <span className="ml-2">{relationship.related_data_display_name}</span>
-                                          </div>
-                                          <div>
-                                            <span className="font-medium text-muted-foreground">ID:</span>
-                                            <span className="ml-2 font-mono text-xs">{relationship.related_data_id}</span>
-                                          </div>
                                           {typeInfo.key === 'contacts' && (
                                             <>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Name:</span>
+                                                <span className="ml-2">{relationship.related_data_display_name}</span>
+                                              </div>
                                               <div>
                                                 <span className="font-medium text-muted-foreground">Email:</span>
                                                 <span className="ml-2">{relationship.email || 'Not available'}</span>
@@ -302,8 +315,92 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                                                 <span className="ml-2">{relationship.bank_name || relationship.related_data_display_name}</span>
                                               </div>
                                               <div>
+                                                <span className="font-medium text-muted-foreground">Institution Held At:</span>
+                                                <span className="ml-2">{relationship.institution_held_at || 'Not specified'}</span>
+                                              </div>
+                                              <div>
                                                 <span className="font-medium text-muted-foreground">Purpose:</span>
                                                 <span className="ml-2">{relationship.purpose || 'No purpose specified'}</span>
+                                              </div>
+                                            </>
+                                          )}
+                                          {typeInfo.key === 'investment_accounts' && (
+                                            <>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Provider:</span>
+                                                <span className="ml-2">{relationship.provider || relationship.related_data_display_name}</span>
+                                              </div>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Account Type:</span>
+                                                <span className="ml-2">{relationship.account_type || 'Not specified'}</span>
+                                              </div>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Account Number:</span>
+                                                <span className="ml-2">{relationship.account_number || 'Not specified'}</span>
+                                              </div>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Institution Held At:</span>
+                                                <span className="ml-2">{relationship.institution_held_at || 'Not specified'}</span>
+                                              </div>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Purpose:</span>
+                                                <span className="ml-2">{relationship.purpose || 'No purpose specified'}</span>
+                                              </div>
+                                            </>
+                                          )}
+                                          {typeInfo.key === 'crypto_accounts' && (
+                                            <>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Platform:</span>
+                                                <span className="ml-2">{relationship.platform || relationship.related_data_display_name}</span>
+                                              </div>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Institution Held At:</span>
+                                                <span className="ml-2">{relationship.institution_held_at || 'Not specified'}</span>
+                                              </div>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Purpose:</span>
+                                                <span className="ml-2">{relationship.purpose || 'No purpose specified'}</span>
+                                              </div>
+                                            </>
+                                          )}
+                                          {typeInfo.key === 'credit_cards' && (
+                                            <>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Cardholder Name:</span>
+                                                <span className="ml-2">{relationship.cardholder_name || relationship.related_data_display_name}</span>
+                                              </div>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Issuer:</span>
+                                                <span className="ml-2">{relationship.issuer || 'Not specified'}</span>
+                                              </div>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Purpose:</span>
+                                                <span className="ml-2">{relationship.purpose || 'No purpose specified'}</span>
+                                              </div>
+                                            </>
+                                          )}
+                                          {typeInfo.key === 'websites' && (
+                                            <>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">URL:</span>
+                                                <span className="ml-2">{relationship.url || relationship.related_data_display_name}</span>
+                                              </div>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Label:</span>
+                                                <span className="ml-2">{relationship.label || 'No label'}</span>
+                                              </div>
+                                            </>
+                                          )}
+                                          {typeInfo.key === 'hosting_accounts' && (
+                                            <>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Provider:</span>
+                                                <span className="ml-2">{relationship.provider || relationship.related_data_display_name}</span>
+                                              </div>
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Description:</span>
+                                                <span className="ml-2">{relationship.description || 'No description'}</span>
                                               </div>
                                             </>
                                           )}
