@@ -163,7 +163,7 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                                       {item.name || item[tableConfigs[child.table]?.fields.find(f => f.name === 'name')?.name || 'id']}
                                     </div>
                                   </PopoverTrigger>
-                                  <PopoverContent className="w-80 p-4 bg-white border-2 border-gray-200 shadow-xl" align="start">
+                                  <PopoverContent className="w-80 p-4 bg-white border-2 border-gray-200 shadow-xl rounded-lg" align="start">
                                     <div className="space-y-3">
                                       <div className="flex items-center gap-2">
                                         <Building2 className="h-4 w-4 text-teal-600" />
@@ -178,6 +178,54 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                                           <span className="font-medium text-muted-foreground">ID:</span>
                                           <span className="ml-2 font-mono text-xs">{item.id}</span>
                                         </div>
+                                        {child.table === 'contacts' && (
+                                          <>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Email:</span>
+                                              <span className="ml-2">{item.email || 'Not available'}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Phone:</span>
+                                              <span className="ml-2">{item.phone || 'Not available'}</span>
+                                            </div>
+                                          </>
+                                        )}
+                                        {child.table === 'emails' && (
+                                          <>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Email:</span>
+                                              <span className="ml-2">{item.email_address || item.name || 'Not available'}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Description:</span>
+                                              <span className="ml-2">{item.description || 'No description'}</span>
+                                            </div>
+                                          </>
+                                        )}
+                                        {child.table === 'phones' && (
+                                          <>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Phone:</span>
+                                              <span className="ml-2">{item.phone_number || item.name || 'Not available'}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Label:</span>
+                                              <span className="ml-2">{item.label || 'No label'}</span>
+                                            </div>
+                                          </>
+                                        )}
+                                        {child.table === 'bank_accounts' && (
+                                          <>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Bank Name:</span>
+                                              <span className="ml-2">{item.bank_name || item.name || 'Not available'}</span>
+                                            </div>
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Purpose:</span>
+                                              <span className="ml-2">{item.purpose || 'No purpose specified'}</span>
+                                            </div>
+                                          </>
+                                        )}
                                         {item.description && (
                                           <div>
                                             <span className="font-medium text-muted-foreground">Description:</span>

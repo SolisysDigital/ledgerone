@@ -198,7 +198,7 @@ export default async function DetailPage({
                 <div className="flex items-center gap-3">
                   <p className="text-sm text-muted-foreground">ID: {id}</p>
                   {data.name && (
-                    <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-lg">
+                    <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-xl">
                       {data.name}
                     </span>
                   )}
