@@ -4,10 +4,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, Users, Mail, Phone, CreditCard, TrendingUp, Bitcoin, Globe, Server, Eye, Link as LinkIcon } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Mail, Phone, CreditCard, TrendingUp, Bitcoin, Globe, Server, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Relationship {
   id: string;
@@ -229,9 +230,48 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                                   <Icon className={`h-4 w-4 ${typeInfo.textColor}`} />
                                 </div>
                                 <div>
-                                  <div className="font-semibold text-foreground">
-                                    {relationship.related_data_display_name}
-                                  </div>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <div className="font-semibold text-foreground cursor-pointer hover:text-teal-600 transition-colors">
+                                        {relationship.related_data_display_name}
+                                      </div>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-80 p-4" align="start">
+                                      <div className="space-y-3">
+                                        <div className="flex items-center gap-2">
+                                          <Icon className={`h-4 w-4 ${typeInfo.textColor}`} />
+                                          <h4 className="font-semibold">{typeInfo.label.slice(0, -1)} Details</h4>
+                                        </div>
+                                        <div className="space-y-2 text-sm">
+                                          <div>
+                                            <span className="font-medium text-muted-foreground">Name:</span>
+                                            <span className="ml-2">{relationship.related_data_display_name}</span>
+                                          </div>
+                                          <div>
+                                            <span className="font-medium text-muted-foreground">ID:</span>
+                                            <span className="ml-2 font-mono text-xs">{relationship.related_data_id}</span>
+                                          </div>
+                                          {relationship.relationship_description && (
+                                            <div>
+                                              <span className="font-medium text-muted-foreground">Relationship:</span>
+                                              <span className="ml-2">{relationship.relationship_description}</span>
+                                            </div>
+                                          )}
+                                        </div>
+                                        <Button 
+                                          asChild 
+                                          size="sm" 
+                                          className="w-full"
+                                          onClick={() => window.open(`/${typeInfo.key}/${relationship.related_data_id}`, '_blank')}
+                                        >
+                                          <div className="flex items-center justify-center gap-2">
+                                            <ExternalLink className="h-4 w-4" />
+                                            View Full Details
+                                          </div>
+                                        </Button>
+                                      </div>
+                                    </PopoverContent>
+                                  </Popover>
                                   <div className="text-xs text-muted-foreground">
                                     ID: {relationship.related_data_id}
                                   </div>
@@ -260,19 +300,19 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleEditRelationship(relationship.id, typeInfo.key)}
-                                  className="shadow-sm hover:shadow-md transition-shadow"
+                                  className="shadow-sm hover:shadow-md transition-shadow p-2"
+                                  title="Edit Relationship"
                                 >
-                                  <Edit className="w-4 h-4 mr-1" />
-                                  Edit
+                                  <Edit className="w-4 h-4" />
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleDeleteRelationship(relationship.id)}
-                                  className="text-destructive hover:text-destructive hover:bg-destructive/10 shadow-sm hover:shadow-md transition-shadow"
+                                  className="text-destructive hover:text-destructive hover:bg-destructive/10 shadow-sm hover:shadow-md transition-shadow p-2"
+                                  title="Remove Relationship"
                                 >
-                                  <Trash2 className="w-4 h-4 mr-1" />
-                                  Remove
+                                  <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>
                             </TableCell>

@@ -4,13 +4,13 @@ import { supabase } from "@/lib/supabase";
 import { tableConfigs } from "@/lib/tableConfigs";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import ClientRelationshipTabs from "@/components/relationships/ClientRelationshipTabs";
 import Link from "next/link";
-import { ArrowLeft, Edit, Trash2, Building2, Users, FileText } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Users, FileText } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Suspense } from "react";
 
@@ -195,7 +195,14 @@ export default async function DetailPage({
               </Button>
               <div className="space-y-1">
                 <h1 className="text-2xl font-bold text-foreground">Entity Details</h1>
-                <p className="text-sm text-muted-foreground">ID: {id}</p>
+                <div className="flex items-center gap-3">
+                  <p className="text-sm text-muted-foreground">ID: {id}</p>
+                  {data.name && (
+                    <span className="text-lg font-semibold text-teal-600 bg-teal-50 px-3 py-1 rounded-lg border border-teal-200">
+                      {data.name}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex items-center space-x-2">

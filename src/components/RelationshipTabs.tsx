@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import Link from "next/link";
-import { Plus, ExternalLink, Building2, Users, Mail, Phone, CreditCard, Globe, Server, Bitcoin, TrendingUp, BarChart3, FileText } from "lucide-react";
+import { Plus, ExternalLink, Building2, Users, Mail, Phone, CreditCard, Globe, Server, Bitcoin, TrendingUp, BarChart3, FileText, Edit } from "lucide-react";
 import { tableConfigs } from "@/lib/tableConfigs";
 
 interface RelationshipTabsProps {
@@ -156,9 +157,54 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                           {relatedData[child.table].map((item: any) => (
                             <TableRow key={item.id} className="border-b border-teal-300">
                               <TableCell className="text-xs">
-                                <div title={`ID: ${item.id}`} className="cursor-help text-teal-800">
-                                  {item.name || item[tableConfigs[child.table]?.fields.find(f => f.name === 'name')?.name || 'id']}
-                                </div>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <div className="cursor-pointer text-teal-800 hover:text-teal-600 transition-colors">
+                                      {item.name || item[tableConfigs[child.table]?.fields.find(f => f.name === 'name')?.name || 'id']}
+                                    </div>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-80 p-4" align="start">
+                                    <div className="space-y-3">
+                                      <div className="flex items-center gap-2">
+                                        <Building2 className="h-4 w-4 text-teal-600" />
+                                        <h4 className="font-semibold">{tableConfigs[child.table]?.label || child.table} Details</h4>
+                                      </div>
+                                      <div className="space-y-2 text-sm">
+                                        <div>
+                                          <span className="font-medium text-muted-foreground">Name:</span>
+                                          <span className="ml-2">{item.name || item[tableConfigs[child.table]?.fields.find(f => f.name === 'name')?.name || 'id']}</span>
+                                        </div>
+                                        <div>
+                                          <span className="font-medium text-muted-foreground">ID:</span>
+                                          <span className="ml-2 font-mono text-xs">{item.id}</span>
+                                        </div>
+                                        {item.description && (
+                                          <div>
+                                            <span className="font-medium text-muted-foreground">Description:</span>
+                                            <span className="ml-2">{item.description}</span>
+                                          </div>
+                                        )}
+                                        {item.type && (
+                                          <div>
+                                            <span className="font-medium text-muted-foreground">Type:</span>
+                                            <span className="ml-2">{item.type}</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                      <Button 
+                                        asChild 
+                                        size="sm" 
+                                        className="w-full"
+                                        onClick={() => window.open(`/${child.table}/${item.id}`, '_blank')}
+                                      >
+                                        <div className="flex items-center justify-center gap-2">
+                                          <ExternalLink className="h-4 w-4" />
+                                          View Full Details
+                                        </div>
+                                      </Button>
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
                               </TableCell>
                               <TableCell className="text-xs">
                                 <Badge variant="secondary" className="text-xs">
@@ -167,14 +213,14 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                               </TableCell>
                               <TableCell className="text-xs">
                                 <div className="flex space-x-2">
-                                  <Button asChild variant="outline" size="sm">
+                                  <Button asChild variant="outline" size="sm" className="p-2" title="View Details">
                                     <Link href={`/${child.table}/${item.id}`}>
                                       <ExternalLink className="h-3 w-3" />
                                     </Link>
                                   </Button>
-                                  <Button asChild variant="outline" size="sm">
+                                  <Button asChild variant="outline" size="sm" className="p-2" title="Edit">
                                     <Link href={`/${child.table}/${item.id}/edit`}>
-                                      <Plus className="h-3 w-3" />
+                                      <Edit className="h-3 w-3" />
                                     </Link>
                                   </Button>
                                 </div>
