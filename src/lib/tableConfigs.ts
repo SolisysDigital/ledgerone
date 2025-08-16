@@ -76,6 +76,7 @@ export const tableConfigs: Record<string, TableConfig> = {
       { name: 'title', type: 'text' },
       { name: 'email', type: 'text' },
       { name: 'phone', type: 'text' },
+      { name: 'short_description', type: 'text' },
       { name: 'description', type: 'textarea' },
     ],
   },
@@ -84,6 +85,7 @@ export const tableConfigs: Record<string, TableConfig> = {
     fields: [
       { name: 'email', type: 'text' },
       { name: 'label', type: 'text' },
+      { name: 'short_description', type: 'text' },
       { name: 'description', type: 'textarea' },
     ],
   },
@@ -92,6 +94,7 @@ export const tableConfigs: Record<string, TableConfig> = {
     fields: [
       { name: 'phone', type: 'text' },
       { name: 'label', type: 'text' },
+      { name: 'short_description', type: 'text' },
       { name: 'description', type: 'textarea' },
     ],
   },
@@ -104,6 +107,7 @@ export const tableConfigs: Record<string, TableConfig> = {
       { name: 'institution_held_at', type: 'text' },
       { name: 'purpose', type: 'text' },
       { name: 'last_balance', type: 'number' },
+      { name: 'short_description', type: 'text' },
       { name: 'description', type: 'textarea' },
     ],
   },
@@ -116,6 +120,7 @@ export const tableConfigs: Record<string, TableConfig> = {
       { name: 'institution_held_at', type: 'text' },
       { name: 'purpose', type: 'text' },
       { name: 'last_balance', type: 'number' },
+      { name: 'short_description', type: 'text' },
       { name: 'description', type: 'textarea' },
     ],
     children: [
@@ -144,6 +149,7 @@ export const tableConfigs: Record<string, TableConfig> = {
       { name: 'institution_held_at', type: 'text' },
       { name: 'purpose', type: 'text' },
       { name: 'last_balance', type: 'number' },
+      { name: 'short_description', type: 'text' },
       { name: 'description', type: 'textarea' },
     ],
   },
@@ -166,6 +172,7 @@ export const tableConfigs: Record<string, TableConfig> = {
     fields: [
       { name: 'url', type: 'text' },
       { name: 'label', type: 'text' },
+      { name: 'short_description', type: 'text' },
       { name: 'description', type: 'textarea' },
     ],
   },
@@ -176,6 +183,7 @@ export const tableConfigs: Record<string, TableConfig> = {
       { name: 'login_url', type: 'text' },
       { name: 'username', type: 'text' },
       { name: 'password', type: 'text' },
+      { name: 'short_description', type: 'text' },
       { name: 'description', type: 'textarea' },
     ],
   },
