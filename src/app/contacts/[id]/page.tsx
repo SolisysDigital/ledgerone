@@ -84,56 +84,40 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {contact.name && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Name
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">{contact.name}</span>
+                {tableConfigs.contacts.fields.map((field) => {
+                  // Skip certain fields that are handled separately
+                  if (['id', 'created_at', 'updated_at', 'user_id'].includes(field.name)) {
+                    return null;
+                  }
+
+                  // Get the field value from contact
+                  const fieldValue = (contact as any)[field.name];
+                  
+                  // Format the field label (convert snake_case to Title Case)
+                  const fieldLabel = field.label || field.name
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+
+                  return (
+                    <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
+                      <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                        {fieldLabel}
+                      </Label>
+                      <div className="text-sm">
+                        {field.type === 'textarea' ? (
+                          <div className="whitespace-pre-wrap bg-muted p-3 rounded-md">
+                            {fieldValue ? fieldValue : 'No description provided'}
+                          </div>
+                        ) : (
+                          <span className="text-teal-800 font-medium">
+                            {fieldValue ? fieldValue : 'Not specified'}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-                {contact.title && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Title
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">{contact.title}</span>
-                    </div>
-                  </div>
-                )}
-                {contact.email && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Email
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">{contact.email}</span>
-                    </div>
-                  </div>
-                )}
-                {contact.phone && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Phone
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">{contact.phone}</span>
-                    </div>
-                  </div>
-                )}
-                {contact.description && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors md:col-span-2" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Description
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">{contact.description}</span>
-                    </div>
-                  </div>
-                )}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

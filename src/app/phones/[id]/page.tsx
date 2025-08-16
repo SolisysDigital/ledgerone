@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
+import { tableConfigs } from "@/lib/tableConfigs";
 
 interface PhoneDetailPageProps {
   params: Promise<{ id: string }>;
@@ -53,9 +54,9 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
               <h1 className="text-2xl font-bold text-foreground">Phone Details</h1>
               <div className="flex items-center gap-3">
                 <p className="text-sm text-muted-foreground">ID: {id}</p>
-                {phone.name && (
+                {phone.phone && (
                   <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-xl">
-                    {phone.name}
+                    {phone.phone}
                   </span>
                 )}
               </div>
@@ -88,36 +89,40 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {phone.phone && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Phone Number
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">{phone.phone}</span>
+                {tableConfigs.phones.fields.map((field) => {
+                  // Skip certain fields that are handled separately
+                  if (['id', 'created_at', 'updated_at', 'user_id'].includes(field.name)) {
+                    return null;
+                  }
+
+                  // Get the field value from phone
+                  const fieldValue = (phone as any)[field.name];
+                  
+                  // Format the field label (convert snake_case to Title Case)
+                  const fieldLabel = field.label || field.name
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+
+                  return (
+                    <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
+                      <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                        {fieldLabel}
+                      </Label>
+                      <div className="text-sm">
+                        {field.type === 'textarea' ? (
+                          <div className="whitespace-pre-wrap bg-muted p-3 rounded-md">
+                            {fieldValue ? fieldValue : 'No description provided'}
+                          </div>
+                        ) : (
+                          <span className="text-teal-800 font-medium">
+                            {fieldValue ? fieldValue : 'Not specified'}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-                {phone.label && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Label
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">{phone.label}</span>
-                    </div>
-                  </div>
-                )}
-                {phone.description && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors md:col-span-2" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Description
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">{phone.description}</span>
-                    </div>
-                  </div>
-                )}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

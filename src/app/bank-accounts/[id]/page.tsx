@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Edit, Trash2, Building2 } from "lucide-react";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
+import { tableConfigs } from "@/lib/tableConfigs";
 
 interface BankAccountDetailPageProps {
   params: Promise<{ id: string }>;
@@ -53,9 +54,9 @@ export default async function BankAccountDetailPage({ params }: BankAccountDetai
               <h1 className="text-2xl font-bold text-foreground">Bank Account Details</h1>
               <div className="flex items-center gap-3">
                 <p className="text-sm text-muted-foreground">ID: {id}</p>
-                {account.name && (
+                {account.bank_name && (
                   <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-xl">
-                    {account.name}
+                    {account.bank_name}
                   </span>
                 )}
               </div>
@@ -88,76 +89,44 @@ export default async function BankAccountDetailPage({ params }: BankAccountDetai
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {account.bank_name && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Bank Name
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">{account.bank_name}</span>
+                {tableConfigs.bank_accounts.fields.map((field) => {
+                  // Skip certain fields that are handled separately
+                  if (['id', 'created_at', 'updated_at', 'user_id'].includes(field.name)) {
+                    return null;
+                  }
+
+                  // Get the field value from account
+                  const fieldValue = (account as any)[field.name];
+                  
+                  // Format the field label (convert snake_case to Title Case)
+                  const fieldLabel = field.label || field.name
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+
+                  return (
+                    <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
+                      <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
+                        {fieldLabel}
+                      </Label>
+                      <div className="text-sm">
+                        {field.type === 'textarea' ? (
+                          <div className="whitespace-pre-wrap bg-muted p-3 rounded-md">
+                            {fieldValue ? fieldValue : 'No description provided'}
+                          </div>
+                        ) : field.type === 'number' ? (
+                          <span className="text-teal-800 font-medium">
+                            {fieldValue ? `$${fieldValue.toLocaleString()}` : 'Not specified'}
+                          </span>
+                        ) : (
+                          <span className="text-teal-800 font-medium">
+                            {fieldValue ? fieldValue : 'Not specified'}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-                {account.account_number && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Account Number
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">{account.account_number}</span>
-                    </div>
-                  </div>
-                )}
-                {account.routing_number && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Routing Number
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">{account.routing_number}</span>
-                    </div>
-                  </div>
-                )}
-                {account.institution_held_at && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Institution Held At
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">{account.institution_held_at}</span>
-                    </div>
-                  </div>
-                )}
-                {account.purpose && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Purpose
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">{account.purpose}</span>
-                    </div>
-                  </div>
-                )}
-                {account.last_balance && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Last Balance
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">${account.last_balance}</span>
-                    </div>
-                  </div>
-                )}
-                {account.description && (
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors md:col-span-2" style={{ borderRadius: '0.5rem' }}>
-                    <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                      Description
-                    </Label>
-                    <div className="text-sm">
-                      <span className="text-teal-800 font-medium">{account.description}</span>
-                    </div>
-                  </div>
-                )}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
