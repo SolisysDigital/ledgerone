@@ -9,35 +9,35 @@ import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWra
 import ClientRelationshipTabs from "@/components/relationships/ClientRelationshipTabs";
 import RecordHeader from "@/components/record/RecordHeader";
 import { DetailsGrid } from "@/components/record/DetailsGrid";
-import { bankAccountDisplayFields } from "@/lib/entities/bank-account.fields";
+import { investmentAccountDisplayFields } from "@/lib/entities/investment-account.fields";
 
-export default async function BankAccountPage({ 
+export default async function InvestmentAccountPage({ 
   params 
 }: { 
   params: Promise<{ id: string }> 
 }) {
   const { id } = await params;
   
-  // Fetch bank account data
-  const { data: bankAccount, error } = await supabase
-    .from('bank_accounts')
+  // Fetch investment account data
+  const { data: investmentAccount, error } = await supabase
+    .from('investment_accounts')
     .select("*")
     .eq("id", id)
     .single();
 
-  if (error || !bankAccount) return notFound();
+  if (error || !investmentAccount) return notFound();
 
   // Actions for the header
   const actions = (
     <>
       <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150">
-        <Link href={`/bank-accounts/${id}/edit`}>
+        <Link href={`/investment-accounts/${id}/edit`}>
           <Edit className="h-4 w-4 mr-2" />
           Edit
         </Link>
       </Button>
       <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150 text-red-600 hover:text-red-700">
-        <Link href={`/bank-accounts/${id}/delete`}>
+        <Link href={`/investment-accounts/${id}/delete`}>
           <Trash2 className="h-4 w-4 mr-2" />
           Delete
         </Link>
@@ -47,9 +47,8 @@ export default async function BankAccountPage({
 
   // Define field labels for better display
   const fieldLabels: Record<string, string> = {
-    'bank_name': 'Bank Name',
+    'account_type': 'Account Type',
     'account_number': 'Account Number',
-    'routing_number': 'Routing Number',
     'institution_held_at': 'Institution Held At',
     'short_description': 'Short Description',
     'last_balance': 'Last Balance',
@@ -60,10 +59,10 @@ export default async function BankAccountPage({
       <div className="max-w-7xl mx-auto space-y-8 p-6">
         {/* Main Header */}
         <RecordHeader
-          title="Bank Account Details"
+          title="Investment Account Details"
           id={id}
-          primaryName={bankAccount.account_name || bankAccount.bank_name}
-          backHref="/bank-accounts"
+          primaryName={investmentAccount.account_name || investmentAccount.provider}
+          backHref="/investment-accounts"
           actions={actions}
         />
 
@@ -77,8 +76,8 @@ export default async function BankAccountPage({
           </CardHeader>
           <CardContent>
             <DetailsGrid
-              data={bankAccount}
-              displayFields={bankAccountDisplayFields}
+              data={investmentAccount}
+              displayFields={investmentAccountDisplayFields}
               fieldLabels={fieldLabels}
             />
           </CardContent>
@@ -103,4 +102,4 @@ export default async function BankAccountPage({
       </div>
     </ClientNavigationWrapper>
   );
-} 
+}

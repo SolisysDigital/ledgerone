@@ -7,34 +7,34 @@ import RecordHeader from "@/components/record/RecordHeader";
 import EditForm from "@/app/[table]/[id]/edit/EditForm";
 import { tableConfigs } from "@/lib/tableConfigs";
 
-export default async function EditBankAccountPage({ 
+export default async function EditInvestmentAccountPage({ 
   params 
 }: { 
   params: Promise<{ id: string }> 
 }) {
   const { id } = await params;
   
-  const config = tableConfigs.bank_accounts;
+  const config = tableConfigs.investment_accounts;
   if (!config) return notFound();
 
   // Fetch existing data
-  const { data: bankAccount, error } = await supabase
-    .from('bank_accounts')
+  const { data: investmentAccount, error } = await supabase
+    .from('investment_accounts')
     .select("*")
     .eq("id", id)
     .single();
 
-  if (error || !bankAccount) return notFound();
+  if (error || !investmentAccount) return notFound();
 
   return (
     <ClientNavigationWrapper>
       <div className="space-y-6">
         {/* Header */}
         <RecordHeader
-          title="Edit Bank Account"
+          title="Edit Investment Account"
           id={id}
-          primaryName={bankAccount.account_name || bankAccount.bank_name}
-          backHref={`/bank-accounts/${id}`}
+          primaryName={investmentAccount.account_name || investmentAccount.provider}
+          backHref={`/investment-accounts/${id}`}
         />
 
         {/* Edit Form */}
@@ -43,10 +43,10 @@ export default async function EditBankAccountPage({
             <CardTitle className="text-sm">Update Information</CardTitle>
           </CardHeader>
           <CardContent>
-            <EditForm table="bank_accounts" config={config} initialData={bankAccount} />
+            <EditForm table="investment_accounts" config={config} initialData={investmentAccount} />
           </CardContent>
         </Card>
       </div>
     </ClientNavigationWrapper>
   );
-} 
+}
