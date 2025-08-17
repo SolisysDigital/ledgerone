@@ -19,8 +19,14 @@ export default function DeleteButton({ table, id }: DeleteButtonProps) {
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      await deleteItem(table, id);
-      router.refresh(); // Refresh the page to update the list
+      const result = await deleteItem(table, id);
+      
+      if (result.success) {
+        // Navigate to the table listing page on success
+        router.push(`/${table}`);
+      } else {
+        throw new Error(result.error || 'Delete failed');
+      }
     } catch (error) {
       console.error('Error deleting item:', error);
       setIsDeleting(false);
