@@ -3,11 +3,9 @@ import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { tableConfigs } from "@/lib/tableConfigs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import EditForm from "./EditForm";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
+import RecordHeader from "@/components/record/RecordHeader";
 
 export default async function EditPage({ 
   params 
@@ -29,31 +27,44 @@ export default async function EditPage({
 
   if (error || !data) return notFound();
 
+  // Determine primary name based on entity type
+  const getPrimaryName = (table: string, data: any): string | undefined => {
+    switch (table) {
+      case 'credit_cards':
+        return data.cardholder_name;
+      case 'hosting_accounts':
+        return data.account_name || data.provider;
+      case 'crypto_accounts':
+        return data.account_name || data.platform;
+      case 'investment_accounts':
+        return data.account_name || data.provider;
+      case 'bank_accounts':
+        return data.account_name || data.bank_name;
+      case 'contacts':
+        return data.name;
+      case 'phones':
+        return data.phone;
+      case 'emails':
+        return data.email;
+      case 'websites':
+        return data.url || data.label;
+      default:
+        return data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address || data.platform || data.cardholder_name;
+    }
+  };
+
+  const primaryName = getPrimaryName(table, data);
+
   return (
     <ClientNavigationWrapper>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/${table}/${id}`}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Details
-              </Link>
-            </Button>
-            <div>
-              <h1 className="text-lg font-bold">Edit {config.label}</h1>
-              <div className="flex items-center gap-3">
-                <p className="text-xs text-muted-foreground">ID: {id}</p>
-                {(data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address || data.platform || data.cardholder_name) && (
-                  <span className="text-sm font-semibold text-white bg-teal-600 px-2 py-1 rounded-lg">
-                    {data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address || data.platform || data.cardholder_name}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <RecordHeader
+          title={`Edit ${config.label}`}
+          id={id}
+          primaryName={primaryName}
+          backHref={`/${table}/${id}`}
+        />
 
         {/* Edit Form */}
         <Card>

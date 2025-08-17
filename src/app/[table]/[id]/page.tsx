@@ -1,479 +1,247 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { tableConfigs } from "@/lib/tableConfigs";
-import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
-
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import ClientRelationshipTabs from "@/components/relationships/ClientRelationshipTabs";
+import { Edit, Trash2, ArrowLeft, Users, FileText, Building2 } from "lucide-react";
 import Link from "next/link";
-import { ArrowLeft, Edit, Trash2, Users, FileText } from "lucide-react";
+import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
+import ClientRelationshipTabs from "@/components/relationships/ClientRelationshipTabs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Suspense } from "react";
+import RecordHeader from "@/components/record/RecordHeader";
+import { DetailsGrid } from "@/components/record/DetailsGrid";
 
-export default async function DetailPage({ 
+export default async function EntityPage({ 
   params 
 }: { 
   params: Promise<{ table: string; id: string }> 
 }) {
-  try {
-    console.log('DetailPage: Starting to resolve params');
-    const resolvedParams = await params;
-    const { table, id } = resolvedParams;
-    
-    console.log('DetailPage: Params resolved', { table, id });
-    
-    const config = tableConfigs[table as keyof typeof tableConfigs];
-    if (!config) {
-      console.log('DetailPage: Config not found for table', table);
-      return notFound();
+  const resolvedParams = await params;
+  const { table, id } = resolvedParams;
+  
+  const config = tableConfigs[table as keyof typeof tableConfigs];
+  if (!config) return notFound();
+
+  // Fetch existing data
+  const { data, error } = await supabase
+    .from(table)
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) return notFound();
+
+  // Determine primary name based on entity type
+  const getPrimaryName = (table: string, data: any): string | undefined => {
+    switch (table) {
+      case 'credit_cards':
+        return data.cardholder_name;
+      case 'hosting_accounts':
+        return data.account_name || data.provider;
+      case 'crypto_accounts':
+        return data.account_name || data.platform;
+      case 'investment_accounts':
+        return data.account_name || data.provider;
+      case 'bank_accounts':
+        return data.account_name || data.bank_name;
+      case 'contacts':
+        return data.name;
+      case 'phones':
+        return data.phone;
+      case 'emails':
+        return data.email;
+      case 'websites':
+        return data.url || data.label;
+      default:
+        return data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address || data.platform || data.cardholder_name;
     }
+  };
 
-    console.log('DetailPage: Fetching data from table', table, 'with id', id);
-    
-    // Use simple select to avoid join syntax issues
-    const { data, error } = await supabase
-      .from(table)
-      .select("*")
-      .eq("id", id)
-      .single();
+  const primaryName = getPrimaryName(table, data);
 
-    if (error) {
-      console.error('DetailPage: Database error', error);
-      return notFound();
+  // Get display fields for the entity type
+  const getDisplayFields = (table: string): string[] => {
+    switch (table) {
+      case 'credit_cards':
+        return ['cardholder_name', 'card_number', 'issuer', 'type', 'institution_held_at', 'purpose', 'last_balance', 'short_description', 'description'];
+      case 'hosting_accounts':
+        return ['provider', 'login_url', 'username', 'password', 'short_description', 'description'];
+      case 'crypto_accounts':
+        return ['platform', 'account_number', 'wallet_address', 'institution_held_at', 'purpose', 'last_balance', 'short_description', 'description'];
+      case 'investment_accounts':
+        return ['provider', 'account_type', 'account_number', 'institution_held_at', 'purpose', 'last_balance', 'short_description', 'description'];
+      case 'bank_accounts':
+        return ['bank_name', 'account_number', 'routing_number', 'institution_held_at', 'purpose', 'last_balance', 'short_description', 'description'];
+      case 'contacts':
+        return ['name', 'title', 'email', 'phone', 'short_description', 'description'];
+      case 'phones':
+        return ['phone', 'label', 'short_description', 'description'];
+      case 'emails':
+        return ['email', 'label', 'short_description', 'description'];
+      case 'websites':
+        return ['url', 'label', 'short_description', 'description'];
+      default:
+        return config.fields.map(f => f.name);
     }
-    
-    if (!data) {
-      console.log('DetailPage: No data found');
-      return notFound();
-    }
+  };
 
-    console.log('DetailPage: Data fetched successfully', { table, id, dataKeys: Object.keys(data) });
+  const displayFields = getDisplayFields(table);
 
-    // Helper: group fields
-    const legalInfoFields = [
-      'legal_business_name',
-      'employer_identification_number',
-      'incorporation_date',
-      'country_of_formation',
-      'state_of_formation',
-      'business_type',
-      'industry',
-      'naics_code',
-      'legal_address',
-      'mailing_address',
-      'registered_agent_name',
-      'registered_agent_address',
-    ];
-    const officerFields = [
-      ['officer1_name', 'officer1_title', 'officer1_ownership_percent'],
-      ['officer2_name', 'officer2_title', 'officer2_ownership_percent'],
-      ['officer3_name', 'officer3_title', 'officer3_ownership_percent'],
-      ['officer4_name', 'officer4_title', 'officer4_ownership_percent'],
-    ];
-    const texasSpecificFields = [
-      'texas_taxpayer_number',
-      'texas_file_number',
-      'texas_webfile_number',
-      'texas_webfile_login',
-      'texas_webfile_password',
-    ];
-    const stateOfFormation = data['state_of_formation'];
+  // Define field types for proper formatting
+  const fieldTypes: Record<string, 'text' | 'textarea' | 'select' | 'number' | 'date'> = {
+    'last_balance': 'number',
+    'description': 'textarea',
+    'short_description': 'text',
+  };
 
-    console.log('DetailPage: Rendering component');
+  // Define field labels for better display
+  const fieldLabels: Record<string, string> = {
+    'cardholder_name': 'Cardholder Name',
+    'card_number': 'Card Number',
+    'institution_held_at': 'Institution Held At',
+    'short_description': 'Short Description',
+    'account_type': 'Account Type',
+    'wallet_address': 'Wallet Address',
+    'routing_number': 'Routing Number',
+  };
 
-    // For non-entity pages, use the new design pattern
-    if (table !== 'entities') {
-      return (
-        <ClientNavigationWrapper>
-          <div className="max-w-7xl mx-auto space-y-8 p-6">
-            {/* Simple Header without box */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-6">
-                <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
-                  <Link href={`/${table}`}>
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to List
-                  </Link>
-                </Button>
-                <div className="space-y-1">
-                  <h1 className="text-2xl font-bold text-foreground">{config.label} Details</h1>
-                  <p className="text-sm text-muted-foreground">ID: {id}</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150">
-                  <Link href={`/${table}/${id}/edit`}>
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
-                  </Link>
-                </Button>
-                <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150 text-red-600 hover:text-red-700">
-                  <Link href={`/${table}/${id}/delete`}>
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </Link>
-                </Button>
-              </div>
-            </div>
+  // Actions for the header
+  const actions = (
+    <>
+      <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150">
+        <Link href={`/${table}/${id}/edit`}>
+          <Edit className="h-4 w-4 mr-2" />
+          Edit
+        </Link>
+      </Button>
+      <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150 text-red-600 hover:text-red-700">
+        <Link href={`/${table}/${id}/delete`}>
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete
+        </Link>
+      </Button>
+    </>
+  );
 
-            <div className="space-y-6">
-              {/* Basic Information Section */}
-              <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
-                <CardHeader>
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-1 h-6 bg-primary rounded-full"></div>
-                    <h3 className="text-lg font-semibold">Basic Information</h3>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {config.fields.map((field) => {
-                      const value = (data as any)[field.name];
-                      if (!value && value !== 0) return null;
-                      return (
-                        <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                          <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                            {field.label || field.name.replace(/_/g, ' ')}
-                          </Label>
-                          <div className="text-sm">
-                            {field.type === "select" ? (
-                              <Badge variant="secondary" className="text-teal-800 bg-secondary/50">{value}</Badge>
-                            ) : field.type === "textarea" ? (
-                              <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{value}</p>
-                            ) : field.type === "date" ? (
-                              <span className="text-teal-800 font-medium">{value ? new Date(value).toLocaleDateString() : '-'}</span>
-                            ) : field.type === "number" ? (
-                              <span className="text-teal-800 font-medium">{value?.toLocaleString() || '-'}</span>
-                            ) : (
-                              <span className="text-teal-800 font-medium">{value}</span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-              {/* Related Data Section */}
-              <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
-                <CardHeader>
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-1 h-6 bg-primary rounded-full"></div>
-                    <h3 className="text-lg font-semibold">Related Information</h3>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-muted/10 rounded-lg p-4 border border-border/50" style={{ borderRadius: '0.5rem' }}>
-                    <Suspense fallback={<div>Loading relationships...</div>}>
-                      <ClientRelationshipTabs entityId={id} />
-                    </Suspense>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </ClientNavigationWrapper>
-      );
-    }
-
-    // For entities, use the tabbed structure
+  // For non-entities, use the simple layout
+  if (table !== 'entities') {
     return (
       <ClientNavigationWrapper>
         <div className="max-w-7xl mx-auto space-y-8 p-6">
-          {/* Main Header without box */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6">
-              <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
-                <Link href={`/${table}`}>
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to List
-                </Link>
-              </Button>
-              <div className="space-y-1">
-                <h1 className="text-2xl font-bold text-foreground">Entity Details</h1>
-                <div className="flex items-center gap-3">
-                  <p className="text-sm text-muted-foreground">ID: {id}</p>
-                  {(data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address || data.platform || data.cardholder_name) && (
-                    <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-xl">
-                      {data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address || data.platform || data.cardholder_name}
-                    </span>
-                  )}
-                </div>
+          {/* Main Header */}
+          <RecordHeader
+            title={`${config.label} Details`}
+            id={id}
+            primaryName={primaryName}
+            backHref={`/${table}`}
+            actions={actions}
+          />
+
+          {/* Basic Information Section */}
+          <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+            <CardHeader>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-6 bg-primary rounded-full"></div>
+                <h3 className="text-lg font-semibold">Basic Information</h3>
               </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150">
-                <Link href={`/${table}/${id}/edit`}>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit
-                </Link>
-              </Button>
-              <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150 text-red-600 hover:text-red-700">
-                <Link href={`/${table}/${id}/delete`}>
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Link>
-              </Button>
-            </div>
-          </div>
-
-          {/* Tabs Structure */}
-          <Card className="overflow-hidden">
-            <CardContent className="p-0">
-              <Tabs defaultValue="information" className="w-full">
-                <TabsList className={`border-b border-gray-200 bg-gray-100 rounded-t-lg h-16 p-2 ${table === 'entities' ? 'grid-cols-2' : 'grid-cols-1'} grid w-full`}>
-                  <TabsTrigger value="information" className="data-[state=active]:bg-white data-[state=active]:text-teal-600 data-[state=active]:shadow-md data-[state=active]:border-b-2 data-[state=active]:border-teal-600 data-[state=active]:rounded-t-lg data-[state=active]:font-semibold rounded-t-md transition-all duration-300 ease-in-out hover:bg-teal-100 hover:border-teal-400 border-b border-gray-200">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Information
-                  </TabsTrigger>
-                  {table === 'entities' && (
-                    <TabsTrigger value="relationships" className="data-[state=active]:bg-white data-[state=active]:text-teal-600 data-[state=active]:shadow-md data-[state=active]:border-b-2 data-[state=active]:border-teal-600 data-[state=active]:rounded-t-lg data-[state=active]:font-semibold rounded-t-md transition-all duration-300 ease-in-out hover:bg-teal-100 hover:border-teal-400 border-b border-gray-200">
-                      <Users className="h-4 w-4 mr-2" />
-                      Related Data
-                    </TabsTrigger>
-                  )}
-                </TabsList>
-
-                <TabsContent value="information" className="p-6 space-y-8">
-                  {/* Basic Information */}
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-1 h-6 bg-primary rounded-full"></div>
-                      <h3 className="text-lg font-semibold">Basic Information</h3>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {config.fields.map((field) => {
-                        // Skip certain fields that are handled separately
-                        if (['id', 'created_at', 'updated_at', 'user_id'].includes(field.name)) {
-                          return null;
-                        }
-                        
-                        const fieldValue = (data as any)[field.name];
-                        const fieldLabel = field.label || field.name
-                          .split('_')
-                          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                          .join(' ');
-                        
-                        let displayValue = fieldValue;
-                        if (field.type === 'number' && typeof fieldValue === 'number') {
-                          displayValue = fieldValue.toLocaleString();
-                        } else if (field.type === 'date' && fieldValue) {
-                          displayValue = new Date(fieldValue).toLocaleDateString();
-                        } else if (field.type === 'textarea' && typeof fieldValue === 'string') {
-                          displayValue = fieldValue.length > 100 ? `${fieldValue.substring(0, 100)}...` : fieldValue;
-                        }
-                        
-                        return (
-                          <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                            <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                              {fieldLabel}
-                            </Label>
-                            <div className="text-sm">
-                              {field.type === "select" ? (
-                                <Badge variant="secondary" className="text-teal-800 bg-secondary/50">
-                                  {fieldValue ? fieldValue : 'Not specified'}
-                                </Badge>
-                              ) : field.type === "textarea" ? (
-                                <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">
-                                  {fieldValue ? displayValue : 'No description provided'}
-                                </p>
-                              ) : field.type === "date" ? (
-                                <span className="text-teal-800 font-medium">
-                                  {fieldValue ? new Date(fieldValue).toLocaleDateString() : 'Not specified'}
-                                </span>
-                              ) : field.type === "number" ? (
-                                <span className="text-teal-800 font-medium">
-                                  {fieldValue ? displayValue : 'Not specified'}
-                                </span>
-                              ) : (
-                                <span className="text-teal-800 font-medium">
-                                  {fieldValue ? displayValue : 'Not specified'}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Legal Information */}
-                  {legalInfoFields.some(field => (data as any)[field]) && (
-                    <div className="space-y-6">
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="w-1 h-6 bg-primary rounded-full"></div>
-                        <h3 className="text-lg font-semibold">Legal Information</h3>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {legalInfoFields.map((fieldName) => {
-                          const value = (data as any)[fieldName];
-                          if (!value && value !== 0) return null;
-                          const field = config.fields.find(f => f.name === fieldName);
-                          if (!field) return null;
-                          return (
-                            <div key={fieldName} className="bg-muted/10 p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                              <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                                {field.label || fieldName.replace(/_/g, ' ')}
-                              </Label>
-                              <div className="text-sm">
-                                {fieldName === 'naics_code' ? (
-                                  <div className="space-y-2">
-                                    <span className="text-teal-800 font-medium">{value}</span>
-                                    <div>
-                                      <a 
-                                        href={`https://www.naics.com/naics-code-description/?code=${value}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 hover:text-blue-800 text-xs underline"
-                                      >
-                                        View NAICS Code Details
-                                      </a>
-                                    </div>
-                                  </div>
-                                ) : field && field.type === "select" ? (
-                                  <Badge variant="secondary" className="text-teal-800 bg-secondary/50">{value}</Badge>
-                                ) : field && field.type === "textarea" ? (
-                                  <p className="whitespace-pre-wrap text-teal-800 leading-relaxed">{value}</p>
-                                ) : field && field.type === "date" ? (
-                                  <span className="text-teal-800 font-medium">{value ? new Date(value).toLocaleDateString() : '-'}</span>
-                                ) : field && field.type === "number" ? (
-                                  <span className="text-teal-800 font-medium">{value?.toLocaleString() || '-'}</span>
-                                ) : (
-                                  <span className="text-teal-800 font-medium">{value}</span>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Officers Information */}
-                  {officerFields.some(([name]) => (data as any)[name]) && (
-                    <div className="space-y-6">
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="w-1 h-6 bg-primary rounded-full"></div>
-                        <h3 className="text-lg font-semibold">Officers</h3>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {officerFields.map(([nameField, titleField, ownershipField], index) => {
-                          const name = (data as any)[nameField];
-                          const title = (data as any)[titleField];
-                          const ownership = (data as any)[ownershipField];
-                          
-                          if (!name) return null;
-
-                          return (
-                            <div key={index} className="bg-muted/10 p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                              <Label className="text-sm font-medium text-muted-foreground mb-2 block">
-                                Officer {index + 1}
-                              </Label>
-                              <div className="space-y-3">
-                                <div>
-                                  <span className="text-xs text-muted-foreground block">Name</span>
-                                  <span className="text-sm text-teal-800 font-medium">{name}</span>
-                                </div>
-                                {title && (
-                                  <div>
-                                    <span className="text-xs text-muted-foreground block">Title</span>
-                                    <span className="text-sm text-teal-800 font-medium">{title}</span>
-                                  </div>
-                                )}
-                                {ownership !== null && ownership !== undefined && (
-                                  <div>
-                                    <span className="text-xs text-muted-foreground block">Ownership</span>
-                                    <span className="text-sm text-teal-800 font-medium">{ownership}%</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Texas-specific Information */}
-                  {stateOfFormation === 'Texas' && texasSpecificFields.some(field => (data as any)[field]) && (
-                    <div className="space-y-6">
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="w-1 h-6 bg-primary rounded-full"></div>
-                        <h3 className="text-lg font-semibold">Texas-Specific Information</h3>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {texasSpecificFields.map((fieldName) => {
-                          const value = (data as any)[fieldName];
-                          if (!value && value !== 0) return null;
-                          const field = config.fields.find(f => f.name === fieldName);
-                          if (!field) return null;
-
-                          const isWebfileField = fieldName.includes('webfile');
-                          
-                          return (
-                            <div key={fieldName} className="bg-muted/10 p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
-                              <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
-                                {field.label || fieldName.replace(/_/g, ' ')}
-                              </Label>
-                              <div className="text-sm space-y-2">
-                                <span className="text-teal-800 font-medium">{value}</span>
-                                {isWebfileField && (
-                                  <div>
-                                    <a 
-                                      href="https://mycpa.cpa.state.tx.us/coa/"
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-600 hover:text-blue-800 text-xs underline"
-                                    >
-                                      Texas Webfile Portal
-                                    </a>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </TabsContent>
-                
-                {table === 'entities' && (
-                  <TabsContent value="relationships" className="p-6">
-                    <Suspense fallback={<div>Loading relationships...</div>}>
-                      <ClientRelationshipTabs entityId={id} />
-                    </Suspense>
-                  </TabsContent>
-                )}
-              </Tabs>
+            </CardHeader>
+            <CardContent>
+              <DetailsGrid
+                data={data}
+                displayFields={displayFields}
+                fieldLabels={fieldLabels}
+              />
             </CardContent>
           </Card>
-        </div>
-      </ClientNavigationWrapper>
-    );
-  } catch (error) {
-    console.error('DetailPage: Unexpected error', error);
-    return (
-      <ClientNavigationWrapper>
-        <div className="container mx-auto p-6">
-          <Card className="max-w-md mx-auto mt-12">
-            <CardContent className="p-8 text-center space-y-4">
-              <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
-                <Trash2 className="h-8 w-8 text-destructive" />
+
+          {/* Related Data Section */}
+          <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+            <CardHeader>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-6 bg-primary rounded-full"></div>
+                <h3 className="text-lg font-semibold">Related Information</h3>
               </div>
-              <h1 className="text-2xl font-bold text-foreground">Error Loading Page</h1>
-              <p className="text-muted-foreground">An unexpected error occurred while loading this page.</p>
-              <Button asChild variant="outline" className="mt-4">
-                <Link href="/">Go Home</Link>
-              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-muted/10 rounded-lg p-4 border border-border/50" style={{ borderRadius: '0.5rem' }}>
+                <Suspense fallback={<div>Loading relationships...</div>}>
+                  <ClientRelationshipTabs entityId={id} />
+                </Suspense>
+              </div>
             </CardContent>
           </Card>
         </div>
       </ClientNavigationWrapper>
     );
   }
+
+  // For entities, use the tabbed structure
+  return (
+    <ClientNavigationWrapper>
+      <div className="max-w-7xl mx-auto space-y-8 p-6">
+        {/* Main Header without box */}
+        <RecordHeader
+          title="Entity Details"
+          id={id}
+          primaryName={primaryName}
+          backHref={`/${table}`}
+          actions={actions}
+        />
+
+        {/* Tabs Structure */}
+        <Card className="overflow-hidden">
+          <CardContent className="p-0">
+            <Tabs defaultValue="information" className="w-full">
+              <TabsList className={`border-b border-gray-200 bg-gray-100 rounded-t-lg h-16 p-2 ${table === 'entities' ? 'grid-cols-2' : 'grid-cols-1'} grid w-full`}>
+                <TabsTrigger value="information" className="data-[state=active]:bg-white data-[state=active]:text-teal-600 data-[state=active]:shadow-md data-[state=active]:border-b-2 data-[state=active]:border-teal-600 data-[state=active]:rounded-t-lg data-[state=active]:font-semibold rounded-md transition-all duration-300 ease-out hover:bg-teal-100 hover:border-teal-400 border-b border-gray-200">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Information
+                </TabsTrigger>
+                {table === 'entities' && (
+                  <TabsTrigger value="relationships" className="data-[state=active]:bg-white data-[state=active]:text-teal-600 data-[state=active]:shadow-md data-[state=active]:border-b-2 data-[state=active]:border-teal-600 data-[state=active]:rounded-t-lg data-[state=active]:font-semibold rounded-md transition-all duration-300 ease-out hover:bg-teal-100 hover:border-teal-400 border-b border-gray-200">
+                    <Users className="h-4 w-4 mr-2" />
+                    Relationships
+                  </TabsTrigger>
+                )}
+              </TabsList>
+
+              <TabsContent value="information" className="p-6">
+                <div className="space-y-6">
+                  {/* Basic Information */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-1 h-6 bg-primary rounded-full"></div>
+                      <h3 className="text-lg font-semibold">Basic Information</h3>
+                    </div>
+                    <DetailsGrid
+                      data={data}
+                      displayFields={displayFields}
+                      fieldLabels={fieldLabels}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              {table === 'entities' && (
+                <TabsContent value="relationships" className="p-6">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-1 h-6 bg-primary rounded-full"></div>
+                      <h3 className="text-lg font-semibold">Entity Relationships</h3>
+                    </div>
+                    <div className="bg-muted/10 rounded-lg p-4 border border-border/50" style={{ borderRadius: '0.5rem' }}>
+                      <Suspense fallback={<div>Loading relationships...</div>}>
+                        <ClientRelationshipTabs entityId={id} />
+                      </Suspense>
+                    </div>
+                  </div>
+                </TabsContent>
+              )}
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+    </ClientNavigationWrapper>
+  );
 } 
