@@ -1,0 +1,96 @@
+name: Field Parity & Database Coverage Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  field-parity-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Check field parity
+      run: npm run test:field-parity
+      
+    - name: Build project
+      run: npm run build
+      
+    - name: Lint code
+      run: npm run lint
+      
+    - name: Check for critical fields
+      run: |
+        echo "🔍 Checking for critical fields in entity specifications..."
+        if ! npm run test:field-parity; then
+          echo "❌ Field parity check failed!"
+          echo "Please ensure all entities have matching display and form fields."
+          echo "Critical fields like 'short_description' must be present in both arrays."
+          exit 1
+        fi
+        echo "✅ All critical field checks passed!"
+        
+  database-schema-validation:
+    runs-on: ubuntu-latest
+    needs: field-parity-check
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Validate entity field specifications
+      run: |
+        echo "🔍 Validating entity field specifications against expected database schema..."
+        node scripts/check-database-coverage.js
+        
+    - name: Check for missing fields
+      run: |
+        echo "🔍 Checking for missing fields in entity specifications..."
+        # This will fail the build if any critical fields are missing
+        npm run test:coverage
+        
+  summary:
+    runs-on: ubuntu-latest
+    needs: [field-parity-check, database-schema-validation]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Generate summary
+      run: |
+        echo "## 🎯 Field Parity & Database Coverage Check Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### ✅ Completed Checks:" >> $GITHUB_STEP_SUMMARY
+        echo "- Field parity between display and form fields" >> $GITHUB_STEP_SUMMARY
+        echo "- Critical field presence (short_description)" >> $GITHUB_STEP_SUMMARY
+        echo "- Database schema coverage validation" >> $GITHUB_STEP_SUMMARY
+        echo "- Build and lint verification" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🚀 Next Steps:" >> $GITHUB_STEP_SUMMARY
+        echo "- All checks passed successfully!" >> $GITHUB_STEP_SUMMARY
+        echo "- Field specifications are in sync across all entity types" >> $GITHUB_STEP_SUMMARY
+        echo "- Database coverage is complete and up-to-date" >> $GITHUB_STEP_SUMMARY

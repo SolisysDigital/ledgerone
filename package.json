@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "update-admin-password": "node scripts/update-admin-password.js"
+    "update-admin-password": "node scripts/update-admin-password.js",
+    "test:field-parity": "node scripts/check-database-coverage.js",
+    "test:coverage": "npm run test:field-parity",
+    "prebuild": "npm run test:coverage"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
