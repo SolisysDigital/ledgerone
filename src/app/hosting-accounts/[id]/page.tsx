@@ -9,7 +9,7 @@ import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWra
 import ClientRelationshipTabs from "@/components/relationships/ClientRelationshipTabs";
 import RecordHeader from "@/components/record/RecordHeader";
 import { DetailsGrid } from "@/components/record/DetailsGrid";
-import { hostingAccountDisplayFields } from "@/lib/entities/hosting-account.fields";
+import { hostingAccountDisplayFields, HostingAccount } from "@/lib/entities/hosting-account.fields";
 
 export default async function HostingAccountPage({ 
   params 
@@ -23,7 +23,7 @@ export default async function HostingAccountPage({
     .from('hosting_accounts')
     .select("*")
     .eq("id", id)
-    .single();
+    .single() as { data: HostingAccount | null; error: any };
 
   if (error || !hostingAccount) return notFound();
 
@@ -58,7 +58,7 @@ export default async function HostingAccountPage({
         <RecordHeader
           title="Hosting Account Details"
           id={id}
-          primaryName={hostingAccount.account_name || hostingAccount.provider}
+          primaryName={hostingAccount.provider}
           backHref="/hosting-accounts"
           actions={actions}
         />

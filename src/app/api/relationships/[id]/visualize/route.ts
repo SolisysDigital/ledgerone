@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { tableConfigs } from '@/lib/tableConfigs';
 
+// Force dynamic rendering to prevent build-time issues
+export const dynamic = 'force-dynamic';
+
 const NODE_COLORS = {
   entity: '#14b8a6', // teal-500
-  contact: '#3b82f6', // blue-500
-  email: '#8b5cf6', // purple-500
+  contact: '#14b8a6', // teal-500
+  email: '#3b82f6', // blue-500
   phone: '#f97316', // orange-500
   website: '#6366f1', // indigo-500
   bank_account: '#22c55e', // green-500
@@ -97,26 +100,29 @@ export async function GET(
       // 2. Get parent relationships (if this table has a parent)
       if (config.parent) {
         try {
-          const { data: parentRecords, error: parentError } = await supabase
-            .from(config.parent.table)
-            .select('*')
-            .eq('id', centralNode[config.parent.fk]);
+          const parentId = centralNode[config.parent.fk];
+          if (parentId && typeof parentId === 'string') {
+            const { data: parentRecords, error: parentError } = await supabase
+              .from(config.parent.table)
+              .select('*')
+              .eq('id', parentId);
 
-          if (!parentError && parentRecords && parentRecords.length > 0) {
-            const primaryField = getPrimaryField(config.parent.table, parentRecords[0]);
-            
-            const items = parentRecords.map(record => ({
-              id: record.id,
-              label: record[primaryField] || `ID: ${record.id}`,
-              type: config.parent!.table,
-              table: config.parent!.table
-            }));
+            if (!parentError && parentRecords && parentRecords.length > 0) {
+              const primaryField = getPrimaryField(config.parent.table, parentRecords[0]);
+              
+              const items = parentRecords.map(record => ({
+                id: record.id,
+                label: record[primaryField] || `ID: ${record.id}`,
+                type: config.parent!.table,
+                table: config.parent!.table
+              }));
 
-            relationships.push({
-              category: getCategoryLabel(config.parent.table),
-              color: NODE_COLORS[config.parent.table as keyof typeof NODE_COLORS] || '#6b7280',
-              items: items
-            });
+              relationships.push({
+                category: getCategoryLabel(config.parent.table),
+                color: NODE_COLORS[config.parent.table as keyof typeof NODE_COLORS] || '#6b7280',
+                items: items
+              });
+            }
           }
         } catch (error) {
           console.error(`Error fetching ${config.parent.table} relationships:`, error);
@@ -138,36 +144,44 @@ export async function GET(
           
           for (const record of relatedDataRecords) {
             const recordType = record.type_of_record;
-            if (!groupedRecords[recordType]) {
-              groupedRecords[recordType] = [];
+            if (recordType && typeof recordType === 'string') {
+              if (!groupedRecords[recordType]) {
+                groupedRecords[recordType] = [];
+              }
+              groupedRecords[recordType].push(record);
             }
-            groupedRecords[recordType].push(record);
           }
 
           // Create relationship branches for each type
           for (const [recordType, records] of Object.entries(groupedRecords)) {
             try {
               // Fetch the actual related records
-              const { data: actualRecords, error: actualError } = await supabase
-                .from(recordType)
-                .select('*')
-                .in('id', records.map(r => r.related_data_id));
+              const relatedIds = records
+                .map(r => r.related_data_id)
+                .filter((id): id is string => id && typeof id === 'string');
+              
+              if (relatedIds.length > 0) {
+                const { data: actualRecords, error: actualError } = await supabase
+                  .from(recordType)
+                  .select('*')
+                  .in('id', relatedIds);
 
-              if (!actualError && actualRecords && actualRecords.length > 0) {
-                const primaryField = getPrimaryField(recordType, actualRecords[0]);
-                
-                const items = actualRecords.map(record => ({
-                  id: record.id,
-                  label: record[primaryField] || `ID: ${record.id}`,
-                  type: recordType,
-                  table: recordType
-                }));
+                if (!actualError && actualRecords && actualRecords.length > 0) {
+                  const primaryField = getPrimaryField(recordType, actualRecords[0]);
+                  
+                  const items = actualRecords.map(record => ({
+                    id: record.id,
+                    label: record[primaryField] || `ID: ${record.id}`,
+                    type: recordType,
+                    table: recordType
+                  }));
 
-                relationships.push({
-                  category: getCategoryLabel(recordType),
-                  color: NODE_COLORS[recordType as keyof typeof NODE_COLORS] || '#6b7280',
-                  items: items
-                });
+                  relationships.push({
+                    category: getCategoryLabel(recordType),
+                    color: NODE_COLORS[recordType as keyof typeof NODE_COLORS] || '#6b7280',
+                    items: items
+                  });
+                }
               }
             } catch (error) {
               console.error(`Error fetching ${recordType} records:`, error);

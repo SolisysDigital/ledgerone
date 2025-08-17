@@ -9,7 +9,7 @@ import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWra
 import ClientRelationshipTabs from "@/components/relationships/ClientRelationshipTabs";
 import RecordHeader from "@/components/record/RecordHeader";
 import { DetailsGrid } from "@/components/record/DetailsGrid";
-import { bankAccountDisplayFields } from "@/lib/entities/bank-account.fields";
+import { bankAccountDisplayFields, BankAccount } from "@/lib/entities/bank-account.fields";
 
 export default async function BankAccountPage({ 
   params 
@@ -23,7 +23,7 @@ export default async function BankAccountPage({
     .from('bank_accounts')
     .select("*")
     .eq("id", id)
-    .single();
+    .single() as { data: BankAccount | null; error: any };
 
   if (error || !bankAccount) return notFound();
 
@@ -62,7 +62,7 @@ export default async function BankAccountPage({
         <RecordHeader
           title="Bank Account Details"
           id={id}
-          primaryName={bankAccount.account_name || bankAccount.bank_name}
+          primaryName={bankAccount.bank_name}
           backHref="/bank-accounts"
           actions={actions}
         />

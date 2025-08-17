@@ -3,6 +3,13 @@
 import { supabase } from "@/lib/supabase";
 import { AppLogger } from "@/lib/logger";
 
+interface EntityRelationship {
+  id: string;
+  related_data_id: string;
+  type_of_record: string;
+  relationship_description?: string;
+}
+
 export async function getEntityRelationships(entityId: string) {
   try {
     console.log('getEntityRelationships called with entityId:', entityId);
@@ -17,7 +24,7 @@ export async function getEntityRelationships(entityId: string) {
         relationship_description
       `)
       .eq('entity_id', entityId)
-      .order('type_of_record', { ascending: true });
+      .order('type_of_record', { ascending: true }) as { data: EntityRelationship[] | null; error: any };
 
     if (relationshipsError) {
       console.error('Error fetching relationships:', relationshipsError);

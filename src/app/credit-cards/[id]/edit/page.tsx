@@ -33,7 +33,7 @@ export default async function EditCreditCardPage({
         <RecordHeader
           title="Edit Credit Card"
           id={id}
-          primaryName={creditCard.cardholder_name}
+          primaryName={creditCard.cardholder_name as string}
           backHref={`/credit-cards/${id}`}
         />
 

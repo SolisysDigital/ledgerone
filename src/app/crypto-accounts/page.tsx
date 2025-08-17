@@ -57,7 +57,7 @@ export default function CryptoAccountsPage() {
   };
 
   const getPrimaryField = () => {
-    const displayFields = ['platform', 'account_name', 'wallet_address'];
+    const displayFields = ['platform', 'account_number', 'wallet_address'];
     for (const field of displayFields) {
       if (config.fields.some((f: any) => f.name === field)) {
         return field;

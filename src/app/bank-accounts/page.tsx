@@ -56,7 +56,7 @@ export default function BankAccountsPage() {
   };
 
   const getPrimaryField = () => {
-    const displayFields = ['bank_name', 'account_name', 'account_number', 'institution_name'];
+    const displayFields = ['bank_name', 'account_number', 'routing_number', 'institution_held_at'];
     for (const field of displayFields) {
       if (config.fields.some((f: any) => f.name === field)) {
         return field;

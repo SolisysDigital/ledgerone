@@ -33,7 +33,7 @@ export default function EditRelationshipPage({ params }: EditRelationshipPagePro
         setLoadingRelationship(true);
         const relationshipData = await getRelationship(relationshipId);
         setRelationship(relationshipData);
-        setRelationshipDescription(relationshipData?.relationship_description || "");
+        setRelationshipDescription((relationshipData?.relationship_description as string) || "");
       } catch (error) {
         console.error('Error loading relationship:', error);
       } finally {

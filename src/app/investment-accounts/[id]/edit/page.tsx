@@ -6,6 +6,7 @@ import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWra
 import RecordHeader from "@/components/record/RecordHeader";
 import EditForm from "@/app/[table]/[id]/edit/EditForm";
 import { tableConfigs } from "@/lib/tableConfigs";
+import { InvestmentAccount } from "@/lib/entities/investment-account.fields";
 
 export default async function EditInvestmentAccountPage({ 
   params 
@@ -22,7 +23,7 @@ export default async function EditInvestmentAccountPage({
     .from('investment_accounts')
     .select("*")
     .eq("id", id)
-    .single();
+    .single() as { data: InvestmentAccount | null; error: any };
 
   if (error || !investmentAccount) return notFound();
 
@@ -33,7 +34,7 @@ export default async function EditInvestmentAccountPage({
         <RecordHeader
           title="Edit Investment Account"
           id={id}
-          primaryName={investmentAccount.account_name || investmentAccount.provider}
+          primaryName={investmentAccount.provider}
           backHref={`/investment-accounts/${id}`}
         />
 

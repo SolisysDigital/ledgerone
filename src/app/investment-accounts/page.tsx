@@ -57,7 +57,7 @@ export default function InvestmentAccountsPage() {
   };
 
   const getPrimaryField = () => {
-    const displayFields = ['provider', 'account_name', 'account_number'];
+    const displayFields = ['provider', 'account_type', 'account_number'];
     for (const field of displayFields) {
       if (config.fields.some((f: any) => f.name === field)) {
         return field;

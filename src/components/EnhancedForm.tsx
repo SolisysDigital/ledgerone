@@ -132,6 +132,9 @@ export default function EnhancedForm({
       // Clean up the data - handle updates vs creates differently
       const cleanedData: Record<string, any> = {};
       Object.entries(data).forEach(([key, value]) => {
+        // Get field configuration to understand the expected type
+        const fieldConfig = config.fields.find((f: FieldConfig) => f.name === key);
+        
         // For updates, include all fields even if empty to allow clearing
         // For creates, only include non-empty values
         if (initialData) {
@@ -139,12 +142,30 @@ export default function EnhancedForm({
           if (value === '' || value === null || value === undefined) {
             cleanedData[key] = null;
           } else {
-            cleanedData[key] = value;
+            // Handle number fields - convert empty strings to null, ensure numbers are valid
+            if (fieldConfig?.type === 'number') {
+              if (value === '' || value === null || value === undefined) {
+                cleanedData[key] = null;
+              } else {
+                const numValue = Number(value);
+                cleanedData[key] = isNaN(numValue) ? null : numValue;
+              }
+            } else {
+              cleanedData[key] = value;
+            }
           }
         } else {
           // This is a create - only include non-empty values
           if (value !== undefined && value !== null && value !== '') {
-            cleanedData[key] = value;
+            // Handle number fields - ensure they're valid numbers
+            if (fieldConfig?.type === 'number') {
+              const numValue = Number(value);
+              if (!isNaN(numValue)) {
+                cleanedData[key] = numValue;
+              }
+            } else {
+              cleanedData[key] = value;
+            }
           }
         }
       });
@@ -152,6 +173,40 @@ export default function EnhancedForm({
       console.log('Cleaned data:', cleanedData);
       console.log('Table:', table);
       console.log('Is update:', !!initialData);
+      
+      // Log specific field processing for debugging
+      if (table === 'entities') {
+        const numberFields = config.fields.filter((f: FieldConfig) => f.type === 'number');
+        console.log('Number fields in entities:', numberFields.map((f: FieldConfig) => f.name));
+        numberFields.forEach((field: FieldConfig) => {
+          console.log(`Field ${field.name}:`, {
+            original: data[field.name],
+            cleaned: cleanedData[field.name],
+            type: typeof cleanedData[field.name]
+          });
+        });
+        
+        // Additional validation for entities table
+        const validationErrors: string[] = [];
+        numberFields.forEach((field: FieldConfig) => {
+          const value = cleanedData[field.name];
+          if (value !== null && value !== undefined && (typeof value !== 'number' || isNaN(value))) {
+            validationErrors.push(`${field.name} must be a valid number or empty`);
+          }
+        });
+        
+        if (validationErrors.length > 0) {
+          const error = new Error(`Validation errors: ${validationErrors.join(', ')}`);
+          console.error('Validation errors:', validationErrors);
+          await AppLogger.error('EnhancedForm', 'validation', 'Number field validation failed', error, { 
+            table, 
+            validationErrors,
+            cleanedData 
+          });
+          alert(`Validation errors:\n${validationErrors.join('\n')}`);
+          return;
+        }
+      }
       
       // Log cleaned data
       await AppLogger.debug('EnhancedForm', 'data_cleaning', `Data cleaned for ${table}`, { 
@@ -202,6 +257,7 @@ export default function EnhancedForm({
       }
       
       console.log('=== ABOUT TO CALL onSubmit ===');
+      console.log('Final cleaned data being sent to database:', JSON.stringify(cleanedData, null, 2));
       await AppLogger.debug('EnhancedForm', 'onSubmit_call', `About to call onSubmit for ${table}`, { 
         table, 
         cleanedData 

@@ -42,15 +42,29 @@ export default function LogsPage() {
     try {
       setLoading(true);
       const recentLogs = await AppLogger.getRecentErrors(100);
-      setLogs(recentLogs || []);
+      
+      // Map the database response to LogEntry structure
+      const mappedLogs: LogEntry[] = (recentLogs || []).map((log: any) => ({
+        id: log.id || '',
+        timestamp: log.timestamp || log.created_at || new Date().toISOString(),
+        level: (log.level || log.log_level || 'INFO') as 'ERROR' | 'WARNING' | 'INFO' | 'DEBUG',
+        source: log.source || log.source_name || '',
+        action: log.action || log.action_name || '',
+        message: log.message || log.error_message || '',
+        details: log.details || log.error_details || log.metadata,
+        stack_trace: log.stack_trace || log.error_stack || '',
+        user_id: log.user_id || log.userId || undefined
+      }));
+      
+      setLogs(mappedLogs);
       
       // Calculate stats
       const stats = {
-        total: recentLogs?.length || 0,
-        errors: recentLogs?.filter(log => log.level === 'ERROR').length || 0,
-        warnings: recentLogs?.filter(log => log.level === 'WARNING').length || 0,
-        info: recentLogs?.filter(log => log.level === 'INFO').length || 0,
-        debug: recentLogs?.filter(log => log.level === 'DEBUG').length || 0
+        total: mappedLogs.length,
+        errors: mappedLogs.filter(log => log.level === 'ERROR').length,
+        warnings: mappedLogs.filter(log => log.level === 'WARNING').length,
+        info: mappedLogs.filter(log => log.level === 'INFO').length,
+        debug: mappedLogs.filter(log => log.level === 'DEBUG').length
       };
       setStats(stats);
     } catch (error) {

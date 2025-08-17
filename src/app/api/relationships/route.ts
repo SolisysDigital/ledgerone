@@ -15,38 +15,59 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Entity ID is required' }, { status: 400 });
     }
 
+    // Try to use the view first, fallback to basic table if view doesn't exist
     let query = supabase
-      .from('entity_related_data')
-      .select(`
-        *,
-        related_record:related_data_id(
-          id,
-          name,
-          email,
-          phone,
-          bank_name,
-          provider,
-          platform,
-          cardholder_name,
-          url,
-          account_name
-        )
-      `)
+      .from('entity_relationships_view')
+      .select('*')
       .eq('entity_id', entityId);
 
     if (typeOfRecord) {
       query = query.eq('type_of_record', typeOfRecord);
     }
 
-    const { data, error } = await query;
+    let { data, error } = await query;
+
+    // If view doesn't exist, fallback to basic table
+    if (error && error.message && error.message.includes('relation "entity_relationships_view" does not exist')) {
+      console.log('View not found, falling back to basic table');
+      
+      query = supabase
+        .from('entity_related_data')
+        .select('*')
+        .eq('entity_id', entityId);
+
+      if (typeOfRecord) {
+        query = query.eq('type_of_record', typeOfRecord);
+      }
+
+      const fallbackResult = await query;
+      data = fallbackResult.data;
+      error = fallbackResult.error;
+    }
 
     if (error) {
+      console.error('Supabase error:', error);
       await AppLogger.error('api/relationships', 'GET', 'Failed to fetch relationships', error, { entityId, typeOfRecord });
-      return NextResponse.json({ error: 'Failed to fetch relationships' }, { status: 500 });
+      
+      return NextResponse.json({ 
+        error: 'Failed to fetch relationships',
+        details: error.message 
+      }, { status: 500 });
     }
 
     await AppLogger.info('api/relationships', 'GET', 'Successfully fetched relationships', { entityId, typeOfRecord, count: data?.length });
-    return NextResponse.json(data);
+    
+    // Add metadata about the data source
+    const responseData = {
+      data: data || [],
+      metadata: {
+        source: 'entity_relationships_view',
+        count: data?.length || 0,
+        hasDisplayNames: data && data.length > 0 && 'related_data_display_name' in data[0]
+      }
+    };
+    
+    return NextResponse.json(responseData);
   } catch (error) {
     await AppLogger.error('api/relationships', 'GET', 'Exception in GET relationships', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

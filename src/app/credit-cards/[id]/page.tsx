@@ -61,7 +61,7 @@ export default async function CreditCardPage({
         <RecordHeader
           title="Credit Card Details"
           id={id}
-          primaryName={creditCard.cardholder_name}
+          primaryName={creditCard.cardholder_name as string}
           backHref="/credit-cards"
           actions={actions}
         />

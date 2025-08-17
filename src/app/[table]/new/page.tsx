@@ -38,7 +38,7 @@ export default async function CreatePage({
         .eq('id', resolvedSearchParams.fk)
         .single();
       
-      if (entityData) {
+      if (entityData && typeof entityData.name === 'string') {
         entityName = entityData.name;
       }
     }

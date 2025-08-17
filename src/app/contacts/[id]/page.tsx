@@ -49,9 +49,9 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
               <h1 className="text-2xl font-bold text-foreground">Contact Details</h1>
               <div className="flex items-center gap-3">
                 <p className="text-sm text-muted-foreground">ID: {id}</p>
-                {contact.name && (
+                {(contact.name as string) && (
                   <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-xl">
-                    {contact.name}
+                    {contact.name as string}
                   </span>
                 )}
               </div>

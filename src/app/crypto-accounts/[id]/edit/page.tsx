@@ -6,6 +6,7 @@ import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWra
 import RecordHeader from "@/components/record/RecordHeader";
 import EditForm from "@/app/[table]/[id]/edit/EditForm";
 import { tableConfigs } from "@/lib/tableConfigs";
+import { CryptoAccount } from "@/lib/entities/crypto-account.fields";
 
 export default async function EditCryptoAccountPage({ 
   params 
@@ -22,7 +23,7 @@ export default async function EditCryptoAccountPage({
     .from('crypto_accounts')
     .select("*")
     .eq("id", id)
-    .single();
+    .single() as { data: CryptoAccount | null; error: any };
 
   if (error || !cryptoAccount) return notFound();
 
@@ -33,7 +34,7 @@ export default async function EditCryptoAccountPage({
         <RecordHeader
           title="Edit Crypto Account"
           id={id}
-          primaryName={cryptoAccount.account_name || cryptoAccount.platform}
+          primaryName={cryptoAccount.platform}
           backHref={`/crypto-accounts/${id}`}
         />
 

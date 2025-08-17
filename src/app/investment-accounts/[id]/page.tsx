@@ -9,7 +9,7 @@ import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWra
 import ClientRelationshipTabs from "@/components/relationships/ClientRelationshipTabs";
 import RecordHeader from "@/components/record/RecordHeader";
 import { DetailsGrid } from "@/components/record/DetailsGrid";
-import { investmentAccountDisplayFields } from "@/lib/entities/investment-account.fields";
+import { investmentAccountDisplayFields, InvestmentAccount } from "@/lib/entities/investment-account.fields";
 
 export default async function InvestmentAccountPage({ 
   params 
@@ -23,7 +23,7 @@ export default async function InvestmentAccountPage({
     .from('investment_accounts')
     .select("*")
     .eq("id", id)
-    .single();
+    .single() as { data: InvestmentAccount | null; error: any };
 
   if (error || !investmentAccount) return notFound();
 
@@ -61,7 +61,7 @@ export default async function InvestmentAccountPage({
         <RecordHeader
           title="Investment Account Details"
           id={id}
-          primaryName={investmentAccount.account_name || investmentAccount.provider}
+          primaryName={investmentAccount.provider}
           backHref="/investment-accounts"
           actions={actions}
         />

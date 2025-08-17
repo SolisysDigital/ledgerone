@@ -6,6 +6,7 @@ import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWra
 import RecordHeader from "@/components/record/RecordHeader";
 import EditForm from "@/app/[table]/[id]/edit/EditForm";
 import { tableConfigs } from "@/lib/tableConfigs";
+import { HostingAccount } from "@/lib/entities/hosting-account.fields";
 
 export default async function EditHostingAccountPage({ 
   params 
@@ -22,7 +23,7 @@ export default async function EditHostingAccountPage({
     .from('hosting_accounts')
     .select("*")
     .eq("id", id)
-    .single();
+    .single() as { data: HostingAccount | null; error: any };
 
   if (error || !hostingAccount) return notFound();
 
@@ -33,7 +34,7 @@ export default async function EditHostingAccountPage({
         <RecordHeader
           title="Edit Hosting Account"
           id={id}
-          primaryName={hostingAccount.account_name || hostingAccount.provider}
+          primaryName={hostingAccount.provider}
           backHref={`/hosting-accounts/${id}`}
         />
 

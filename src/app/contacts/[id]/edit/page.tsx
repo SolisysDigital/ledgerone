@@ -25,9 +25,9 @@ export default async function EditContactPage({ params }: { params: Promise<{ id
           <h1 className="text-3xl font-bold">Edit Contact</h1>
           <div className="flex items-center gap-3 mt-2">
             <p className="text-gray-600">ID: {id}</p>
-            {contact.name && (
+            {(contact.name as string) && (
               <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-xl">
-                {contact.name}
+                {contact.name as string}
               </span>
             )}
           </div>

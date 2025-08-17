@@ -9,6 +9,17 @@ import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 import { tableConfigs } from "@/lib/tableConfigs";
 
+interface Phone {
+  id: string;
+  phone?: string | null;
+  label?: string | null;
+  short_description?: string | null;
+  description?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  user_id?: string;
+}
+
 interface PhoneDetailPageProps {
   params: Promise<{ id: string }>;
 }
@@ -20,7 +31,7 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
     .from('phones')
     .select('*')
     .eq('id', id)
-    .single();
+    .single() as { data: Phone | null; error: any };
 
   if (error || !phone) {
     notFound();
@@ -36,7 +47,7 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
       entities!inner(name)
     `)
     .eq('related_data_id', id)
-    .eq('type_of_record', 'phones');
+    .eq('type_of_record', 'phones') as { data: any[] | null; error: any };
 
   return (
     <ClientNavigationWrapper>

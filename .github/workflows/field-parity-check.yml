@@ -17,20 +17,23 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
         
     - name: Install dependencies
       run: npm ci
+      
+    - name: Type check
+      run: npm run typecheck
+      
+    - name: Lint code
+      run: npm run lint
       
     - name: Check field parity
       run: npm run test:field-parity
       
     - name: Build project
       run: npm run build
-      
-    - name: Lint code
-      run: npm run lint
       
     - name: Check for critical fields
       run: |
@@ -54,7 +57,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
         
     - name: Install dependencies

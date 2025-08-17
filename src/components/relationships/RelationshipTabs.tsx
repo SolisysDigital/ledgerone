@@ -79,10 +79,12 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
         throw new Error(`Failed to load relationships: ${response.status} ${response.statusText}`);
       }
       
-      const data = await response.json();
-      console.log('RelationshipTabs: Relationships loaded successfully:', data);
+      const responseData = await response.json();
+      console.log('RelationshipTabs: Relationships loaded successfully:', responseData);
       
-      setRelationships(data || []);
+      // Handle both old and new response formats
+      const relationships = responseData.data || responseData || [];
+      setRelationships(relationships);
     } catch (error) {
       console.error('RelationshipTabs: Error loading relationships:', error);
       setError(`Failed to load relationships: ${error instanceof Error ? error.message : 'Unknown error'}`);

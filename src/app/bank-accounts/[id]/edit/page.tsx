@@ -6,6 +6,7 @@ import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWra
 import RecordHeader from "@/components/record/RecordHeader";
 import EditForm from "@/app/[table]/[id]/edit/EditForm";
 import { tableConfigs } from "@/lib/tableConfigs";
+import { BankAccount } from "@/lib/entities/bank-account.fields";
 
 export default async function EditBankAccountPage({ 
   params 
@@ -22,7 +23,7 @@ export default async function EditBankAccountPage({
     .from('bank_accounts')
     .select("*")
     .eq("id", id)
-    .single();
+    .single() as { data: BankAccount | null; error: any };
 
   if (error || !bankAccount) return notFound();
 
@@ -33,7 +34,7 @@ export default async function EditBankAccountPage({
         <RecordHeader
           title="Edit Bank Account"
           id={id}
-          primaryName={bankAccount.account_name || bankAccount.bank_name}
+          primaryName={bankAccount.bank_name}
           backHref={`/bank-accounts/${id}`}
         />
 

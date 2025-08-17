@@ -136,7 +136,7 @@ export class AppLogger {
         p_session_id: logEntry.sessionId || null,
         p_ip_address: logEntry.ipAddress || null,
         p_user_agent: logEntry.userAgent || null
-      });
+      }) as { data: string | null; error: any };
 
       if (error) {
         console.error('Database function error:', error);
@@ -157,7 +157,7 @@ export class AppLogger {
             user_agent: logEntry.userAgent
           })
           .select('id')
-          .single();
+          .single() as { data: { id: string } | null; error: any };
 
         if (insertError) {
           console.error('Direct insert error:', insertError);
@@ -167,7 +167,7 @@ export class AppLogger {
         return { success: true, logId: insertData?.id };
       }
 
-      return { success: true, logId: data };
+      return { success: true, logId: data || undefined };
     } catch (error) {
       console.error('Logger error:', error);
       return { success: false, error: 'Logger failed' };

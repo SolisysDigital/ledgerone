@@ -57,7 +57,7 @@ export default function HostingAccountsPage() {
   };
 
   const getPrimaryField = () => {
-    const displayFields = ['provider', 'account_name', 'domain_name'];
+    const displayFields = ['provider', 'login_url', 'username'];
     for (const field of displayFields) {
       if (config.fields.some((f: any) => f.name === field)) {
         return field;

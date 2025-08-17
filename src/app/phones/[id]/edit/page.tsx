@@ -5,6 +5,17 @@ import EditForm from "@/app/[table]/[id]/edit/EditForm";
 import { notFound } from "next/navigation";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 
+interface Phone {
+  id: string;
+  phone?: string | null;
+  label?: string | null;
+  short_description?: string | null;
+  description?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  user_id?: string;
+}
+
 interface EditPhonePageProps {
   params: Promise<{ id: string }>;
 }
@@ -16,7 +27,7 @@ export default async function EditPhonePage({ params }: EditPhonePageProps) {
     .from('phones')
     .select('*')
     .eq('id', id)
-    .single();
+    .single() as { data: Phone | null; error: any };
 
   if (error || !phone) {
     notFound();

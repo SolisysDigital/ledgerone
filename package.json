@@ -2,11 +2,15 @@
   "name": "ledgerone",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0 <21"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
     "update-admin-password": "node scripts/update-admin-password.js",
     "test:field-parity": "node scripts/check-database-coverage.js",
     "test:coverage": "npm run test:field-parity",

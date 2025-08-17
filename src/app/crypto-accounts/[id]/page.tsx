@@ -9,7 +9,7 @@ import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWra
 import ClientRelationshipTabs from "@/components/relationships/ClientRelationshipTabs";
 import RecordHeader from "@/components/record/RecordHeader";
 import { DetailsGrid } from "@/components/record/DetailsGrid";
-import { cryptoAccountDisplayFields } from "@/lib/entities/crypto-account.fields";
+import { cryptoAccountDisplayFields, CryptoAccount } from "@/lib/entities/crypto-account.fields";
 
 export default async function CryptoAccountPage({ 
   params 
@@ -23,7 +23,7 @@ export default async function CryptoAccountPage({
     .from('crypto_accounts')
     .select("*")
     .eq("id", id)
-    .single();
+    .single() as { data: CryptoAccount | null; error: any };
 
   if (error || !cryptoAccount) return notFound();
 
@@ -61,7 +61,7 @@ export default async function CryptoAccountPage({
         <RecordHeader
           title="Crypto Account Details"
           id={id}
-          primaryName={cryptoAccount.account_name || cryptoAccount.platform}
+          primaryName={cryptoAccount.platform}
           backHref="/crypto-accounts"
           actions={actions}
         />
