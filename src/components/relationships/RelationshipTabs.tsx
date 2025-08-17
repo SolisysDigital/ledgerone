@@ -58,20 +58,10 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
 
   const loadRelationships = useCallback(async () => {
     try {
-      console.log('RelationshipTabs: Starting to load relationships for entityId:', entityId);
       setLoading(true);
       setError(null);
       
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 10000)
-      );
-      
-      const fetchPromise = fetch(`/api/relationships?entityId=${entityId}`);
-      
-      const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
-      
-      console.log('RelationshipTabs: Fetch response status:', response.status);
+      const response = await fetch(`/api/relationships?entityId=${entityId}`);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -80,10 +70,18 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
       }
       
       const responseData = await response.json();
-      console.log('RelationshipTabs: Relationships loaded successfully:', responseData);
+      console.log('RelationshipTabs: API response data:', responseData);
       
       // Handle both old and new response formats
       const relationships = responseData.data || responseData || [];
+      console.log('RelationshipTabs: Processed relationships:', relationships);
+      
+      // Log the first relationship to see its structure
+      if (relationships.length > 0) {
+        console.log('RelationshipTabs: First relationship structure:', relationships[0]);
+        console.log('RelationshipTabs: Available fields:', Object.keys(relationships[0]));
+      }
+      
       setRelationships(relationships);
     } catch (error) {
       console.error('RelationshipTabs: Error loading relationships:', error);
@@ -124,6 +122,15 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
   };
 
   const handleEditRelationship = (relationshipId: string, type: string) => {
+    console.log('RelationshipTabs: handleEditRelationship called with:', { relationshipId, type });
+    
+    // Check if relationshipId is valid
+    if (!relationshipId || relationshipId === 'undefined') {
+      console.error('RelationshipTabs: Invalid relationshipId:', relationshipId);
+      alert('Cannot edit relationship: Invalid relationship ID');
+      return;
+    }
+    
     router.push(`/entities/${entityId}/relationships/${type}/${relationshipId}/edit`);
   };
 
@@ -240,8 +247,10 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {typeRelationships.map((relationship) => (
-                          <TableRow key={relationship.id} className="hover:bg-muted/30 transition-colors duration-150 border-b border-teal-300">
+                        {typeRelationships.map((relationship) => {
+                          console.log('RelationshipTabs: Rendering relationship:', relationship);
+                          return (
+                          <TableRow key={relationship.id || relationship.related_data_id} className="hover:bg-muted/30 transition-colors duration-150 border-b border-teal-300">
                             <TableCell className="py-4">
                               <div className="flex items-center gap-3">
                                 <div className={`w-8 h-8 ${typeInfo.bgColor} rounded-lg flex items-center justify-center`}>
@@ -454,7 +463,12 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => handleEditRelationship(relationship.id, typeInfo.key)}
+                                  onClick={() => {
+                                    console.log('RelationshipTabs: Edit button clicked for relationship:', relationship);
+                                    const idToUse = relationship.id || relationship.related_data_id;
+                                    console.log('RelationshipTabs: Using ID for edit:', idToUse);
+                                    handleEditRelationship(idToUse, typeInfo.key);
+                                  }}
                                   className="hover:bg-muted/30 transition-colors duration-150"
                                   title="Edit Relationship"
                                 >
@@ -472,7 +486,8 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                               </div>
                             </TableCell>
                           </TableRow>
-                        ))}
+                        );
+                        })}
                       </TableBody>
                     </Table>
                   </div>
