@@ -21,6 +21,7 @@ interface EnhancedFormProps {
   config: any;
   initialData?: any;
   onSubmit: (data: any) => Promise<void>;
+  onCancel?: () => void;
   submitLabel?: string;
 }
 
@@ -34,6 +35,7 @@ export default function EnhancedForm({
   config, 
   initialData, 
   onSubmit, 
+  onCancel,
   submitLabel = "Save" 
 }: EnhancedFormProps) {
   const [fkOptions, setFkOptions] = useState<Record<string, FkOption[]>>({});
@@ -514,6 +516,11 @@ export default function EnhancedForm({
           </Accordion>
         )}
         <div className="flex justify-end space-x-2 pt-6 border-t">
+          {onCancel && (
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+          )}
           <Button type="submit" className="min-w-[100px]">
             {submitLabel}
           </Button>

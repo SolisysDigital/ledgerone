@@ -41,12 +41,18 @@ export default function CreateForm({ table, config, entityName }: CreateFormProp
     }
   };
 
+  const handleCancel = () => {
+    // Navigate back to the table listing page
+    router.push(`/${table}`);
+  };
+
   return (
     <EnhancedForm
       table={table}
       config={config}
       initialData={prefill}
       onSubmit={onSubmit}
+      onCancel={handleCancel}
       submitLabel="Create"
     />
   );
