@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { tableConfigs } from '@/lib/tableConfigs';
 
+// Force dynamic rendering to prevent build-time issues
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ table: string }> }
@@ -10,9 +13,19 @@ export async function GET(
     const resolvedParams = await params;
     const { table } = resolvedParams;
     
+    // Build-time safety check
+    if (!table) {
+      return NextResponse.json({ error: 'Invalid table parameter' }, { status: 400 });
+    }
+    
     const config = tableConfigs[table as keyof typeof tableConfigs];
     if (!config) {
       return NextResponse.json({ error: 'Table not found' }, { status: 404 });
+    }
+
+    // Only proceed if we have a valid Supabase connection
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database connection not available' }, { status: 503 });
     }
 
     const { searchParams } = new URL(request.url);
