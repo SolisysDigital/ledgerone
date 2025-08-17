@@ -27,26 +27,23 @@ export default function EditForm({ table, config, initialData }: EditFormProps) 
         data 
       });
       
-      await updateItem(table, initialData.id, data);
+      const result = await updateItem(table, initialData.id, data);
       
-      console.log('=== EDITFORM SUBMISSION COMPLETED ===');
-      await AppLogger.info('EditForm', 'submission_success', `EditForm submission completed for ${table}`, { 
-        table, 
-        entityId: initialData.id, 
-        data 
-      });
-      
-      // The updateItem function will handle the redirect, so we don't need to push here
-      // router.push(`/${table}/${initialData.id}`);
+      if (result.success) {
+        console.log('=== EDITFORM SUBMISSION COMPLETED ===');
+        await AppLogger.info('EditForm', 'submission_success', `EditForm submission completed for ${table}`, { 
+          table, 
+          entityId: initialData.id, 
+          data 
+        });
+        
+        // Navigate to the detail page on success
+        router.push(`/${table}/${initialData.id}`);
+      } else {
+        throw new Error(result.error || 'Update failed');
+      }
     } catch (error) {
       console.error('Error updating item:', error);
-      
-      // Check if this is a redirect error (which is actually success)
-      if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
-        console.log('Update successful - redirecting...');
-        router.push(`/${table}/${initialData.id}`);
-        return;
-      }
       
       await AppLogger.error('EditForm', 'submission_error', 'EditForm submission failed', error, { 
         table, 

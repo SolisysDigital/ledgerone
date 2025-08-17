@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import { createItem } from "@/lib/actions";
 import EnhancedForm from "@/components/EnhancedForm";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 interface CreateFormProps {
   table: string;
@@ -13,6 +13,7 @@ interface CreateFormProps {
 
 export default function CreateForm({ table, config, entityName }: CreateFormProps) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   
   const prefill = useMemo(() => {
     const result: Record<string, string> = {};
@@ -25,7 +26,19 @@ export default function CreateForm({ table, config, entityName }: CreateFormProp
   }, [searchParams]);
 
   const onSubmit = async (data: Record<string, string>) => {
-    await createItem(table, data);
+    try {
+      const result = await createItem(table, data);
+      
+      if (result.success) {
+        // Navigate to the table listing page on success
+        router.push(`/${table}`);
+      } else {
+        throw new Error(result.error || 'Creation failed');
+      }
+    } catch (error) {
+      console.error('Error creating item:', error);
+      alert('Error creating item. Please check the console for details.');
+    }
   };
 
   return (
