@@ -316,7 +316,7 @@ export default function EnhancedForm({
         })} className="space-y-6">
         {/* Main fields (not legal info) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {config.fields.filter((f: FieldConfig) => !legalInfoFields.includes(f.name) && !texasFields.includes(f.name) && !officerFields.flat().includes(f.name) && f.name !== 'short_description' && f.name !== 'description').map((field: FieldConfig) => {
+          {config.fields.filter((f: FieldConfig) => !legalInfoFields.includes(f.name) && !texasFields.includes(f.name) && !officerFields.flat().includes(f.name)).map((field: FieldConfig) => {
             // For foreign key fields, only show them if they're not already set (for creates)
             // For updates, foreign key fields are typically hidden since they shouldn't change
             if (field.type === "fk" && initialData && initialData[field.name]) return null;
@@ -342,52 +342,6 @@ export default function EnhancedForm({
           })}
         </div>
         
-        {/* Horizontal layout for short_description and description */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Short Description */}
-          <FormField
-            control={form.control}
-            name="short_description"
-            render={({ field: formField }) => (
-              <FormItem>
-                <FormLabel className="capitalize font-medium">
-                  Short Description
-                </FormLabel>
-                <FormControl>
-                  <Input 
-                    {...formField} 
-                    value={formField.value as string || ''}
-                    placeholder="Enter short description (max 50 characters)"
-                    maxLength={50}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          {/* Description */}
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field: formField }) => (
-              <FormItem>
-                <FormLabel className="capitalize font-medium">
-                  Description
-                </FormLabel>
-                <FormControl>
-                  <Textarea 
-                    {...formField} 
-                    value={formField.value as string || ''}
-                    placeholder="Enter detailed description"
-                    rows={3}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
         {/* Legal Info Accordion - Only show for entities table */}
         {table === 'entities' && (
           <Accordion type="single" collapsible defaultValue="legal-info">

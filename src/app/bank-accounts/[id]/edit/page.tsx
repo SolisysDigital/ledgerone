@@ -27,7 +27,19 @@ export default async function EditBankAccountPage({ params }: EditBankAccountPag
   return (
     <ClientNavigationWrapper>
       <div className="container mx-auto py-8">
-        <h1 className="text-3xl font-bold mb-6">Edit Bank Account</h1>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">Edit Bank Account</h1>
+            <div className="flex items-center gap-3 mt-2">
+              <p className="text-sm text-muted-foreground">ID: {id}</p>
+              {account.bank_name && (
+                <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-xl">
+                  {account.bank_name}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
         <Suspense fallback={<div>Loading form...</div>}>
           <EditForm table="bank_accounts" config={config} initialData={account} />
         </Suspense>

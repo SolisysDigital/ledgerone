@@ -43,7 +43,14 @@ export default async function EditPage({
             </Button>
             <div>
               <h1 className="text-lg font-bold">Edit {config.label}</h1>
-              <p className="text-xs text-muted-foreground">ID: {id}</p>
+              <div className="flex items-center gap-3">
+                <p className="text-xs text-muted-foreground">ID: {id}</p>
+                {(data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address || data.platform || data.cardholder_name) && (
+                  <span className="text-sm font-semibold text-white bg-teal-600 px-2 py-1 rounded-lg">
+                    {data.name || data.account_name || data.provider || data.domain_name || data.bank_name || data.phone || data.email_address || data.platform || data.cardholder_name}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>

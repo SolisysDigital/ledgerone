@@ -23,6 +23,14 @@ export default async function EditContactPage({ params }: { params: Promise<{ id
       <div className="container mx-auto p-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Edit Contact</h1>
+          <div className="flex items-center gap-3 mt-2">
+            <p className="text-gray-600">ID: {id}</p>
+            {contact.name && (
+              <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-xl">
+                {contact.name}
+              </span>
+            )}
+          </div>
           <p className="text-gray-600 mt-2">Update contact information</p>
         </div>
         
