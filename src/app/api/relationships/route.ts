@@ -45,6 +45,56 @@ export async function GET(request: NextRequest) {
       error = fallbackResult.error;
     }
 
+    // Ensure we have the relationship ID field for editing
+    if (data && data.length > 0) {
+      // Check if the data has the relationship ID field
+      const hasRelationshipId = 'id' in data[0];
+      console.log('API: Data has relationship ID field:', hasRelationshipId);
+      
+      if (!hasRelationshipId) {
+        console.log('API: Missing relationship ID field, enriching data with relationship IDs');
+        
+        // Enrich the data with relationship IDs by querying entity_related_data
+        const enrichedData = await Promise.all(
+          data.map(async (item: any) => {
+            try {
+              const { data: relationshipData, error: relError } = await supabase
+                .from('entity_related_data')
+                .select('id, relationship_description')
+                .eq('entity_id', entityId)
+                .eq('related_data_id', item.related_data_id || item.id)
+                .eq('type_of_record', item.type_of_record)
+                .single();
+
+              if (relError) {
+                console.warn('API: Could not find relationship data for item:', item);
+                return {
+                  ...item,
+                  relationship_id: null,
+                  relationship_description: item.relationship_description || null
+                };
+              }
+
+              return {
+                ...item,
+                relationship_id: relationshipData.id,
+                relationship_description: relationshipData.relationship_description
+              };
+            } catch (error) {
+              console.warn('API: Error enriching relationship data:', error);
+              return {
+                ...item,
+                relationship_id: null,
+                relationship_description: item.relationship_description || null
+              };
+            }
+          })
+        );
+        
+        data = enrichedData;
+      }
+    }
+
     if (error) {
       console.error('Supabase error:', error);
       await AppLogger.error('api/relationships', 'GET', 'Failed to fetch relationships', error, { entityId, typeOfRecord });

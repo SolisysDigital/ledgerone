@@ -32,6 +32,7 @@ interface Relationship {
   cardholder_name?: string;
   issuer?: string;
   platform?: string;
+  relationship_id?: string; // Added for edit button
 }
 
 interface RelationshipTabsProps {
@@ -465,7 +466,8 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                                   size="sm"
                                   onClick={() => {
                                     console.log('RelationshipTabs: Edit button clicked for relationship:', relationship);
-                                    const idToUse = relationship.id || relationship.related_data_id;
+                                    // Use relationship_id if available, otherwise fall back to id or related_data_id
+                                    const idToUse = relationship.relationship_id || relationship.id || relationship.related_data_id;
                                     console.log('RelationshipTabs: Using ID for edit:', idToUse);
                                     handleEditRelationship(idToUse, typeInfo.key);
                                   }}

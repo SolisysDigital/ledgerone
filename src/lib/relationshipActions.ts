@@ -288,7 +288,10 @@ export async function deleteRelationship(relationshipId: string) {
 
 export async function getRelationship(relationshipId: string) {
   try {
-    const { data, error } = await supabase
+    console.log('getRelationship called with relationshipId:', relationshipId);
+    
+    // First try to find the relationship by its ID in entity_related_data
+    let { data, error } = await supabase
       .from('entity_related_data')
       .select(`
         id,
@@ -300,12 +303,39 @@ export async function getRelationship(relationshipId: string) {
       .eq('id', relationshipId)
       .single();
 
+    // If not found by ID, try to find by related_data_id
+    if (error && error.code === 'PGRST116') {
+      console.log('Relationship not found by ID, trying to find by related_data_id:', relationshipId);
+      
+      const { data: relationshipByRelatedId, error: relatedIdError } = await supabase
+        .from('entity_related_data')
+        .select(`
+          id,
+          entity_id,
+          related_data_id,
+          type_of_record,
+          relationship_description
+        `)
+        .eq('related_data_id', relationshipId)
+        .single();
+
+      if (relatedIdError) {
+        console.log('Relationship not found by related_data_id either:', relatedIdError);
+        await AppLogger.error('relationshipActions', 'getRelationship', 'Failed to fetch relationship by ID or related_data_id', relatedIdError, { relationshipId });
+        throw new Error(`Relationship not found with ID: ${relationshipId}`);
+      }
+
+      data = relationshipByRelatedId;
+      error = null;
+      console.log('Found relationship by related_data_id:', data);
+    }
+
     if (error) {
       await AppLogger.error('relationshipActions', 'getRelationship', 'Failed to fetch relationship', error, { relationshipId });
       throw error;
     }
 
-    await AppLogger.info('relationshipActions', 'getRelationship', 'Successfully fetched relationship', { relationshipId });
+    await AppLogger.info('relationshipActions', 'getRelationship', 'Successfully fetched relationship', { relationshipId, relationshipData: data });
     return data;
   } catch (error) {
     await AppLogger.error('relationshipActions', 'getRelationship', 'Exception in getRelationship', error, { relationshipId });
