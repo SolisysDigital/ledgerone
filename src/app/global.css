@@ -9,6 +9,16 @@
   --font-montserrat: 'Montserrat', sans-serif;
 }
 
+/* Ensure buttons always have rounded corners */
+button, .btn, [class*="btn-"] {
+  border-radius: 0.5rem !important;
+}
+
+/* Force rounded corners for our Button component */
+[class*="inline-flex items-center justify-center"] {
+  border-radius: 0.5rem !important;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
