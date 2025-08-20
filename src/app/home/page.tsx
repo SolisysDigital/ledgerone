@@ -42,10 +42,9 @@ export default function HomePage() {
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Input
                   type="text"
-                  placeholder="Search entities, contacts, accounts, and more..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-full focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all duration-200"
                   autoFocus
                 />
               </div>
@@ -54,7 +53,7 @@ export default function HomePage() {
                 <Button 
                   type="submit" 
                   size="lg"
-                  className="px-8 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-full flex items-center space-x-2"
+                  className="px-8 py-3 bg-teal-600 hover:bg-teal-700 text-white flex items-center space-x-2"
                   disabled={!searchQuery.trim()}
                 >
                   <span>Search</span>
