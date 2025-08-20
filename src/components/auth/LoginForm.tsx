@@ -66,7 +66,6 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
                 <Input
                   id="username"
                   type="text"
-                  placeholder="Enter your username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="pl-10"
@@ -83,7 +82,6 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10"

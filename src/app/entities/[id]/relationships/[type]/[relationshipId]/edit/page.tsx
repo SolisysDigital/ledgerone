@@ -141,7 +141,6 @@ export default function EditRelationshipPage({ params }: EditRelationshipPagePro
                 <Label htmlFor="description">Relationship Description</Label>
                 <Textarea
                   id="description"
-                  placeholder={`Describe how this ${typeLabel.toLowerCase()} relates to the entity (e.g., "Primary Attorney", "Tax Advisor")`}
                   value={relationshipDescription}
                   onChange={(e) => setRelationshipDescription(e.target.value)}
                   rows={3}

@@ -296,13 +296,13 @@ export default function EnhancedForm({
   const renderField = (field: FieldConfig, formField: any) => {
     switch (field.type) {
       case "text":
-        return <Input {...formField} placeholder={`Enter ${field.name.replace(/_/g, ' ')}`} />;
+        return <Input {...formField} />;
       
       case "textarea":
-        return <Textarea {...formField} placeholder={`Enter ${field.name.replace(/_/g, ' ')}`} rows={3} />;
+        return <Textarea {...formField} rows={3} />;
       
       case "number":
-        return <Input type="number" step="any" {...formField} placeholder={`Enter ${field.name.replace(/_/g, ' ')}`} />;
+        return <Input type="number" step="any" {...formField} />;
       
       case "date":
         return <Input type="date" {...formField} />;

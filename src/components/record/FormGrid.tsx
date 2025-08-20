@@ -12,7 +12,6 @@ type FormGridProps<T extends FieldValues> = {
   fieldLabels?: Record<string, string>;
   fieldTypes?: Record<string, 'text' | 'textarea' | 'select' | 'number' | 'date'>;
   fieldOptions?: Record<string, string[]>;
-  fieldPlaceholders?: Record<string, string>;
   fieldMaxLengths?: Record<string, number>;
 };
 
@@ -22,7 +21,6 @@ export function FormGrid<T extends Record<string, any>>({
   fieldLabels = {},
   fieldTypes = {},
   fieldOptions = {},
-  fieldPlaceholders = {},
   fieldMaxLengths = {}
 }: FormGridProps<T>) {
   const getFieldLabel = (fieldName: string): string => {
@@ -38,14 +36,12 @@ export function FormGrid<T extends Record<string, any>>({
 
   const renderField = (fieldName: string, fieldType: string) => {
     const label = getFieldLabel(fieldName);
-    const placeholder = fieldPlaceholders[fieldName] || `Enter ${label.toLowerCase()}`;
     const maxLength = fieldMaxLengths[fieldName];
 
     switch (fieldType) {
       case 'textarea':
         return (
           <Textarea 
-            placeholder={placeholder}
             rows={3}
             maxLength={maxLength}
           />
@@ -56,7 +52,7 @@ export function FormGrid<T extends Record<string, any>>({
         return (
           <Select>
             <SelectTrigger>
-              <SelectValue placeholder={placeholder} />
+              <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
             </SelectTrigger>
             <SelectContent>
               {options.map((option) => (
@@ -72,7 +68,6 @@ export function FormGrid<T extends Record<string, any>>({
         return (
           <Input 
             type="number" 
-            placeholder={placeholder}
             step="0.01"
           />
         );
@@ -81,14 +76,12 @@ export function FormGrid<T extends Record<string, any>>({
         return (
           <Input 
             type="date" 
-            placeholder={placeholder}
           />
         );
       
       default:
         return (
           <Input 
-            placeholder={placeholder}
             maxLength={maxLength}
           />
         );
