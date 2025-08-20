@@ -20,11 +20,11 @@ function getSupabaseClient() {
     } else {
       // Only import and create real Supabase client when environment variables are available
       try {
-        // For now, always use mock client to ensure build works
-        // In production with proper env vars, this will be overridden
-        supabaseClient = createMockSupabaseClient();
+        const { createClient } = require('@supabase/supabase-js');
+        supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+        console.log('Real Supabase client created successfully');
       } catch (error) {
-        console.warn('Failed to create Supabase client, falling back to mock:', error);
+        console.warn('Failed to create real Supabase client, falling back to mock:', error);
         supabaseClient = createMockSupabaseClient();
       }
     }
