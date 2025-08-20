@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get IDs of already related records
-    const existingIds = (existingRelationships || []).map(r => r.related_data_id);
+    const existingIds = (existingRelationships || []).map((r: any) => r.related_data_id);
 
     // Get all records of the specified type
     const { data: allRecords, error: allRecordsError } = await supabase
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Filter out existing records
-    const availableRecords = (allRecords || []).filter(record => !existingIds.includes(record.id));
+    const availableRecords = (allRecords || []).filter((record: any) => !existingIds.includes(record.id));
 
     await AppLogger.info('api/available-records', 'GET', 'Successfully fetched available records', { typeOfRecord, entityId, count: availableRecords?.length });
     return NextResponse.json(availableRecords);

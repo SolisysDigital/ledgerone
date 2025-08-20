@@ -1,10 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from './supabase';
 import { User, LoginCredentials, LoginResponse } from '@/types/auth';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export class AuthService {
   static async login(credentials: LoginCredentials): Promise<LoginResponse> {
