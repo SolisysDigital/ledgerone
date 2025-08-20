@@ -137,7 +137,7 @@ export async function getAvailableRecords(typeOfRecord: string, entityId: string
     console.log('Existing relationships:', existingRelationships);
 
     // Get the IDs of already related records
-    const existingIds = (existingRelationships || []).map(r => r.related_data_id);
+    const existingIds = (existingRelationships || []).map((r: any) => r.related_data_id);
     console.log('Existing IDs to exclude:', existingIds);
 
     // Get all records of the specified type that are not already related to this entity
@@ -160,7 +160,7 @@ export async function getAvailableRecords(typeOfRecord: string, entityId: string
       console.log('All records fetched:', allRecords);
 
       // Filter out existing records in JavaScript
-      const availableRecords = (allRecords || []).filter(record => !existingIds.includes(record.id));
+      const availableRecords = (allRecords || []).filter((record: any) => !existingIds.includes(record.id));
       
       console.log('Available records after filtering:', availableRecords);
       await AppLogger.info('relationshipActions', 'getAvailableRecords', 'Successfully fetched available records', { typeOfRecord, entityId, count: availableRecords?.length });

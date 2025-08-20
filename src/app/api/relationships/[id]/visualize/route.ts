@@ -78,7 +78,7 @@ export async function GET(
             if (!childError && childRecords && childRecords.length > 0) {
               const primaryField = getPrimaryField(child.table, childRecords[0]);
               
-              const items = childRecords.map(record => ({
+              const items = childRecords.map((record: any) => ({
                 id: record.id,
                 label: record[primaryField] || `ID: ${record.id}`,
                 type: child.table,
@@ -110,7 +110,7 @@ export async function GET(
             if (!parentError && parentRecords && parentRecords.length > 0) {
               const primaryField = getPrimaryField(config.parent.table, parentRecords[0]);
               
-              const items = parentRecords.map(record => ({
+              const items = parentRecords.map((record: any) => ({
                 id: record.id,
                 label: record[primaryField] || `ID: ${record.id}`,
                 type: config.parent!.table,
@@ -169,7 +169,7 @@ export async function GET(
                 if (!actualError && actualRecords && actualRecords.length > 0) {
                   const primaryField = getPrimaryField(recordType, actualRecords[0]);
                   
-                  const items = actualRecords.map(record => ({
+                  const items = actualRecords.map((record: any) => ({
                     id: record.id,
                     label: record[primaryField] || `ID: ${record.id}`,
                     type: recordType,
@@ -223,7 +223,7 @@ export async function GET(
             .in('id', relatedEntityIds);
 
           if (!entitiesError && relatedEntities && relatedEntities.length > 0) {
-            const items = relatedEntities.map(entity => ({
+            const items = relatedEntities.map((entity: any) => ({
               id: entity.id,
               label: entity.name || `ID: ${entity.id}`,
               type: 'entity',

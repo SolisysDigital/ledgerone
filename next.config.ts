@@ -3,8 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   typescript: {
-    // Temporarily disable TypeScript checking during build
-    ignoreBuildErrors: true,
+    // TypeScript checking is now enabled
   },
   eslint: {
     // Temporarily disable ESLint checking during build
