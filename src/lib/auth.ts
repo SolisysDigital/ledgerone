@@ -5,15 +5,18 @@ import CryptoJS from 'crypto-js';
 export class AuthService {
   // Track if we've already tried to ensure admin user
   private static adminUserEnsured = false;
+  private static adminUserEnsuring = false; // Prevent concurrent calls
 
   static async login(credentials: LoginCredentials): Promise<LoginResponse> {
     try {
       console.log('Attempting login with username:', credentials.username);
 
       // Only ensure admin user once per session
-      if (!this.adminUserEnsured) {
+      if (!this.adminUserEnsured && !this.adminUserEnsuring) {
+        this.adminUserEnsuring = true;
         await this.ensureAdminUser();
         this.adminUserEnsured = true;
+        this.adminUserEnsuring = false;
       }
 
       // Query for the user - we need the password_hash field for verification
@@ -91,6 +94,12 @@ export class AuthService {
 
   static async ensureAdminUser(): Promise<void> {
     try {
+      // Double-check to prevent race conditions
+      if (this.adminUserEnsured) {
+        console.log('Admin user already ensured, skipping...');
+        return;
+      }
+      
       // Check if admin user exists
       const { data: existingUser, error: checkError } = await supabase
         .from('users')
