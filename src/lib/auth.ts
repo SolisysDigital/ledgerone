@@ -3,12 +3,18 @@ import { User, LoginCredentials, LoginResponse } from '@/types/auth';
 import CryptoJS from 'crypto-js';
 
 export class AuthService {
+  // Track if we've already tried to ensure admin user
+  private static adminUserEnsured = false;
+
   static async login(credentials: LoginCredentials): Promise<LoginResponse> {
     try {
       console.log('Attempting login with username:', credentials.username);
 
-      // First, try to ensure the users table exists and has admin user
-      await this.ensureAdminUser();
+      // Only ensure admin user once per session
+      if (!this.adminUserEnsured) {
+        await this.ensureAdminUser();
+        this.adminUserEnsured = true;
+      }
 
       // Query for the user - we need the password_hash field for verification
       const { data, error } = await supabase
@@ -117,12 +123,19 @@ export class AuthService {
         .single();
 
       if (createError) {
+        // Check if it's a duplicate key error
+        if (createError.code === '23505') { // PostgreSQL unique constraint violation
+          console.log('Admin user already exists (caught duplicate key error)');
+          return;
+        }
         console.error('Failed to create admin user:', createError);
       } else {
         console.log('Admin user created successfully:', newUser);
       }
     } catch (error) {
+      // Handle any other errors gracefully
       console.error('Error ensuring admin user:', error);
+      // Don't throw - just log the error and continue
     }
   }
 
