@@ -1,19 +1,12 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
+import { getServiceSupabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!url || !serviceKey) {
-      throw new Error('Missing required environment variables for authentication');
-    }
-
-    const supabase = createClient(url, serviceKey, { auth: { persistSession: false }});
+    const supabase = getServiceSupabase();
     
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get('session');
