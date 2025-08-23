@@ -120,18 +120,98 @@ export const supabase = {
     // This should be replaced with proper typed functions
     console.warn(`Using deprecated 'supabase.from(${table})' - migrate to typed functions`);
     
+    const mockResult = { 
+      data: { 
+        id: 'mock-id', 
+        name: 'Mock Entity', 
+        description: 'Mock description',
+        // Log-specific fields for when querying logs
+        timestamp: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        level: 'INFO',
+        log_level: 'INFO',
+        source: 'mock-source',
+        source_name: 'mock-source',
+        action: 'mock-action',
+        action_name: 'mock-action',
+        message: 'Mock log message',
+        error_message: 'Mock log message',
+        details: {},
+        error_details: {},
+        metadata: {},
+        stack_trace: '',
+        error_stack: '',
+        user_id: 'mock-user-id',
+        userId: 'mock-user-id',
+        session_id: 'mock-session-id',
+        ip_address: '127.0.0.1',
+        user_agent: 'Mock User Agent'
+      }, 
+      error: null 
+    };
+
     const queryBuilder = {
       select: (columns?: string) => queryBuilder,
       insert: (data?: any) => queryBuilder,
       update: (data?: any) => queryBuilder,
       delete: () => queryBuilder,
-      eq: (column: string, value: any) => queryBuilder,
+      eq: (column: string, value: any) => mockResult,  // Return result after eq() for any operation
       single: () => ({ 
-        data: { id: 'mock-id', name: 'Mock Entity', description: 'Mock description' }, 
+        data: { 
+          id: 'mock-id', 
+          name: 'Mock Entity', 
+          description: 'Mock description',
+          // Log-specific fields for when querying logs
+          timestamp: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          level: 'INFO',
+          log_level: 'INFO',
+          source: 'mock-source',
+          source_name: 'mock-source',
+          action: 'mock-action',
+          action_name: 'mock-action',
+          message: 'Mock log message',
+          error_message: 'Mock log message',
+          details: {},
+          error_details: {},
+          metadata: {},
+          stack_trace: '',
+          error_stack: '',
+          user_id: 'mock-user-id',
+          userId: 'mock-user-id',
+          session_id: 'mock-session-id',
+          ip_address: '127.0.0.1',
+          user_agent: 'Mock User Agent'
+        }, 
         error: null 
       }),
       maybeSingle: () => ({ 
-        data: { id: 'mock-id', name: 'Mock Entity', description: 'Mock description' }, 
+        data: { 
+          id: 'mock-id', 
+          name: 'Mock Entity', 
+          description: 'Mock description',
+          // Log-specific fields for when querying logs
+          timestamp: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          level: 'INFO',
+          log_level: 'INFO',
+          source: 'mock-source',
+          source_name: 'mock-source',
+          action: 'mock-action',
+          action_name: 'mock-action',
+          message: 'Mock log message',
+          error_message: 'Mock log message',
+          details: {},
+          error_details: {},
+          metadata: {},
+          stack_trace: '',
+          error_stack: '',
+          user_id: 'mock-user-id',
+          userId: 'mock-user-id',
+          session_id: 'mock-session-id',
+          ip_address: '127.0.0.1',
+          user_agent: 'Mock User Agent'
+        }, 
         error: null 
       }),
     };

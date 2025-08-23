@@ -149,7 +149,7 @@ export default async function EntityPage({
             <CardContent>
               <DetailsGrid
                 data={data}
-                displayFields={displayFields}
+                displayFields={displayFields as Array<keyof typeof data>}
                 fieldLabels={fieldLabels}
               />
             </CardContent>
@@ -216,7 +216,7 @@ export default async function EntityPage({
                     </div>
                     <DetailsGrid
                       data={data}
-                      displayFields={displayFields}
+                      displayFields={displayFields as Array<keyof typeof data>}
                       fieldLabels={fieldLabels}
                     />
                   </div>
