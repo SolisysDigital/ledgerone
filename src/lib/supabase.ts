@@ -67,8 +67,8 @@ export async function selectUserByUsername(
   const supabase = getServiceSupabase();
   // Explicit column list to avoid ever exposing sensitive fields by accident
   const { data, error } = await supabase
-    .from<'users', TableRow<'users'>>('users')
-    .select('id, username, password_hash, full_name, role, status')
+    .from('users')
+    .select('id, username, password_hash, full_name, role, status, created_at, updated_at')
     .eq('username', username)
     .maybeSingle();
 
@@ -78,7 +78,7 @@ export async function selectUserByUsername(
     // You may want to log this on the server
     throw new Error(`selectUserByUsername failed: ${message}`);
   }
-  return data ?? null;
+  return data as TableRow<'users'> | null;
 }
 
 /** Example safe wrapper around RPC calls without `any`. */
@@ -88,7 +88,7 @@ export async function callRpc<
   Ret  extends Database['public']['Functions'][FnName] extends { Returns: infer R } ? R : never
 >(fn: FnName, args: Args): Promise<Ret> {
   const supabase = getServiceSupabase();
-  const { data, error } = await supabase.rpc<Ret>(fn as string, args as Record<string, unknown>);
+  const { data, error } = await supabase.rpc(fn as string, args as Record<string, unknown>);
   if (error) {
     const message = typeof error.message === 'string' ? error.message : 'Unknown error';
     throw new Error(`RPC ${String(fn)} failed: ${message}`);
@@ -223,14 +223,23 @@ export const supabase = {
             short_description: 'Mock website',
             description: 'Mock website description',
           };
-        case 'entities':
-          return {
-            ...baseData,
-            name: 'Mock Entity',
-            type: 'Company',
-            short_description: 'Mock entity',
-            description: 'Mock entity description',
-          };
+                 case 'entities':
+           return {
+             ...baseData,
+             name: 'Mock Entity',
+             type: 'Company',
+             short_description: 'Mock entity',
+             description: 'Mock entity description',
+           };
+         case 'users':
+           return {
+             ...baseData,
+             username: 'mock-user',
+             password_hash: 'mock-hash',
+             full_name: 'Mock User',
+             role: 'admin',
+             status: 'active',
+           };
         case 'app_logs':
         case 'debug_logs':
           return {
@@ -277,23 +286,36 @@ export const supabase = {
     const mockData = generateMockData(table);
 
     // Create flexible mock results that can adapt to expected types
+    const mockError = {
+      message: 'Mock error message',
+      code: 'MOCK_ERROR',
+      details: 'Mock error details',
+      hint: 'Mock error hint',
+    };
+
     const mockResult = { 
       data: mockData as any, 
-      error: null 
+      error: null as any,
+      count: 1,
     };
     const mockArrayResult = { 
       data: [mockData] as any[], 
-      error: null, 
+      error: null as any, 
       count: 1 
     };
 
-    // Create a proper chainable query builder with Promise-like behavior
+    // Create a query builder that is both chainable and awaitable
     const createQueryBuilder = () => {
+      let currentResult = mockResult;
+      
       const builder = {
         select: (columns?: string, options?: any) => builder,
         insert: (data?: any) => builder,
         update: (data?: any) => builder,
-        delete: () => builder,
+        delete: () => {
+          currentResult = { data: null, error: null, count: 0 };
+          return builder;
+        },
         eq: (column: string, value: any) => builder,
         neq: (column: string, value: any) => builder,
         gt: (column: string, value: any) => builder,
@@ -321,46 +343,31 @@ export const supabase = {
         range: (from: number, to: number) => builder,
         abortSignal: (signal: any) => builder,
         or: (filters: string) => builder,
+        // Terminal methods that return promises with correct result types
         count: (type?: string) => Promise.resolve(mockArrayResult),
         single: () => Promise.resolve(mockResult),
         maybeSingle: () => Promise.resolve(mockResult),
+        // Make the builder awaitable by adding Promise methods
+        then: (resolve: any, reject?: any) => Promise.resolve(currentResult).then(resolve, reject),
+        catch: (reject: any) => Promise.resolve(currentResult).catch(reject),
+        finally: (callback: any) => Promise.resolve(currentResult).finally(callback),
+        [Symbol.toStringTag]: 'Promise' as const,
       };
       
-      // Create a Promise-like wrapper that can be awaited
-      const createPromiseWrapper = (result: any) => {
-        const promise = Promise.resolve(result);
-        return Object.assign(promise, builder);
-      };
-      
-      // Override terminal methods to return Promise-like objects
-      builder.count = (type?: string) => createPromiseWrapper(mockArrayResult);
-      builder.single = () => createPromiseWrapper(mockResult);
-      builder.maybeSingle = () => createPromiseWrapper(mockResult);
-      
-      // Make the builder itself Promise-like for direct awaiting
-      const promiseBuilder = Object.assign(builder, {
-        then: (resolve: any) => Promise.resolve(mockResult).then(resolve),
-        catch: (reject: any) => Promise.resolve(mockResult).catch(reject),
-        finally: (callback: any) => Promise.resolve(mockResult).finally(callback),
-        [Symbol.toStringTag]: 'Promise',
-        // Add data and error properties for direct access
-        data: mockResult.data,
-        error: mockResult.error,
-      });
-      
-      return promiseBuilder;
+      return builder;
     };
     
     return createQueryBuilder();
   },
-  rpc: (functionName: string, params?: any) => ({ 
-    single: () => Promise.resolve({ data: 'mock-rpc-result', error: null }),
-    maybeSingle: () => Promise.resolve({ data: 'mock-rpc-result', error: null }),
-    then: (resolve: any) => Promise.resolve({ data: 'mock-rpc-result', error: null }).then(resolve),
-    catch: (reject: any) => Promise.resolve({ data: 'mock-rpc-result', error: null }).catch(reject),
-    finally: (callback: any) => Promise.resolve({ data: 'mock-rpc-result', error: null }).finally(callback),
-    [Symbol.toStringTag]: 'Promise',
-  }),
+  rpc: (functionName: string, params?: any) => {
+    const rpcResult = { data: 'mock-rpc-result', error: null };
+    const rpcPromise = Promise.resolve(rpcResult);
+    
+    return Object.assign(rpcPromise, {
+      single: () => Promise.resolve(rpcResult),
+      maybeSingle: () => Promise.resolve(rpcResult),
+    });
+  },
   auth: {
     signInWithPassword: (credentials: any) => ({ 
       data: { user: { id: 'mock-user-id', email: 'mock@example.com' }, session: null }, 
