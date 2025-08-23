@@ -175,13 +175,33 @@ export class AppLogger {
   }
 
   /**
+   * Get a specific log by ID
+   */
+  static async getLogById(logId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('app_logs')
+        .select('*')
+        .eq('id', logId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Failed to get log by ID:', error);
+      return null;
+    }
+  }
+
+  /**
    * Get recent errors
    */
   static async getRecentErrors(limit: number = 50) {
     try {
       const { data, error } = await supabase
-        .from('recent_errors')
+        .from('app_logs')
         .select('*')
+        .order('timestamp', { ascending: false })
         .limit(limit);
 
       if (error) throw error;

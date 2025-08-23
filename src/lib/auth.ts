@@ -29,28 +29,37 @@ export class AuthService {
         throw new Error('Invalid credentials - user not found');
       }
 
-      // Simple password check for demo (in production, use proper password hashing)
-      if (credentials.password !== 'admin123') {
-        console.log('Password mismatch');
-        throw new Error('Invalid credentials - wrong password');
+      // Use Supabase authentication instead of hardcoded password
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: credentials.username, // Assuming username is email
+        password: credentials.password
+      });
+
+      if (authError) {
+        console.log('Authentication failed:', authError.message);
+        throw new Error('Invalid credentials - authentication failed');
       }
 
-      // Update last login
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({ last_login: new Date().toISOString() })
-        .eq('id', data.id);
-
-      if (updateError) {
-        console.warn('Failed to update last login:', updateError);
+      if (!authData.user) {
+        console.log('No user returned from authentication');
+        throw new Error('Invalid credentials - no user returned');
       }
 
-      // Generate a simple token (in production, use JWT)
-      const token = btoa(JSON.stringify({ userId: data.id, timestamp: Date.now() }));
+      // Use Supabase session token
+      const token = authData.session?.access_token || '';
 
-      console.log('Login successful for user:', data.username);
+      // Get user profile from our users table if needed
+      const userProfile = {
+        id: authData.user.id,
+        username: authData.user.email || credentials.username,
+        full_name: authData.user.user_metadata?.full_name || 'System Administrator',
+        role: 'admin',
+        status: 'active'
+      };
+
+      console.log('Login successful for user:', userProfile.username);
       return {
-        user: data as User,
+        user: userProfile as User,
         token
       };
     } catch (error) {
