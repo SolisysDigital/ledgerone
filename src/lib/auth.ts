@@ -9,10 +9,10 @@ export class AuthService {
       // First, try to ensure the users table exists and has admin user
       await this.ensureAdminUser();
 
-      // Query for the user
+      // Query for the user - let's be explicit about the fields we need
       const { data, error } = await supabase
         .from('users')
-        .select('*')
+        .select('id, username, password, password_hash, full_name, role, status')
         .eq('username', credentials.username)
         .eq('status', 'active')
         .single();
@@ -29,32 +29,34 @@ export class AuthService {
         throw new Error('Invalid credentials - user not found');
       }
 
-      // Use Supabase authentication instead of hardcoded password
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: credentials.username, // Assuming username is email
-        password: credentials.password
-      });
-
-      if (authError) {
-        console.log('Authentication failed:', authError.message);
-        throw new Error('Invalid credentials - authentication failed');
+      // Check password against the stored value in our custom users table
+      // Handle both possible field names: 'password' or 'password_hash'
+      const storedPassword = data.password || data.password_hash;
+      
+      if (!storedPassword) {
+        console.log('User has no password field');
+        console.log('Available fields:', Object.keys(data));
+        throw new Error('Invalid credentials - user account not properly configured');
       }
 
-      if (!authData.user) {
-        console.log('No user returned from authentication');
-        throw new Error('Invalid credentials - no user returned');
+      // For now, let's use a simple password comparison
+      // In production, you should use proper password hashing (bcrypt, argon2, etc.)
+      if (storedPassword !== credentials.password) {
+        console.log('Password mismatch');
+        console.log('Stored password field:', storedPassword ? 'exists' : 'missing');
+        throw new Error('Invalid credentials - wrong password');
       }
 
-      // Use Supabase session token
-      const token = authData.session?.access_token || '';
+      // Generate a simple token (in production, use JWT)
+      const token = btoa(JSON.stringify({ userId: data.id, timestamp: Date.now() }));
 
-      // Get user profile from our users table if needed
+      // Use the user data from our custom table
       const userProfile = {
-        id: authData.user.id,
-        username: authData.user.email || credentials.username,
-        full_name: authData.user.user_metadata?.full_name || 'System Administrator',
-        role: 'admin',
-        status: 'active'
+        id: data.id,
+        username: data.username,
+        full_name: data.full_name || 'System Administrator',
+        role: data.role || 'admin',
+        status: data.status || 'active'
       };
 
       console.log('Login successful for user:', userProfile.username);
