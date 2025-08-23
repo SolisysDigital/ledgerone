@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { User, LoginCredentials, LoginResponse } from '@/types/auth';
+import CryptoJS from 'crypto-js';
 
 export class AuthService {
   static async login(credentials: LoginCredentials): Promise<LoginResponse> {
@@ -9,10 +10,10 @@ export class AuthService {
       // First, try to ensure the users table exists and has admin user
       await this.ensureAdminUser();
 
-      // Query for the user - let's be explicit about the fields we need
+      // Query for the user - we need the password_hash field for verification
       const { data, error } = await supabase
         .from('users')
-        .select('id, username, password, password_hash, full_name, role, status')
+        .select('id, username, password_hash, full_name, role, status')
         .eq('username', credentials.username)
         .eq('status', 'active')
         .single();
@@ -29,22 +30,34 @@ export class AuthService {
         throw new Error('Invalid credentials - user not found');
       }
 
-      // Check password against the stored value in our custom users table
-      // Handle both possible field names: 'password' or 'password_hash'
-      const storedPassword = data.password || data.password_hash;
-      
-      if (!storedPassword) {
-        console.log('User has no password field');
+      // Check password against the stored hash in our custom users table
+      if (!data.password_hash) {
+        console.log('User has no password_hash field');
         console.log('Available fields:', Object.keys(data));
         throw new Error('Invalid credentials - user account not properly configured');
       }
 
-      // For now, let's use a simple password comparison
-      // In production, you should use proper password hashing (bcrypt, argon2, etc.)
-      if (storedPassword !== credentials.password) {
-        console.log('Password mismatch');
-        console.log('Stored password field:', storedPassword ? 'exists' : 'missing');
-        throw new Error('Invalid credentials - wrong password');
+      // Try to verify the password using different methods
+      // First, try direct comparison (in case it's stored as plain text)
+      if (data.password_hash === credentials.password) {
+        console.log('Password verified by direct comparison');
+      } else {
+        // Try SHA-256 hash comparison
+        const sha256Hash = CryptoJS.SHA256(credentials.password).toString();
+        if (data.password_hash === sha256Hash) {
+          console.log('Password verified by SHA-256 hash');
+        } else {
+          // Try MD5 hash comparison (less secure, but common)
+          const md5Hash = CryptoJS.MD5(credentials.password).toString();
+          if (data.password_hash === md5Hash) {
+            console.log('Password verified by MD5 hash');
+          } else {
+            console.log('Password verification failed - no matching hash method found');
+            console.log('Stored hash:', data.password_hash);
+            console.log('Entered password length:', credentials.password.length);
+            throw new Error('Invalid credentials - wrong password');
+          }
+        }
       }
 
       // Generate a simple token (in production, use JWT)
