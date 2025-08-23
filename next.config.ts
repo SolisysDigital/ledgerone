@@ -37,9 +37,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default {
-  ...nextConfig,
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-};
+export default nextConfig;

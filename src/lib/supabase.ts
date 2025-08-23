@@ -120,103 +120,80 @@ export const supabase = {
     // This should be replaced with proper typed functions
     console.warn(`Using deprecated 'supabase.from(${table})' - migrate to typed functions`);
     
-    const mockResult = { 
-      data: { 
-        id: 'mock-id', 
-        name: 'Mock Entity', 
-        description: 'Mock description',
-        // Log-specific fields for when querying logs
-        timestamp: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        level: 'INFO',
-        log_level: 'INFO',
-        source: 'mock-source',
-        source_name: 'mock-source',
-        action: 'mock-action',
-        action_name: 'mock-action',
-        message: 'Mock log message',
-        error_message: 'Mock log message',
-        details: {},
-        error_details: {},
-        metadata: {},
-        stack_trace: '',
-        error_stack: '',
-        user_id: 'mock-user-id',
-        userId: 'mock-user-id',
-        session_id: 'mock-session-id',
-        ip_address: '127.0.0.1',
-        user_agent: 'Mock User Agent'
-      }, 
-      error: null 
+    const mockData = { 
+      id: 'mock-id', 
+      name: 'Mock Entity', 
+      description: 'Mock description',
+      // Log-specific fields for when querying logs
+      timestamp: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      level: 'INFO',
+      log_level: 'INFO',
+      source: 'mock-source',
+      source_name: 'mock-source',
+      action: 'mock-action',
+      action_name: 'mock-action',
+      message: 'Mock log message',
+      error_message: 'Mock log message',
+      details: {},
+      error_details: {},
+      metadata: {},
+      stack_trace: '',
+      error_stack: '',
+      user_id: 'mock-user-id',
+      userId: 'mock-user-id',
+      session_id: 'mock-session-id',
+      ip_address: '127.0.0.1',
+      user_agent: 'Mock User Agent'
     };
 
-    const queryBuilder = {
-      select: (columns?: string) => queryBuilder,
-      insert: (data?: any) => queryBuilder,
-      update: (data?: any) => queryBuilder,
-      delete: () => queryBuilder,
-      eq: (column: string, value: any) => mockResult,  // Return result after eq() for any operation
-      single: () => ({ 
-        data: { 
-          id: 'mock-id', 
-          name: 'Mock Entity', 
-          description: 'Mock description',
-          // Log-specific fields for when querying logs
-          timestamp: new Date().toISOString(),
-          created_at: new Date().toISOString(),
-          level: 'INFO',
-          log_level: 'INFO',
-          source: 'mock-source',
-          source_name: 'mock-source',
-          action: 'mock-action',
-          action_name: 'mock-action',
-          message: 'Mock log message',
-          error_message: 'Mock log message',
-          details: {},
-          error_details: {},
-          metadata: {},
-          stack_trace: '',
-          error_stack: '',
-          user_id: 'mock-user-id',
-          userId: 'mock-user-id',
-          session_id: 'mock-session-id',
-          ip_address: '127.0.0.1',
-          user_agent: 'Mock User Agent'
-        }, 
-        error: null 
-      }),
-      maybeSingle: () => ({ 
-        data: { 
-          id: 'mock-id', 
-          name: 'Mock Entity', 
-          description: 'Mock description',
-          // Log-specific fields for when querying logs
-          timestamp: new Date().toISOString(),
-          created_at: new Date().toISOString(),
-          level: 'INFO',
-          log_level: 'INFO',
-          source: 'mock-source',
-          source_name: 'mock-source',
-          action: 'mock-action',
-          action_name: 'mock-action',
-          message: 'Mock log message',
-          error_message: 'Mock log message',
-          details: {},
-          error_details: {},
-          metadata: {},
-          stack_trace: '',
-          error_stack: '',
-          user_id: 'mock-user-id',
-          userId: 'mock-user-id',
-          session_id: 'mock-session-id',
-          ip_address: '127.0.0.1',
-          user_agent: 'Mock User Agent'
-        }, 
-        error: null 
-      }),
+    const mockResult = { data: mockData, error: null };
+    const mockArrayResult = { data: [mockData], error: null, count: 1 };
+
+    // Create a proper chainable query builder
+    const createQueryBuilder = () => {
+      const builder = {
+        select: (columns?: string) => builder,
+        insert: (data?: any) => builder,
+        update: (data?: any) => builder,
+        delete: () => builder,
+        eq: (column: string, value: any) => builder,
+        neq: (column: string, value: any) => builder,
+        gt: (column: string, value: any) => builder,
+        gte: (column: string, value: any) => builder,
+        lt: (column: string, value: any) => builder,
+        lte: (column: string, value: any) => builder,
+        like: (column: string, value: any) => builder,
+        ilike: (column: string, value: any) => builder,
+        is: (column: string, value: any) => builder,
+        in: (column: string, values: any[]) => builder,
+        contains: (column: string, value: any) => builder,
+        containedBy: (column: string, value: any) => builder,
+        rangeGt: (column: string, value: any) => builder,
+        rangeGte: (column: string, value: any) => builder,
+        rangeLt: (column: string, value: any) => builder,
+        rangeLte: (column: string, value: any) => builder,
+        rangeAdjacent: (column: string, value: any) => builder,
+        overlaps: (column: string, value: any) => builder,
+        textSearch: (column: string, value: any) => builder,
+        match: (criteria: any) => builder,
+        not: (column: string, operator: string, value: any) => builder,
+        filter: (column: string, operator: string, value: any) => builder,
+        order: (column: string, options?: any) => builder,
+        limit: (count: number) => builder,
+        range: (from: number, to: number) => builder,
+        abortSignal: (signal: any) => builder,
+        or: (filters: string) => builder,
+        count: (type?: string) => mockArrayResult,
+        single: () => mockResult,
+        maybeSingle: () => mockResult,
+        then: (resolve: any) => resolve(mockResult),
+      };
+      
+      return builder;
     };
     
-    return queryBuilder;
+    return createQueryBuilder();
   },
   rpc: (functionName: string) => ({ 
     single: () => ({ data: 'mock-rpc-result', error: null }),
