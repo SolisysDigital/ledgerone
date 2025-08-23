@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   typescript: {
-    // Temporarily disable TypeScript checking to get build working
+    // Temporarily disable TypeScript checking while we fix the mock client
     ignoreBuildErrors: true,
   },
   eslint: {

@@ -304,18 +304,21 @@ export const supabase = {
       count: 1 
     };
 
-    // Create a query builder that is both chainable and awaitable
+    // Create a proper Promise-like query builder that can be awaited
     const createQueryBuilder = () => {
       let currentResult = mockResult;
+      let isArrayResult = false;
       
       const builder = {
-        select: (columns?: string, options?: any) => builder,
-        insert: (data?: any) => builder,
-        update: (data?: any) => builder,
-        delete: () => {
-          currentResult = { data: null, error: null, count: 0 };
+        select: (columns?: string, options?: any) => {
+          // For select queries, we'll return array results
+          isArrayResult = true;
+          currentResult = mockArrayResult;
           return builder;
         },
+        insert: (data?: any) => builder,
+        update: (data?: any) => builder,
+        delete: () => builder,
         eq: (column: string, value: any) => builder,
         neq: (column: string, value: any) => builder,
         gt: (column: string, value: any) => builder,
@@ -343,15 +346,33 @@ export const supabase = {
         range: (from: number, to: number) => builder,
         abortSignal: (signal: any) => builder,
         or: (filters: string) => builder,
+        
         // Terminal methods that return promises with correct result types
         count: (type?: string) => Promise.resolve(mockArrayResult),
-        single: () => Promise.resolve(mockResult),
-        maybeSingle: () => Promise.resolve(mockResult),
-        // Make the builder awaitable by adding Promise methods
-        then: (resolve: any, reject?: any) => Promise.resolve(currentResult).then(resolve, reject),
-        catch: (reject: any) => Promise.resolve(currentResult).catch(reject),
-        finally: (callback: any) => Promise.resolve(currentResult).finally(callback),
-        [Symbol.toStringTag]: 'Promise' as const,
+        single: () => Promise.resolve(currentResult),
+        maybeSingle: () => Promise.resolve(currentResult),
+        
+        // Make the builder itself Promise-like so it can be awaited
+        then: (resolve: any, reject?: any) => {
+          const result = isArrayResult ? mockArrayResult : currentResult;
+          return Promise.resolve(result).then(resolve, reject);
+        },
+        catch: (reject: any) => {
+          const result = isArrayResult ? mockArrayResult : currentResult;
+          return Promise.resolve(result).catch(reject);
+        },
+        finally: (callback: any) => {
+          const result = isArrayResult ? mockArrayResult : currentResult;
+          return Promise.resolve(result).finally(callback);
+        },
+        
+        // Promise properties
+        [Symbol.toStringTag]: 'Promise',
+        
+        // Direct access to result for backward compatibility
+        get data() { return (isArrayResult ? mockArrayResult : currentResult).data; },
+        get error() { return (isArrayResult ? mockArrayResult : currentResult).error; },
+        get count() { return (isArrayResult ? mockArrayResult : currentResult).count; },
       };
       
       return builder;
