@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 // Explicitly define the route segment to ensure priority
 export const runtime = 'nodejs';
 
+// Force deployment to fix route precedence - static routes should take priority over dynamic [table] routes
 // Enable verbose logging for debugging - can be disabled by setting VERBOSE_LOGIN=false
 const VERBOSE_LOGIN = process.env.VERBOSE_LOGIN !== 'false';
 
