@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getServiceSupabase } from '@/lib/supabase';
 import { tableConfigs } from '@/lib/tableConfigs';
 
 // Force dynamic rendering to prevent build-time issues
@@ -28,10 +28,9 @@ export async function GET(
       return NextResponse.json({ error: 'Table not found' }, { status: 404 });
     }
 
-    // Only proceed if we have a valid Supabase connection
-    if (!supabase) {
-      return NextResponse.json({ error: 'Database connection not available' }, { status: 503 });
-    }
+    // Use service role Supabase client to bypass RLS
+    const supabase = getServiceSupabase();
+    console.log(`[API] Using service role client for table: ${table}`);
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -69,6 +68,8 @@ export async function GET(
 
     const totalRecords = count || 0;
     const totalPages = Math.ceil(totalRecords / limit);
+
+    console.log(`[API] Table ${table}: Found ${totalRecords} records, returning ${data?.length || 0} records`);
 
     return NextResponse.json({
       records: data || [],

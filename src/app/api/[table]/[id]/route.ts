@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getServiceSupabase } from '@/lib/supabase';
 import { tableConfigs } from '@/lib/tableConfigs';
 
 // Force dynamic rendering to prevent build-time issues
@@ -31,10 +31,9 @@ export async function GET(
       return NextResponse.json({ error: 'Table not found' }, { status: 404 });
     }
 
-    // Only proceed if we have a valid Supabase connection
-    if (!supabase) {
-      return NextResponse.json({ error: 'Database connection not available' }, { status: 503 });
-    }
+    // Use service role Supabase client to bypass RLS
+    const supabase = getServiceSupabase();
+    console.log(`[API] Using service role client for table: ${table}, id: ${id}`);
 
     const { data, error } = await supabase
       .from(table)
@@ -46,6 +45,8 @@ export async function GET(
       console.error('Database error:', error);
       return NextResponse.json({ error: 'Record not found' }, { status: 404 });
     }
+
+    console.log(`[API] Table ${table}: Found record with id: ${id}`);
 
     return NextResponse.json(data);
 
@@ -81,10 +82,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Table not found' }, { status: 404 });
     }
 
-    // Only proceed if we have a valid Supabase connection
-    if (!supabase) {
-      return NextResponse.json({ error: 'Database connection not available' }, { status: 503 });
-    }
+    // Use service role Supabase client to bypass RLS
+    const supabase = getServiceSupabase();
+    console.log(`[API] Using service role client for DELETE on table: ${table}, id: ${id}`);
 
     const { error } = await supabase
       .from(table)
@@ -95,6 +95,8 @@ export async function DELETE(
       console.error('Database error:', error);
       return NextResponse.json({ error: 'Failed to delete record' }, { status: 500 });
     }
+
+    console.log(`[API] Table ${table}: Successfully deleted record with id: ${id}`);
 
     return NextResponse.json({ success: true });
 
