@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { FieldConfig } from "@/lib/tableConfigs";
+import { getApiUrl } from "@/lib/utils";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -83,7 +84,7 @@ export default function EnhancedForm({
       for (const field of fkFields) {
         if (field.refTable && field.displayField) {
           try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/${field.refTable}`, {
+            const response = await fetch(getApiUrl(`/${field.refTable}`), {
               method: 'GET',
               headers: {
                 'Content-Type': 'application/json',

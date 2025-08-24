@@ -1,6 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { tableConfigs } from "@/lib/tableConfigs";
+import { getApiUrl } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import EditForm from "@/app/[table]/[id]/edit/EditForm";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
@@ -9,7 +10,7 @@ export default async function EditContactPage({ params }: { params: Promise<{ id
   const { id } = await params;
 
   // Fetch contact data using the working API endpoint instead of direct Supabase
-  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/contacts/${id}`, {
+  const response = await fetch(getApiUrl(`/contacts/${id}`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

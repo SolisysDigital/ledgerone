@@ -5,6 +5,7 @@ import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWra
 import RecordHeader from "@/components/record/RecordHeader";
 import EditForm from "@/app/[table]/[id]/edit/EditForm";
 import { tableConfigs } from "@/lib/tableConfigs";
+import { getApiUrl } from "@/lib/utils";
 import { InvestmentAccount } from "@/lib/entities/investment-account.fields";
 
 export default async function EditInvestmentAccountPage({ 
@@ -18,7 +19,7 @@ export default async function EditInvestmentAccountPage({
   if (!config) return notFound();
 
   // Fetch investment account data using the working API endpoint instead of direct Supabase
-  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/investment-accounts/${id}`, {
+  const response = await fetch(getApiUrl(`/investment-accounts/${id}`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

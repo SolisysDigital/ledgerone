@@ -1,4 +1,5 @@
 import { tableConfigs } from "@/lib/tableConfigs";
+import { getApiUrl } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
   const { id } = await params;
   
   // Fetch contact data using the working API endpoint instead of direct Supabase
-  const contactResponse = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/contacts/${id}`, {
+  const contactResponse = await fetch(getApiUrl(`/contacts/${id}`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -31,7 +32,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
   }
 
   // Get entity relationships for this contact using the working API endpoint
-  const relationshipsResponse = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/relationships?related_data_id=${id}&type_of_record=contacts`, {
+  const relationshipsResponse = await fetch(getApiUrl(`/relationships?related_data_id=${id}&type_of_record=contacts`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

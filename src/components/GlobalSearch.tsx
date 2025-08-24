@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 // Remove supabase import - we'll use fetch instead
 import { tableConfigs } from "@/lib/tableConfigs";
+import { getApiUrl } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -61,7 +62,7 @@ export default function GlobalSearch() {
 
         // Use the working API endpoint for search
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/${tableName}`, {
+          const response = await fetch(getApiUrl(`/${tableName}`), {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { tableConfigs } from "@/lib/tableConfigs";
+import { getApiUrl } from "@/lib/utils";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, ArrowLeft, Users, FileText, Building2 } from "lucide-react";
@@ -23,7 +24,7 @@ export default async function EntityPage({
   if (!config) return notFound();
 
   // Fetch existing data using the working API endpoint instead of direct Supabase
-  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/${table}/${id}`, {
+  const response = await fetch(getApiUrl(`/${table}/${id}`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

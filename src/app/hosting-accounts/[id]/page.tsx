@@ -1,5 +1,6 @@
 import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { getApiUrl } from "@/lib/utils";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
@@ -18,7 +19,7 @@ export default async function HostingAccountPage({
   const { id } = await params;
   
   // Fetch hosting account data using the working API endpoint instead of direct Supabase
-  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/hosting-accounts/${id}`, {
+  const response = await fetch(getApiUrl(`/hosting-accounts/${id}`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

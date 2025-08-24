@@ -5,6 +5,7 @@ import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWra
 import RecordHeader from "@/components/record/RecordHeader";
 import EditForm from "@/app/[table]/[id]/edit/EditForm";
 import { tableConfigs } from "@/lib/tableConfigs";
+import { getApiUrl } from "@/lib/utils";
 import { CryptoAccount } from "@/lib/entities/crypto-account.fields";
 
 export default async function EditCryptoAccountPage({ 
@@ -18,7 +19,7 @@ export default async function EditCryptoAccountPage({
   if (!config) return notFound();
 
   // Fetch crypto account data using the working API endpoint instead of direct Supabase
-  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/crypto-accounts/${id}`, {
+  const response = await fetch(getApiUrl(`/crypto-accounts/${id}`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

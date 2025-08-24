@@ -6,6 +6,7 @@ import RecordHeader from "@/components/record/RecordHeader";
 import EditForm from "@/app/[table]/[id]/edit/EditForm";
 import { tableConfigs } from "@/lib/tableConfigs";
 import { HostingAccount } from "@/lib/entities/hosting-account.fields";
+import { getApiUrl } from "@/lib/utils";
 
 export default async function EditHostingAccountPage({ 
   params 
@@ -18,7 +19,7 @@ export default async function EditHostingAccountPage({
   if (!config) return notFound();
 
   // Fetch hosting account data using the working API endpoint instead of direct Supabase
-  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/hosting-accounts/${id}`, {
+  const response = await fetch(getApiUrl(`/hosting-accounts/${id}`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

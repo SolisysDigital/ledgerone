@@ -1,4 +1,5 @@
 import { tableConfigs } from "./tableConfigs";
+import { getApiUrl } from "./utils";
 
 export async function fetchRelatedData(table: string, id: string) {
   const config = tableConfigs[table as keyof typeof tableConfigs];
@@ -9,7 +10,7 @@ export async function fetchRelatedData(table: string, id: string) {
   // Fetch parent data using the working API endpoint
   if (config.parent) {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/${config.parent.table}?${config.parent.fk}=${id}`, {
+      const response = await fetch(getApiUrl(`/${config.parent.table}?${config.parent.fk}=${id}`), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -31,7 +32,7 @@ export async function fetchRelatedData(table: string, id: string) {
   if (config.children) {
     for (const child of config.children) {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/${child.table}?${child.fk}=${id}`, {
+        const response = await fetch(getApiUrl(`/${child.table}?${child.fk}=${id}`), {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

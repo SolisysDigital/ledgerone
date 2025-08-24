@@ -1,5 +1,6 @@
 import React from "react";
 import { tableConfigs } from "@/lib/tableConfigs";
+import { getApiUrl } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import CreateForm from "./CreateForm";
@@ -32,7 +33,7 @@ export default async function CreatePage({
     const fkField = config.fields.find(field => field.name === resolvedSearchParams.fkField);
     if (fkField && fkField.type === 'fk' && fkField.refTable) {
       // Fetch entity data using the working API endpoint instead of direct Supabase
-      const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/${fkField.refTable}/${resolvedSearchParams.fk}`, {
+      const response = await fetch(getApiUrl(`/${fkField.refTable}/${resolvedSearchParams.fk}`), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

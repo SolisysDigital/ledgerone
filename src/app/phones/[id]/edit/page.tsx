@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import { tableConfigs } from "@/lib/tableConfigs";
 import { notFound } from "next/navigation";
+import { getApiUrl } from "@/lib/utils";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 
 interface Phone {
@@ -22,7 +23,7 @@ export default async function EditPhonePage({ params }: EditPhonePageProps) {
   const { id } = await params;
   
   // Fetch phone data using the working API endpoint instead of direct Supabase
-  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/phones/${id}`, {
+  const response = await fetch(getApiUrl(`/phones/${id}`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

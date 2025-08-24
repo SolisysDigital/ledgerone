@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 import { tableConfigs } from "@/lib/tableConfigs";
+import { getApiUrl } from "@/lib/utils";
 
 interface Phone {
   id: string;
@@ -27,7 +28,7 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
   const { id } = await params;
   
   // Fetch phone data using the working API endpoint instead of direct Supabase
-  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/phones/${id}`, {
+  const response = await fetch(getApiUrl(`/phones/${id}`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

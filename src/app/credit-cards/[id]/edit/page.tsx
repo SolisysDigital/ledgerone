@@ -1,5 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
+import { getApiUrl } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 import RecordHeader from "@/components/record/RecordHeader";
@@ -17,7 +18,7 @@ export default async function EditCreditCardPage({
   if (!config) return notFound();
 
   // Fetch credit card data using the working API endpoint instead of direct Supabase
-  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/credit-cards/${id}`, {
+  const response = await fetch(getApiUrl(`/credit-cards/${id}`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
