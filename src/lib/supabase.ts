@@ -15,6 +15,9 @@ const SUPABASE_URL: string = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY: string = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 const SUPABASE_SERVICE_ROLE_KEY: string | undefined = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+// Check if we have the required environment variables for real Supabase
+const hasRealSupabaseConfig = SUPABASE_URL && SUPABASE_ANON_KEY;
+
 // Small helper to ensure required envs exist at runtime (server only)
 function assertEnv(name: string, value: string | undefined): asserts value is string {
   if (!value) {
@@ -29,6 +32,9 @@ let browserClient: SupabaseClient<Database> | null = null;
 
 export function getBrowserSupabase(): SupabaseClient<Database> {
   if (!browserClient) {
+    if (!hasRealSupabaseConfig) {
+      throw new Error('Supabase environment variables not configured');
+    }
     browserClient = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
         persistSession: true,
@@ -48,6 +54,9 @@ export function getBrowserSupabase(): SupabaseClient<Database> {
  */
 export function getServiceSupabase(): SupabaseClient<Database> {
   assertEnv('SUPABASE_SERVICE_ROLE_KEY', SUPABASE_SERVICE_ROLE_KEY);
+  if (!hasRealSupabaseConfig) {
+    throw new Error('Supabase environment variables not configured');
+  }
   return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
     global: { headers: { 'X-Client-Info': 'ledgerone/service' } },
@@ -112,289 +121,299 @@ export function safeParseJson<T>(value: string | null): T | null {
 
 // ---- Backward Compatibility Export ----
 // For existing code that imports { supabase } from '@/lib/supabase'
-// This will be deprecated in favor of the new typed functions
+// This will use the real client when available, mock client only as fallback
 
-export const supabase = {
-  from: (table: string) => {
-    // Return a mock query builder for backward compatibility
-    // This should be replaced with proper typed functions
-    console.warn(`Using deprecated 'supabase.from(${table})' - migrate to typed functions`);
-    
-    // Generate appropriate mock data based on table name
-    const generateMockData = (tableName: string) => {
-      const baseData = {
-        id: 'mock-id',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        user_id: 'mock-user-id',
+export const supabase = hasRealSupabaseConfig ? 
+  // Use real Supabase client when environment variables are available
+  createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  }) : 
+  // Fall back to mock client only when environment variables are missing
+  {
+    from: (table: string) => {
+      // Return a mock query builder for backward compatibility
+      // This should be replaced with proper typed functions
+      console.warn(`Using mock client for '${table}' - environment variables not configured`);
+      
+      // Generate appropriate mock data based on table name
+      const generateMockData = (tableName: string) => {
+        const baseData = {
+          id: 'mock-id',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          user_id: 'mock-user-id',
+        };
+
+        switch (tableName) {
+          case 'bank_accounts':
+            return {
+              ...baseData,
+              bank_name: 'Mock Bank',
+              account_number: '1234567890',
+              routing_number: '987654321',
+              institution_held_at: 'Mock Institution',
+              purpose: 'Personal',
+              last_balance: 1000.00,
+              short_description: 'Mock bank account',
+              description: 'Mock bank account description',
+            };
+          case 'credit_cards':
+            return {
+              ...baseData,
+              cardholder_name: 'Mock Cardholder',
+              card_number: '1234-5678-9012-3456',
+              issuer: 'Mock Issuer',
+              type: 'Visa',
+              institution_held_at: 'Mock Institution',
+              purpose: 'Personal',
+              last_balance: 500.00,
+              short_description: 'Mock credit card',
+              description: 'Mock credit card description',
+            };
+          case 'crypto_accounts':
+            return {
+              ...baseData,
+              platform: 'Mock Platform',
+              account_number: 'CRYPTO123',
+              wallet_address: '0x1234567890abcdef',
+              institution_held_at: 'Mock Institution',
+              purpose: 'Investment',
+              last_balance: 0.5,
+              short_description: 'Mock crypto account',
+              description: 'Mock crypto account description',
+            };
+          case 'hosting_accounts':
+            return {
+              ...baseData,
+              provider: 'Mock Provider',
+              login_url: 'https://mock-provider.com',
+              username: 'mockuser',
+              password: 'mockpass',
+              short_description: 'Mock hosting account',
+              description: 'Mock hosting account description',
+            };
+          case 'investment_accounts':
+            return {
+              ...baseData,
+              provider: 'Mock Investment Co',
+              account_type: 'Individual',
+              account_number: 'INV123456',
+              institution_held_at: 'Mock Institution',
+              purpose: 'Retirement',
+              last_balance: 50000.00,
+              short_description: 'Mock investment account',
+              description: 'Mock investment account description',
+            };
+          case 'contacts':
+            return {
+              ...baseData,
+              name: 'Mock Contact',
+              title: 'Mock Title',
+              email: 'mock@example.com',
+              phone: '+1-555-123-4567',
+              short_description: 'Mock contact',
+              description: 'Mock contact description',
+            };
+          case 'phones':
+            return {
+              ...baseData,
+              phone: '+1-555-123-4567',
+              label: 'Mobile',
+              short_description: 'Mock phone',
+              description: 'Mock phone description',
+            };
+          case 'emails':
+            return {
+              ...baseData,
+              email: 'mock@example.com',
+              label: 'Personal',
+              short_description: 'Mock email',
+              description: 'Mock email description',
+            };
+          case 'websites':
+            return {
+              ...baseData,
+              url: 'https://mock-website.com',
+              label: 'Personal Site',
+              short_description: 'Mock website',
+              description: 'Mock website description',
+            };
+          case 'entities':
+            return {
+              ...baseData,
+              name: 'Mock Entity',
+              type: 'Company',
+              short_description: 'Mock entity',
+              description: 'Mock entity description',
+            };
+          case 'users':
+            return {
+              ...baseData,
+              username: 'mock-user',
+              password_hash: 'mock-hash',
+              full_name: 'Mock User',
+              role: 'admin',
+              status: 'active',
+            };
+          case 'app_logs':
+          case 'debug_logs':
+            return {
+              ...baseData,
+              timestamp: new Date().toISOString(),
+              level: 'INFO',
+              log_level: 'INFO',
+              source: 'mock-source',
+              source_name: 'mock-source',
+              action: 'mock-action',
+              action_name: 'mock-action',
+              message: 'Mock log message',
+              error_message: 'Mock log message',
+              details: {},
+              error_details: {},
+              metadata: {},
+              stack_trace: '',
+              error_stack: '',
+              session_id: 'mock-session-id',
+              ip_address: '127.0.0.1',
+              user_agent: 'Mock User Agent',
+            };
+          case 'entity_related_data':
+          case 'entity_relationships':
+          case 'entity_relationships_view':
+            return {
+              ...baseData,
+              entity_id: 'mock-entity-id',
+              related_data_id: 'mock-related-id',
+              type_of_record: 'contacts',
+              relationship_description: 'Mock relationship',
+              related_data_display_name: 'Mock Related Data',
+            };
+          default:
+            return {
+              ...baseData,
+              name: 'Mock Record',
+              short_description: 'Mock description',
+              description: 'Mock detailed description',
+            };
+        }
       };
 
-      switch (tableName) {
-        case 'bank_accounts':
-          return {
-            ...baseData,
-            bank_name: 'Mock Bank',
-            account_number: '1234567890',
-            routing_number: '987654321',
-            institution_held_at: 'Mock Institution',
-            purpose: 'Personal',
-            last_balance: 1000.00,
-            short_description: 'Mock bank account',
-            description: 'Mock bank account description',
-          };
-        case 'credit_cards':
-          return {
-            ...baseData,
-            cardholder_name: 'Mock Cardholder',
-            card_number: '1234-5678-9012-3456',
-            issuer: 'Mock Issuer',
-            type: 'Visa',
-            institution_held_at: 'Mock Institution',
-            purpose: 'Personal',
-            last_balance: 500.00,
-            short_description: 'Mock credit card',
-            description: 'Mock credit card description',
-          };
-        case 'crypto_accounts':
-          return {
-            ...baseData,
-            platform: 'Mock Platform',
-            account_number: 'CRYPTO123',
-            wallet_address: '0x1234567890abcdef',
-            institution_held_at: 'Mock Institution',
-            purpose: 'Investment',
-            last_balance: 0.5,
-            short_description: 'Mock crypto account',
-            description: 'Mock crypto account description',
-          };
-        case 'hosting_accounts':
-          return {
-            ...baseData,
-            provider: 'Mock Provider',
-            login_url: 'https://mock-provider.com',
-            username: 'mockuser',
-            password: 'mockpass',
-            short_description: 'Mock hosting account',
-            description: 'Mock hosting account description',
-          };
-        case 'investment_accounts':
-          return {
-            ...baseData,
-            provider: 'Mock Investment Co',
-            account_type: 'Individual',
-            account_number: 'INV123456',
-            institution_held_at: 'Mock Institution',
-            purpose: 'Retirement',
-            last_balance: 50000.00,
-            short_description: 'Mock investment account',
-            description: 'Mock investment account description',
-          };
-        case 'contacts':
-          return {
-            ...baseData,
-            name: 'Mock Contact',
-            title: 'Mock Title',
-            email: 'mock@example.com',
-            phone: '+1-555-123-4567',
-            short_description: 'Mock contact',
-            description: 'Mock contact description',
-          };
-        case 'phones':
-          return {
-            ...baseData,
-            phone: '+1-555-123-4567',
-            label: 'Mobile',
-            short_description: 'Mock phone',
-            description: 'Mock phone description',
-          };
-        case 'emails':
-          return {
-            ...baseData,
-            email: 'mock@example.com',
-            label: 'Personal',
-            short_description: 'Mock email',
-            description: 'Mock email description',
-          };
-        case 'websites':
-          return {
-            ...baseData,
-            url: 'https://mock-website.com',
-            label: 'Personal Site',
-            short_description: 'Mock website',
-            description: 'Mock website description',
-          };
-                 case 'entities':
-           return {
-             ...baseData,
-             name: 'Mock Entity',
-             type: 'Company',
-             short_description: 'Mock entity',
-             description: 'Mock entity description',
-           };
-         case 'users':
-           return {
-             ...baseData,
-             username: 'mock-user',
-             password_hash: 'mock-hash',
-             full_name: 'Mock User',
-             role: 'admin',
-             status: 'active',
-           };
-        case 'app_logs':
-        case 'debug_logs':
-          return {
-            ...baseData,
-            timestamp: new Date().toISOString(),
-            level: 'INFO',
-            log_level: 'INFO',
-            source: 'mock-source',
-            source_name: 'mock-source',
-            action: 'mock-action',
-            action_name: 'mock-action',
-            message: 'Mock log message',
-            error_message: 'Mock log message',
-            details: {},
-            error_details: {},
-            metadata: {},
-            stack_trace: '',
-            error_stack: '',
-            session_id: 'mock-session-id',
-            ip_address: '127.0.0.1',
-            user_agent: 'Mock User Agent',
-          };
-        case 'entity_related_data':
-        case 'entity_relationships':
-        case 'entity_relationships_view':
-          return {
-            ...baseData,
-            entity_id: 'mock-entity-id',
-            related_data_id: 'mock-related-id',
-            type_of_record: 'contacts',
-            relationship_description: 'Mock relationship',
-            related_data_display_name: 'Mock Related Data',
-          };
-        default:
-          return {
-            ...baseData,
-            name: 'Mock Record',
-            short_description: 'Mock description',
-            description: 'Mock detailed description',
-          };
-      }
-    };
+      const mockData = generateMockData(table);
 
-    const mockData = generateMockData(table);
+      // Create flexible mock results that can adapt to expected types
+      const mockError = {
+        message: 'Mock error message',
+        code: 'MOCK_ERROR',
+        details: 'Mock error details',
+        hint: 'Mock error hint',
+      };
 
-    // Create flexible mock results that can adapt to expected types
-    const mockError = {
-      message: 'Mock error message',
-      code: 'MOCK_ERROR',
-      details: 'Mock error details',
-      hint: 'Mock error hint',
-    };
+      const mockResult = { 
+        data: mockData as any, 
+        error: null as any,
+        count: 1,
+      };
+      const mockArrayResult = { 
+        data: [mockData] as any[], 
+        error: null as any, 
+        count: 1 
+      };
 
-    const mockResult = { 
-      data: mockData as any, 
-      error: null as any,
-      count: 1,
-    };
-    const mockArrayResult = { 
-      data: [mockData] as any[], 
-      error: null as any, 
-      count: 1 
-    };
-
-    // Create a proper Promise-like query builder that can be awaited
-    const createQueryBuilder = () => {
-      let currentResult = mockResult;
-      let isArrayResult = false;
-      
-      const builder = {
-        select: (columns?: string, options?: any) => {
-          // For select queries, we'll return array results
-          isArrayResult = true;
-          currentResult = mockArrayResult;
-          return builder;
-        },
-        insert: (data?: any) => builder,
-        update: (data?: any) => builder,
-        delete: () => builder,
-        eq: (column: string, value: any) => builder,
-        neq: (column: string, value: any) => builder,
-        gt: (column: string, value: any) => builder,
-        gte: (column: string, value: any) => builder,
-        lt: (column: string, value: any) => builder,
-        lte: (column: string, value: any) => builder,
-        like: (column: string, value: any) => builder,
-        ilike: (column: string, value: any) => builder,
-        is: (column: string, value: any) => builder,
-        in: (column: string, values: any[]) => builder,
-        contains: (column: string, value: any) => builder,
-        containedBy: (column: string, value: any) => builder,
-        rangeGt: (column: string, value: any) => builder,
-        rangeGte: (column: string, value: any) => builder,
-        rangeLt: (column: string, value: any) => builder,
-        rangeLte: (column: string, value: any) => builder,
-        rangeAdjacent: (column: string, value: any) => builder,
-        overlaps: (column: string, value: any) => builder,
-        textSearch: (column: string, value: any) => builder,
-        match: (criteria: any) => builder,
-        not: (column: string, operator: string, value: any) => builder,
-        filter: (column: string, operator: string, value: any) => builder,
-        order: (column: string, options?: any) => builder,
-        limit: (count: number) => builder,
-        range: (from: number, to: number) => builder,
-        abortSignal: (signal: any) => builder,
-        or: (filters: string) => builder,
+      // Create a proper Promise-like query builder that can be awaited
+      const createQueryBuilder = () => {
+        let currentResult = mockResult;
+        let isArrayResult = false;
         
-        // Terminal methods that return promises with correct result types
-        count: (type?: string) => Promise.resolve(mockArrayResult),
-        single: () => Promise.resolve(currentResult),
-        maybeSingle: () => Promise.resolve(currentResult),
+        const builder = {
+          select: (columns?: string, options?: any) => {
+            // For select queries, we'll return array results
+            isArrayResult = true;
+            currentResult = mockArrayResult;
+            return builder;
+          },
+          insert: (data?: any) => builder,
+          update: (data?: any) => builder,
+          delete: () => builder,
+          eq: (column: string, value: any) => builder,
+          neq: (column: string, value: any) => builder,
+          gt: (column: string, value: any) => builder,
+          gte: (column: string, value: any) => builder,
+          lt: (column: string, value: any) => builder,
+          lte: (column: string, value: any) => builder,
+          like: (column: string, value: any) => builder,
+          ilike: (column: string, value: any) => builder,
+          is: (column: string, value: any) => builder,
+          in: (column: string, values: any[]) => builder,
+          contains: (column: string, value: any) => builder,
+          containedBy: (column: string, value: any) => builder,
+          rangeGt: (column: string, value: any) => builder,
+          rangeGte: (column: string, value: any) => builder,
+          rangeLt: (column: string, value: any) => builder,
+          rangeLte: (column: string, value: any) => builder,
+          rangeAdjacent: (column: string, value: any) => builder,
+          overlaps: (column: string, value: any) => builder,
+          textSearch: (column: string, value: any) => builder,
+          match: (criteria: any) => builder,
+          not: (column: string, operator: string, value: any) => builder,
+          filter: (column: string, operator: string, value: any) => builder,
+          order: (column: string, options?: any) => builder,
+          limit: (count: number) => builder,
+          range: (from: number, to: number) => builder,
+          abortSignal: (signal: any) => builder,
+          or: (filters: string) => builder,
+          
+          // Terminal methods that return promises with correct result types
+          count: (type?: string) => Promise.resolve(mockArrayResult),
+          single: () => Promise.resolve(currentResult),
+          maybeSingle: () => Promise.resolve(currentResult),
+          
+          // Make the builder itself Promise-like so it can be awaited
+          then: (resolve: any, reject?: any) => {
+            const result = isArrayResult ? mockArrayResult : currentResult;
+            return Promise.resolve(result).then(resolve, reject);
+          },
+          catch: (reject: any) => {
+            const result = isArrayResult ? mockArrayResult : currentResult;
+            return Promise.resolve(result).catch(reject);
+          },
+          finally: (callback: any) => {
+            const result = isArrayResult ? mockArrayResult : currentResult;
+            return Promise.resolve(result).finally(callback);
+          },
+          
+          // Promise properties
+          [Symbol.toStringTag]: 'Promise',
+          
+          // Direct access to result for backward compatibility
+          get data() { return (isArrayResult ? mockArrayResult : currentResult).data; },
+          get error() { return (isArrayResult ? mockArrayResult : currentResult).error; },
+          get resultCount() { return (isArrayResult ? mockArrayResult : currentResult).count; },
+        };
         
-        // Make the builder itself Promise-like so it can be awaited
-        then: (resolve: any, reject?: any) => {
-          const result = isArrayResult ? mockArrayResult : currentResult;
-          return Promise.resolve(result).then(resolve, reject);
-        },
-        catch: (reject: any) => {
-          const result = isArrayResult ? mockArrayResult : currentResult;
-          return Promise.resolve(result).catch(reject);
-        },
-        finally: (callback: any) => {
-          const result = isArrayResult ? mockArrayResult : currentResult;
-          return Promise.resolve(result).finally(callback);
-        },
-        
-        // Promise properties
-        [Symbol.toStringTag]: 'Promise',
-        
-        // Direct access to result for backward compatibility
-        get data() { return (isArrayResult ? mockArrayResult : currentResult).data; },
-        get error() { return (isArrayResult ? mockArrayResult : currentResult).error; },
-        get count() { return (isArrayResult ? mockArrayResult : currentResult).count; },
+        return builder;
       };
       
-      return builder;
-    };
-    
-    return createQueryBuilder();
-  },
-  rpc: (functionName: string, params?: any) => {
-    const rpcResult = { data: 'mock-rpc-result', error: null };
-    const rpcPromise = Promise.resolve(rpcResult);
-    
-    return Object.assign(rpcPromise, {
-      single: () => Promise.resolve(rpcResult),
-      maybeSingle: () => Promise.resolve(rpcResult),
-    });
-  },
-  auth: {
-    signInWithPassword: (credentials: any) => ({ 
-      data: { user: { id: 'mock-user-id', email: 'mock@example.com' }, session: null }, 
-      error: null 
-    }),
-    signOut: () => ({ error: null }),
-    getUser: () => ({ data: { user: { id: 'mock-user-id', email: 'mock@example.com' } }, error: null }),
-  },
-};
+      return createQueryBuilder();
+    },
+    rpc: (functionName: string, params?: any) => {
+      const rpcResult = { data: 'mock-rpc-result', error: null };
+      const rpcPromise = Promise.resolve(rpcResult);
+      
+      return Object.assign(rpcPromise, {
+        single: () => Promise.resolve(rpcResult),
+        maybeSingle: () => Promise.resolve(rpcResult),
+      });
+    },
+    auth: {
+      signInWithPassword: (credentials: any) => ({ 
+        data: { user: { id: 'mock-user-id', email: 'mock@example.com' }, session: null }, 
+        error: null 
+      }),
+      signOut: () => ({ error: null }),
+      getUser: () => ({ data: { user: { id: 'mock-user-id', email: 'mock@example.com' } }, error: null }),
+    },
+  };
