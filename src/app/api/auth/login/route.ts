@@ -4,6 +4,9 @@ import { getServiceSupabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
+// Explicitly define the route segment to ensure priority
+export const runtime = 'nodejs';
+
 // Enable verbose logging for debugging - can be disabled by setting VERBOSE_LOGIN=false
 const VERBOSE_LOGIN = process.env.VERBOSE_LOGIN !== 'false';
 
