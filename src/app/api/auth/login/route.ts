@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 // Explicitly define the route segment to ensure priority
 export const runtime = 'nodejs';
 
+// BUILD ID: 2025-08-24-01:17 - Force complete rebuild to fix route precedence
 // Force deployment to fix route precedence - static routes should take priority over dynamic [table] routes
 // Enable verbose logging for debugging - can be disabled by setting VERBOSE_LOGIN=false
 const VERBOSE_LOGIN = process.env.VERBOSE_LOGIN !== 'false';
@@ -20,6 +21,7 @@ function log(message: string, data?: any) {
 export async function POST(req: Request) {
   try {
     log('=== LOGIN ATTEMPT START ===');
+    log('BUILD ID: 2025-08-24-01:17 - Route precedence fix');
     
     const supabase = getServiceSupabase();
     log('Supabase service client initialized');

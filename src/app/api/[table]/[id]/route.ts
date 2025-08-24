@@ -18,9 +18,12 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
     }
     
-    // Exclude auth routes from being caught by this dynamic route
+    // TEMPORARY: Explicit exclusion for auth routes while fixing static precedence
     if (table === 'auth') {
-      return NextResponse.json({ error: 'Auth routes not handled here' }, { status: 404 });
+      return NextResponse.json({ 
+        error: 'Auth routes should use static handlers. Use /api/auth/login instead.',
+        buildId: '2025-08-24-01:17'
+      }, { status: 404 });
     }
     
     const config = tableConfigs[table as keyof typeof tableConfigs];
@@ -65,9 +68,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
     }
     
-    // Exclude auth routes from being caught by this dynamic route
+    // TEMPORARY: Explicit exclusion for auth routes while fixing static precedence
     if (table === 'auth') {
-      return NextResponse.json({ error: 'Auth routes not handled here' }, { status: 404 });
+      return NextResponse.json({ 
+        error: 'Auth routes should use static handlers. Use /api/auth/login instead.',
+        buildId: '2025-08-24-01:17'
+      }, { status: 404 });
     }
     
     const config = tableConfigs[table as keyof typeof tableConfigs];
