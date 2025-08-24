@@ -136,6 +136,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Entity ID, related data ID, and type of record are required' }, { status: 400 });
     }
 
+    // Use service role Supabase client to bypass RLS
+    const supabase = getServiceSupabase();
+
     // Check if relationship already exists
     const { data: existingRelationship, error: checkError } = await supabase
       .from('entity_related_data')

@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { getServiceSupabase } from './supabase';
 
 export type LogLevel = 'ERROR' | 'WARNING' | 'INFO' | 'DEBUG';
 
@@ -120,23 +120,26 @@ export class AppLogger {
   }
 
   /**
-   * Insert log entry into database
+   * Insert a log entry into the database
    */
-  private static async insertLog(logEntry: LogEntry): Promise<LogResponse> {
+  static async insertLog(logEntry: LogEntry): Promise<LogResponse> {
     try {
-      // First try using the database function
-      const { data, error } = await supabase.rpc('log_app_event', {
+      // Use service role Supabase client to bypass RLS
+      const supabase = getServiceSupabase();
+      
+      // Try database function first
+      const { data, error } = await supabase.rpc('insert_app_log', {
         p_level: logEntry.level,
         p_source: logEntry.source,
         p_action: logEntry.action,
         p_message: logEntry.message,
-        p_details: logEntry.details ? JSON.stringify(logEntry.details) : null,
-        p_stack_trace: logEntry.stackTrace || null,
-        p_user_id: logEntry.userId || null,
-        p_session_id: logEntry.sessionId || null,
-        p_ip_address: logEntry.ipAddress || null,
-        p_user_agent: logEntry.userAgent || null
-      }) as { data: string | null; error: any };
+        p_details: logEntry.details,
+        p_stack_trace: logEntry.stackTrace,
+        p_user_id: logEntry.userId,
+        p_session_id: logEntry.sessionId,
+        p_ip_address: logEntry.ipAddress,
+        p_user_agent: logEntry.userAgent
+      });
 
       if (error) {
         console.error('Database function error:', error);
@@ -179,6 +182,9 @@ export class AppLogger {
    */
   static async getLogById(logId: string) {
     try {
+      // Use service role Supabase client to bypass RLS
+      const supabase = getServiceSupabase();
+      
       const { data, error } = await supabase
         .from('app_logs')
         .select('*')
@@ -198,6 +204,9 @@ export class AppLogger {
    */
   static async getRecentErrors(limit: number = 50) {
     try {
+      // Use service role Supabase client to bypass RLS
+      const supabase = getServiceSupabase();
+      
       const { data, error } = await supabase
         .from('app_logs')
         .select('*')
@@ -217,6 +226,9 @@ export class AppLogger {
    */
   static async getDebugLogs(limit: number = 50) {
     try {
+      // Use service role Supabase client to bypass RLS
+      const supabase = getServiceSupabase();
+      
       const { data, error } = await supabase
         .from('debug_logs')
         .select('*')
@@ -235,6 +247,9 @@ export class AppLogger {
    */
   static async clearOldLogs() {
     try {
+      // Use service role Supabase client to bypass RLS
+      const supabase = getServiceSupabase();
+      
       const { error } = await supabase
         .from('app_logs')
         .delete()
@@ -244,7 +259,7 @@ export class AppLogger {
       return { success: true };
     } catch (error) {
       console.error('Failed to clear old logs:', error);
-      return { success: false, error: 'Failed to clear old logs' };
+      return { success: false, error: error.message };
     }
   }
 }
