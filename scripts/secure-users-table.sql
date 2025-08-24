@@ -10,9 +10,9 @@ DROP POLICY IF EXISTS "Admins can insert users" ON users;
 DROP POLICY IF EXISTS "Admins can update users" ON users;
 DROP POLICY IF EXISTS "Admins can delete users" ON users;
 
--- Create a secure view that excludes password_hash
+-- Create a secure view that excludes password_hash but includes all other columns
 CREATE OR REPLACE VIEW users_public AS
-SELECT id, username, full_name, role, status, created_at, updated_at
+SELECT id, username, full_name, role, status, created_at, last_login
 FROM users
 WHERE status = 'active';
 

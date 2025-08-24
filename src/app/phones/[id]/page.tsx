@@ -38,16 +38,16 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
   }
 
   // Get relationships for this phone
-  const { data: relationships, error: relationshipsError } = await supabase
+  const { data: relationships, error: relationshipsError } = (await supabase
     .from('entity_related_data')
     .select(`
       id,
       entity_id,
       relationship_description,
-      entities!inner(name)
+      entities(name)
     `)
     .eq('related_data_id', id)
-    .eq('type_of_record', 'phones') as { data: any[] | null; error: any };
+    .eq('type_of_record', 'phones')) as { data: any[] | null; error: any };
 
   return (
     <ClientNavigationWrapper>
