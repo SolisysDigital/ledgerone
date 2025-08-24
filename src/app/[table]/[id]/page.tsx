@@ -1,6 +1,5 @@
 import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import { tableConfigs } from "@/lib/tableConfigs";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,14 +22,22 @@ export default async function EntityPage({
   const config = tableConfigs[table as keyof typeof tableConfigs];
   if (!config) return notFound();
 
-  // Fetch existing data
-  const { data, error } = await supabase
-    .from(table)
-    .select("*")
-    .eq("id", id)
-    .single();
+  // Fetch existing data using the working API endpoint instead of direct Supabase
+  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/${table}/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-  if (error || !data) return notFound();
+  if (!response.ok) {
+    console.error(`Failed to fetch ${table} data:`, response.status, response.statusText);
+    return notFound();
+  }
+
+  const data = await response.json();
+
+  if (!data) return notFound();
 
   // Determine primary name based on entity type
   const getPrimaryName = (table: string, data: any): string | undefined => {

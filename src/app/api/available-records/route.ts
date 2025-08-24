@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getServiceSupabase } from '@/lib/supabase';
 import { AppLogger } from '@/lib/logger';
 
 // Force dynamic rendering to prevent build-time issues
@@ -32,6 +32,9 @@ export async function GET(request: NextRequest) {
     };
 
     const displayField = getDisplayField(typeOfRecord);
+
+    // Use service role Supabase client to bypass RLS
+    const supabase = getServiceSupabase();
 
     // Get existing relationships for this entity and type
     const { data: existingRelationships, error: existingError } = await supabase

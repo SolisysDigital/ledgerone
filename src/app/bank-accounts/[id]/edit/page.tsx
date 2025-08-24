@@ -1,6 +1,5 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 import RecordHeader from "@/components/record/RecordHeader";
@@ -18,14 +17,22 @@ export default async function EditBankAccountPage({
   const config = tableConfigs.bank_accounts;
   if (!config) return notFound();
 
-  // Fetch existing data
-  const { data: bankAccount, error } = await supabase
-    .from('bank_accounts')
-    .select("*")
-    .eq("id", id)
-    .single() as { data: BankAccount | null; error: any };
+  // Fetch bank account data using the working API endpoint instead of direct Supabase
+  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/bank-accounts/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-  if (error || !bankAccount) return notFound();
+  if (!response.ok) {
+    console.error('Failed to fetch bank account data for edit:', response.status, response.statusText);
+    return notFound();
+  }
+
+  const bankAccount = await response.json();
+
+  if (!bankAccount) return notFound();
 
   return (
     <ClientNavigationWrapper>

@@ -1,20 +1,29 @@
-import { tableConfigs } from "@/lib/tableConfigs";
-import { supabase } from "@/lib/supabase";
-import EditForm from "@/app/[table]/[id]/edit/EditForm";
+import React from "react";
 import { notFound } from "next/navigation";
+import { tableConfigs } from "@/lib/tableConfigs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import EditForm from "@/app/[table]/[id]/edit/EditForm";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 
 export default async function EditContactPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { data: contact, error } = await supabase
-    .from('contacts')
-    .select('*')
-    .eq('id', id)
-    .single();
 
-  if (error || !contact) {
-    notFound();
+  // Fetch contact data using the working API endpoint instead of direct Supabase
+  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/contacts/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    console.error('Failed to fetch contact data for edit:', response.status, response.statusText);
+    return notFound();
   }
+
+  const contact = await response.json();
+
+  if (!contact) return notFound();
 
   const config = tableConfigs.contacts;
   

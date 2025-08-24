@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getServiceSupabase } from '@/lib/supabase';
+import { AppLogger } from '@/lib/logger';
 import { tableConfigs } from '@/lib/tableConfigs';
 
 // Force dynamic rendering to prevent build-time issues
@@ -37,6 +38,9 @@ export async function GET(
         { status: 400 }
       );
     }
+
+    // Use service role Supabase client to bypass RLS
+    const supabase = getServiceSupabase();
 
     // Get the central node data
     const { data: centralNode, error: centralError } = await supabase

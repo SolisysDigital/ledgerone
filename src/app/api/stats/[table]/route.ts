@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getServiceSupabase } from '@/lib/supabase';
+import { tableConfigs } from '@/lib/tableConfigs';
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,14 @@ export async function GET(
     if (!table) {
       return NextResponse.json({ error: 'Table parameter is required' }, { status: 400 });
     }
+
+    const config = tableConfigs[table as keyof typeof tableConfigs];
+    if (!config) {
+      return NextResponse.json({ error: 'Table not found' }, { status: 404 });
+    }
+
+    // Use service role Supabase client to bypass RLS
+    const supabase = getServiceSupabase();
 
     // Get total count
     const { count, error: countError } = await supabase

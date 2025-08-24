@@ -1,7 +1,5 @@
 import React, { Suspense } from "react";
 import { tableConfigs } from "@/lib/tableConfigs";
-import { supabase } from "@/lib/supabase";
-import EditForm from "@/app/[table]/[id]/edit/EditForm";
 import { notFound } from "next/navigation";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 
@@ -23,15 +21,22 @@ interface EditPhonePageProps {
 export default async function EditPhonePage({ params }: EditPhonePageProps) {
   const { id } = await params;
   
-  const { data: phone, error } = await supabase
-    .from('phones')
-    .select('*')
-    .eq('id', id)
-    .single() as { data: Phone | null; error: any };
+  // Fetch phone data using the working API endpoint instead of direct Supabase
+  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/phones/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-  if (error || !phone) {
-    notFound();
+  if (!response.ok) {
+    console.error('Failed to fetch phone data for edit:', response.status, response.statusText);
+    return notFound();
   }
+
+  const phone = await response.json();
+
+  if (!phone) return notFound();
 
   const config = tableConfigs.phones;
   

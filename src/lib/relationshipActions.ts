@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { getServiceSupabase } from "@/lib/supabase";
 import { AppLogger } from "@/lib/logger";
 
 interface EntityRelationship {
@@ -13,6 +13,9 @@ interface EntityRelationship {
 export async function getEntityRelationships(entityId: string) {
   try {
     console.log('getEntityRelationships called with entityId:', entityId);
+    
+    // Use service role Supabase client to bypass RLS
+    const supabase = getServiceSupabase();
     
     // First get the relationships
     const { data: relationships, error: relationshipsError } = await supabase
@@ -122,7 +125,7 @@ export async function getAvailableRecords(typeOfRecord: string, entityId: string
     console.log('Display field for', typeOfRecord, ':', displayField);
 
     // First get the IDs of records that are already related to this entity
-    const { data: existingRelationships, error: existingError } = await supabase
+    const { data: existingRelationships, error: existingError } = await getServiceSupabase()
       .from('entity_related_data')
       .select('related_data_id')
       .eq('entity_id', entityId)
@@ -141,7 +144,7 @@ export async function getAvailableRecords(typeOfRecord: string, entityId: string
     console.log('Existing IDs to exclude:', existingIds);
 
     // Get all records of the specified type that are not already related to this entity
-    const query = supabase
+    const query = getServiceSupabase()
       .from(typeOfRecord)
       .select('*')
       .order(displayField, { ascending: true });
@@ -192,7 +195,7 @@ export async function createRelationship(
   relationshipDescription: string
 ) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getServiceSupabase()
       .from('entity_related_data')
       .insert({
         entity_id: entityId,
@@ -237,7 +240,7 @@ export async function updateRelationship(
   relationshipDescription: string
 ) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getServiceSupabase()
       .from('entity_related_data')
       .update({ relationship_description: relationshipDescription })
       .eq('id', relationshipId)
@@ -268,7 +271,7 @@ export async function updateRelationship(
 
 export async function deleteRelationship(relationshipId: string) {
   try {
-    const { error } = await supabase
+    const { error } = await getServiceSupabase()
       .from('entity_related_data')
       .delete()
       .eq('id', relationshipId);
@@ -291,7 +294,7 @@ export async function getRelationship(relationshipId: string) {
     console.log('getRelationship called with relationshipId:', relationshipId);
     
     // First try to find the relationship by its ID in entity_related_data
-    let { data, error } = await supabase
+    let { data, error } = await getServiceSupabase()
       .from('entity_related_data')
       .select(`
         id,
@@ -307,7 +310,7 @@ export async function getRelationship(relationshipId: string) {
     if (error && error.code === 'PGRST116') {
       console.log('Relationship not found by ID, trying to find by related_data_id:', relationshipId);
       
-      const { data: relationshipByRelatedId, error: relatedIdError } = await supabase
+      const { data: relationshipByRelatedId, error: relatedIdError } = await getServiceSupabase()
         .from('entity_related_data')
         .select(`
           id,

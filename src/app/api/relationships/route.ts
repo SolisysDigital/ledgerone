@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getServiceSupabase } from '@/lib/supabase';
 import { AppLogger } from '@/lib/logger';
 
 // Force dynamic rendering to prevent build-time issues
@@ -14,6 +14,9 @@ export async function GET(request: NextRequest) {
     if (!entityId) {
       return NextResponse.json({ error: 'Entity ID is required' }, { status: 400 });
     }
+
+    // Use service role Supabase client to bypass RLS
+    const supabase = getServiceSupabase();
 
     // Try to use the view first, fallback to basic table if view doesn't exist
     let query = supabase

@@ -1,6 +1,5 @@
 import React from "react";
 import { tableConfigs } from "@/lib/tableConfigs";
-import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import CreateForm from "./CreateForm";
@@ -32,14 +31,19 @@ export default async function CreatePage({
     // Find the parent table from the foreign key field
     const fkField = config.fields.find(field => field.name === resolvedSearchParams.fkField);
     if (fkField && fkField.type === 'fk' && fkField.refTable) {
-      const { data: entityData } = await supabase
-        .from(fkField.refTable)
-        .select('name')
-        .eq('id', resolvedSearchParams.fk)
-        .single();
+      // Fetch entity data using the working API endpoint instead of direct Supabase
+      const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/${fkField.refTable}/${resolvedSearchParams.fk}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       
-      if (entityData && typeof entityData.name === 'string') {
-        entityName = entityData.name;
+      if (response.ok) {
+        const entityData = await response.json();
+        if (entityData && typeof entityData.name === 'string') {
+          entityName = entityData.name;
+        }
       }
     }
   }

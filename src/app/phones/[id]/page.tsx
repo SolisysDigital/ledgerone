@@ -1,9 +1,8 @@
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
@@ -27,15 +26,22 @@ interface PhoneDetailPageProps {
 export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) {
   const { id } = await params;
   
-  const { data: phone, error } = await supabase
-    .from('phones')
-    .select('*')
-    .eq('id', id)
-    .single() as { data: Phone | null; error: any };
+  // Fetch phone data using the working API endpoint instead of direct Supabase
+  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/phones/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-  if (error || !phone) {
-    notFound();
+  if (!response.ok) {
+    console.error('Failed to fetch phone data:', response.status, response.statusText);
+    return notFound();
   }
+
+  const phone = await response.json();
+
+  if (!phone) return notFound();
 
   // Get relationships for this phone
   const { data: relationships, error: relationshipsError } = (await supabase

@@ -1,6 +1,5 @@
 import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
@@ -18,14 +17,22 @@ export default async function CreditCardPage({
 }) {
   const { id } = await params;
   
-  // Fetch credit card data
-  const { data: creditCard, error } = await supabase
-    .from('credit_cards')
-    .select("*")
-    .eq("id", id)
-    .single();
+  // Fetch credit card data using the working API endpoint instead of direct Supabase
+  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/credit-cards/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-  if (error || !creditCard) return notFound();
+  if (!response.ok) {
+    console.error('Failed to fetch credit card data:', response.status, response.statusText);
+    return notFound();
+  }
+
+  const creditCard = await response.json();
+
+  if (!creditCard) return notFound();
 
   // Actions for the header
   const actions = (

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+// Remove supabase import - we'll use fetch instead
 import { tableConfigs } from "@/lib/tableConfigs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -59,30 +59,42 @@ export default function GlobalSearch() {
 
         if (searchableFields.length === 0) continue;
 
-        // Create OR conditions for all searchable fields
-        const searchConditions = searchableFields.map(field => 
-          `${field}.ilike.%${query}%`
-        ).join(',');
-
-        const { data, error } = await supabase
-          .from(tableName)
-          .select('*')
-          .or(searchConditions)
-          .limit(5);
-
-        if (!error && data) {
-          data.forEach((item: any) => {
-            const displayName = item.name || item[config.fields[0]?.name] || `ID: ${item.id}`;
-            const description = item.description || item[config.fields.find(f => f.name === 'description')?.name || ''];
-            
-            searchResults.push({
-              table: tableName,
-              id: item.id,
-              displayName,
-              description,
-              icon: tableIcons[tableName] || Building2,
-            });
+        // Use the working API endpoint for search
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/${tableName}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
           });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data && Array.isArray(data)) {
+              // Filter data client-side for search
+              const filteredData = data.filter((item: any) => {
+                return searchableFields.some(field => {
+                  const value = item[field];
+                  return value && value.toString().toLowerCase().includes(query.toLowerCase());
+                });
+              }).slice(0, 5); // Limit to 5 results
+
+              filteredData.forEach((item: any) => {
+                const displayName = item.name || item[config.fields[0]?.name] || `ID: ${item.id}`;
+                const description = item.description || item[config.fields.find(f => f.name === 'description')?.name || ''];
+                
+                searchResults.push({
+                  table: tableName,
+                  id: item.id,
+                  displayName,
+                  description,
+                  icon: tableIcons[tableName] || Building2,
+                });
+              });
+            }
+          }
+        } catch (error) {
+          console.error(`Error searching ${tableName}:`, error);
         }
       }
 

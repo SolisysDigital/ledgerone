@@ -1,6 +1,5 @@
 import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
@@ -18,14 +17,22 @@ export default async function InvestmentAccountPage({
 }) {
   const { id } = await params;
   
-  // Fetch investment account data
-  const { data: investmentAccount, error } = await supabase
-    .from('investment_accounts')
-    .select("*")
-    .eq("id", id)
-    .single() as { data: InvestmentAccount | null; error: any };
+  // Fetch investment account data using the working API endpoint instead of direct Supabase
+  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/investment-accounts/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-  if (error || !investmentAccount) return notFound();
+  if (!response.ok) {
+    console.error('Failed to fetch investment account data:', response.status, response.statusText);
+    return notFound();
+  }
+
+  const investmentAccount = await response.json();
+
+  if (!investmentAccount) return notFound();
 
   // Actions for the header
   const actions = (

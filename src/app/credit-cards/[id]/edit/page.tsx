@@ -1,6 +1,5 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 import RecordHeader from "@/components/record/RecordHeader";
@@ -17,14 +16,22 @@ export default async function EditCreditCardPage({
   const config = tableConfigs.credit_cards;
   if (!config) return notFound();
 
-  // Fetch existing data
-  const { data: creditCard, error } = await supabase
-    .from('credit_cards')
-    .select("*")
-    .eq("id", id)
-    .single();
+  // Fetch credit card data using the working API endpoint instead of direct Supabase
+  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/credit-cards/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-  if (error || !creditCard) return notFound();
+  if (!response.ok) {
+    console.error('Failed to fetch credit card data for edit:', response.status, response.statusText);
+    return notFound();
+  }
+
+  const creditCard = await response.json();
+
+  if (!creditCard) return notFound();
 
   return (
     <ClientNavigationWrapper>

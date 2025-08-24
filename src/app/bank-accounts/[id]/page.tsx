@@ -1,6 +1,5 @@
 import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
@@ -18,14 +17,22 @@ export default async function BankAccountPage({
 }) {
   const { id } = await params;
   
-  // Fetch bank account data
-  const { data: bankAccount, error } = await supabase
-    .from('bank_accounts')
-    .select("*")
-    .eq("id", id)
-    .single() as { data: BankAccount | null; error: any };
+  // Fetch bank account data using the working API endpoint instead of direct Supabase
+  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/bank-accounts/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-  if (error || !bankAccount) return notFound();
+  if (!response.ok) {
+    console.error('Failed to fetch bank account data:', response.status, response.statusText);
+    return notFound();
+  }
+
+  const bankAccount = await response.json() as BankAccount;
+
+  if (!bankAccount) return notFound();
 
   // Actions for the header
   const actions = (

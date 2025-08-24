@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { FieldConfig } from "@/lib/tableConfigs";
-import { supabase } from "@/lib/supabase";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -83,19 +82,28 @@ export default function EnhancedForm({
       
       for (const field of fkFields) {
         if (field.refTable && field.displayField) {
-          const { data, error } = await supabase
-            .from(field.refTable)
-            .select(`id, ${field.displayField}`)
-            .order(field.displayField);
+          try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/${field.refTable}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
 
-          if (!error && data) {
-            setFkOptions(prev => ({
-              ...prev,
-              [field.name]: data.map((item: any) => ({
-                id: item.id,
-                display: item[field.displayField!]
-              }))
-            }));
+            if (response.ok) {
+              const data = await response.json();
+              if (data && Array.isArray(data)) {
+                setFkOptions(prev => ({
+                  ...prev,
+                  [field.name]: data.map((item: any) => ({
+                    id: item.id,
+                    display: item[field.displayField!]
+                  }))
+                }));
+              }
+            }
+          } catch (error) {
+            console.error(`Error fetching FK options for ${field.refTable}:`, error);
           }
         }
       }

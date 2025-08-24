@@ -1,9 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getServiceSupabase } from '@/lib/supabase';
 import { AppLogger } from '@/lib/logger';
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = 'force-dynamic';
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+
+    if (!id) {
+      return NextResponse.json({ error: 'Relationship ID is required' }, { status: 400 });
+    }
+
+    // Use service role Supabase client to bypass RLS
+    const supabase = getServiceSupabase();
+
+    const { data, error } = await supabase
+      .from('entity_related_data')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      await AppLogger.error('api/relationships/[id]', 'GET', 'Failed to fetch relationship', error, { relationshipId: id });
+      return NextResponse.json({ error: 'Failed to fetch relationship' }, { status: 500 });
+    }
+
+    if (!data) {
+      await AppLogger.info('api/relationships/[id]', 'GET', 'Relationship not found', { relationshipId: id });
+      return NextResponse.json({ error: 'Relationship not found' }, { status: 404 });
+    }
+
+    await AppLogger.info('api/relationships/[id]', 'GET', 'Successfully fetched relationship', { relationshipId: id });
+    return NextResponse.json(data);
+  } catch (error) {
+    await AppLogger.error('api/relationships/[id]', 'GET', 'Exception in GET relationship', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
 
 export async function DELETE(
   request: NextRequest,
@@ -11,6 +50,9 @@ export async function DELETE(
 ) {
   try {
     const { id: relationshipId } = await params;
+
+    // Use service role Supabase client to bypass RLS
+    const supabase = getServiceSupabase();
 
     const { error } = await supabase
       .from('entity_related_data')
@@ -38,6 +80,9 @@ export async function PUT(
     const { id: relationshipId } = await params;
     const body = await request.json();
     const { relationshipDescription } = body;
+
+    // Use service role Supabase client to bypass RLS
+    const supabase = getServiceSupabase();
 
     const { data, error } = await supabase
       .from('entity_related_data')

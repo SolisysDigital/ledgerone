@@ -1,6 +1,5 @@
 import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
@@ -18,14 +17,22 @@ export default async function CryptoAccountPage({
 }) {
   const { id } = await params;
   
-  // Fetch crypto account data
-  const { data: cryptoAccount, error } = await supabase
-    .from('crypto_accounts')
-    .select("*")
-    .eq("id", id)
-    .single() as { data: CryptoAccount | null; error: any };
+  // Fetch crypto account data using the working API endpoint instead of direct Supabase
+  const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/crypto-accounts/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-  if (error || !cryptoAccount) return notFound();
+  if (!response.ok) {
+    console.error('Failed to fetch crypto account data:', response.status, response.statusText);
+    return notFound();
+  }
+
+  const cryptoAccount = await response.json();
+
+  if (!cryptoAccount) return notFound();
 
   // Actions for the header
   const actions = (

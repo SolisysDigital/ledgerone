@@ -1,5 +1,4 @@
 import { tableConfigs } from "@/lib/tableConfigs";
-import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,27 +10,39 @@ import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWra
 
 export default async function ContactDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { data: contact, error } = await supabase
-    .from('contacts')
-    .select('*')
-    .eq('id', id)
-    .single();
+  
+  // Fetch contact data using the working API endpoint instead of direct Supabase
+  const contactResponse = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/contacts/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-  if (error || !contact) {
+  if (!contactResponse.ok) {
+    console.error('Failed to fetch contact data:', contactResponse.status, contactResponse.statusText);
     notFound();
   }
 
-  // Get entity relationships for this contact
-  const { data: relationships, error: relationshipError } = await supabase
-    .from('entity_related_data')
-    .select(`
-      id,
-      entity_id,
-      relationship_description,
-      entities!inner(name)
-    `)
-    .eq('related_data_id', id)
-    .eq('type_of_record', 'contacts');
+  const contact = await contactResponse.json();
+
+  if (!contact) {
+    notFound();
+  }
+
+  // Get entity relationships for this contact using the working API endpoint
+  const relationshipsResponse = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'}/api/relationships?related_data_id=${id}&type_of_record=contacts`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  let relationships = [];
+  if (relationshipsResponse.ok) {
+    const relationshipsData = await relationshipsResponse.json();
+    relationships = relationshipsData || [];
+  }
 
   return (
     <ClientNavigationWrapper>
