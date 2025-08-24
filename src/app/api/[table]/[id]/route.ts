@@ -18,6 +18,11 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
     }
     
+    // Exclude auth routes from being caught by this dynamic route
+    if (table === 'auth') {
+      return NextResponse.json({ error: 'Auth routes not handled here' }, { status: 404 });
+    }
+    
     const config = tableConfigs[table as keyof typeof tableConfigs];
     if (!config) {
       return NextResponse.json({ error: 'Table not found' }, { status: 404 });
@@ -58,6 +63,11 @@ export async function DELETE(
     // Build-time safety check
     if (!table || !id) {
       return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
+    }
+    
+    // Exclude auth routes from being caught by this dynamic route
+    if (table === 'auth') {
+      return NextResponse.json({ error: 'Auth routes not handled here' }, { status: 404 });
     }
     
     const config = tableConfigs[table as keyof typeof tableConfigs];
