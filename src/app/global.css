@@ -205,6 +205,34 @@ a {
   box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.1);
 }
 
+/* Disable all form animations */
+form *,
+.form *,
+[class*="form-"] * {
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Specific form element overrides */
+input, textarea, select, button, label {
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Remove hover effects on form elements */
+input:hover, textarea:hover, select:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Focus states without animations */
+input:focus, textarea:focus, select:focus {
+  transform: none !important;
+  transition: none !important;
+}
+
 /* Loading States */
 .loading-shimmer {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);

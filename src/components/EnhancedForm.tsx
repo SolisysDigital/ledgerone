@@ -50,17 +50,23 @@ export default function EnhancedForm({
     }
     
     if (field.type === "number") {
-      // For number fields, allow string, null, or undefined (all optional)
+      // For number fields, allow string, null, undefined, or empty string (all optional)
+      schemaObject[field.name] = z.union([
+        z.string(),
+        z.number(),
+        z.null(),
+        z.undefined()
+      ]).optional();
+    } else if (field.type === "date") {
+      // For date fields, allow string, null, or undefined (all optional)
       schemaObject[field.name] = z.union([
         z.string(),
         z.null(),
         z.undefined()
       ]).optional();
-    } else if (field.type === "date") {
-      schemaObject[field.name] = z.string().optional();
     } else {
-      // For text fields, allow string, null, or undefined
-      // All fields are optional, including Texas-specific fields and officer fields
+      // For text fields, allow string, null, or undefined (all optional)
+      // All fields are truly optional, including Texas-specific fields and officer fields
       schemaObject[field.name] = z.union([
         z.string(),
         z.null(),
@@ -73,7 +79,8 @@ export default function EnhancedForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {},
-    mode: 'onSubmit', // Only validate on submit
+    mode: 'onChange', // Allow validation on change for better UX
+    reValidateMode: 'onChange', // Re-validate on change
   });
 
   // Fetch foreign key options
@@ -146,25 +153,30 @@ export default function EnhancedForm({
         // Get field configuration to understand the expected type
         const fieldConfig = config.fields.find((f: FieldConfig) => f.name === key);
         
-        // For updates, include all fields even if empty to allow clearing
-        // For creates, only include non-empty values
         if (initialData) {
-          // This is an update - include all fields, but handle null/empty properly
-          if (value === '' || value === null || value === undefined) {
-            cleanedData[key] = null;
-          } else {
-            // Handle number fields - convert empty strings to null, ensure numbers are valid
-            if (fieldConfig?.type === 'number') {
-              if (value === '' || value === null || value === undefined) {
-                cleanedData[key] = null;
-              } else {
-                const numValue = Number(value);
-                cleanedData[key] = isNaN(numValue) ? null : numValue;
-              }
+          // This is an update - only include fields that have actually changed
+          const originalValue = initialData[key];
+          const hasChanged = value !== originalValue;
+          
+          if (hasChanged) {
+            // Handle the changed value
+            if (value === '' || value === null || value === undefined) {
+              cleanedData[key] = null;
             } else {
-              cleanedData[key] = value;
+              // Handle number fields - convert empty strings to null, ensure numbers are valid
+              if (fieldConfig?.type === 'number') {
+                if (value === '' || value === null || value === undefined) {
+                  cleanedData[key] = null;
+                } else {
+                  const numValue = Number(value);
+                  cleanedData[key] = isNaN(numValue) ? null : numValue;
+                }
+              } else {
+                cleanedData[key] = value;
+              }
             }
           }
+          // If field hasn't changed, don't include it in the update
         } else {
           // This is a create - only include non-empty values
           if (value !== undefined && value !== null && value !== '') {
@@ -185,24 +197,41 @@ export default function EnhancedForm({
       console.log('Table:', table);
       console.log('Is update:', !!initialData);
       
+      // For updates, ensure we have at least one field to update
+      if (initialData && Object.keys(cleanedData).length === 0) {
+        const error = new Error('No fields have been changed');
+        console.error('No fields have been changed');
+        await AppLogger.error('EnhancedForm', 'validation', 'No fields changed', error, { 
+          table, 
+          originalData: initialData,
+          formData: data 
+        });
+        alert('Please make changes to at least one field before saving');
+        return;
+      }
+      
       // Log specific field processing for debugging
       if (table === 'entities') {
         const numberFields = config.fields.filter((f: FieldConfig) => f.type === 'number');
         console.log('Number fields in entities:', numberFields.map((f: FieldConfig) => f.name));
         numberFields.forEach((field: FieldConfig) => {
-          console.log(`Field ${field.name}:`, {
-            original: data[field.name],
-            cleaned: cleanedData[field.name],
-            type: typeof cleanedData[field.name]
-          });
+          if (cleanedData[field.name] !== undefined) {
+            console.log(`Field ${field.name}:`, {
+              original: initialData?.[field.name],
+              cleaned: cleanedData[field.name],
+              type: typeof cleanedData[field.name]
+            });
+          }
         });
         
-        // Additional validation for entities table
+        // Additional validation for entities table - only validate fields being updated
         const validationErrors: string[] = [];
         numberFields.forEach((field: FieldConfig) => {
-          const value = cleanedData[field.name];
-          if (value !== null && value !== undefined && (typeof value !== 'number' || isNaN(value))) {
-            validationErrors.push(`${field.name} must be a valid number or empty`);
+          if (cleanedData[field.name] !== undefined) {
+            const value = cleanedData[field.name];
+            if (value !== null && value !== undefined && (typeof value !== 'number' || isNaN(value))) {
+              validationErrors.push(`${field.name} must be a valid number or empty`);
+            }
           }
         });
         
@@ -231,39 +260,45 @@ export default function EnhancedForm({
       console.log('Cleaned data:', cleanedData);
       
       if (table === 'entities') {
-        // For entities, require name and type
-        if (!cleanedData.name || !cleanedData.type) {
-          const error = new Error('Missing required fields: name or type');
-          console.error('Missing required fields: name or type');
-          await AppLogger.error('EnhancedForm', 'validation', 'Missing required fields', error, { 
+        // For entities, require name and type only if they're being updated
+        if (cleanedData.name !== undefined && !cleanedData.name) {
+          const error = new Error('Entity name cannot be empty');
+          console.error('Entity name cannot be empty');
+          await AppLogger.error('EnhancedForm', 'validation', 'Entity name empty', error, { 
             table, 
-            cleanedData, 
-            missingFields: { name: !cleanedData.name, type: !cleanedData.type } 
+            cleanedData
           });
-          alert('Please fill in the required fields: Entity Name and Type of Entity');
+          alert('Entity name cannot be empty');
+          return;
+        }
+        if (cleanedData.type !== undefined && !cleanedData.type) {
+          const error = new Error('Entity type cannot be empty');
+          console.error('Entity type cannot be empty');
+          await AppLogger.error('EnhancedForm', 'validation', 'Entity type empty', error, { 
+            table, 
+            cleanedData
+          });
+          alert('Entity type cannot be empty');
           return;
         }
       } else {
-        // For other tables (contacts, emails, etc.), require at least one non-fk field
-        const nonFkFields = config.fields.filter((field: FieldConfig) => field.type !== 'fk');
-        console.log('Non-FK fields for', table, ':', nonFkFields.map((f: FieldConfig) => f.name));
-        console.log('All fields for', table, ':', config.fields.map((f: FieldConfig) => `${f.name} (${f.type})`));
-        
-        const hasNonFkData = nonFkFields.some((field: FieldConfig) => cleanedData[field.name]);
-        console.log('Has non-FK data:', hasNonFkData);
-        console.log('Cleaned data keys:', Object.keys(cleanedData));
-        console.log('Non-FK data values:', nonFkFields.map((f: FieldConfig) => ({ field: f.name, value: cleanedData[f.name] })));
-        
-        if (!hasNonFkData) {
-          const error = new Error('Please fill in at least one field');
-          console.error('No data provided for', table);
-          await AppLogger.error('EnhancedForm', 'validation', 'No data provided', error, { 
-            table, 
-            cleanedData,
-            nonFkFields: nonFkFields.map((f: FieldConfig) => f.name)
-          });
-          alert('Please fill in at least one field');
-          return;
+        // For other tables, only require fields if they're being updated
+        if (Object.keys(cleanedData).length > 0) {
+          // Check if any of the updated fields have valid data
+          const hasValidData = Object.values(cleanedData).some(value => 
+            value !== null && value !== undefined && value !== ''
+          );
+          
+          if (!hasValidData) {
+            const error = new Error('Please provide valid data for at least one field');
+            console.error('No valid data provided');
+            await AppLogger.error('EnhancedForm', 'validation', 'No valid data provided', error, { 
+              table, 
+              cleanedData
+            });
+            alert('Please provide valid data for at least one field');
+            return;
+          }
         }
       }
       
@@ -305,21 +340,25 @@ export default function EnhancedForm({
   const renderField = (field: FieldConfig, formField: any) => {
     switch (field.type) {
       case "text":
-        return <Input {...formField} />;
+        return <Input {...formField} className="transition-none" />;
       
       case "textarea":
-        return <Textarea {...formField} rows={3} />;
+        // Make description fields span full width and be larger
+        const isDescriptionField = field.name === 'description' || field.name === 'short_description';
+        const rows = isDescriptionField ? 6 : 3;
+        const className = isDescriptionField ? "col-span-2 transition-none" : "transition-none";
+        return <Textarea {...formField} rows={rows} className={className} />;
       
       case "number":
-        return <Input type="number" step="any" {...formField} />;
+        return <Input type="number" step="any" {...formField} className="transition-none" />;
       
       case "date":
-        return <Input type="date" {...formField} />;
+        return <Input type="date" {...formField} className="transition-none" />;
       
       case "select":
         return (
           <Select onValueChange={formField.onChange} defaultValue={formField.value}>
-            <SelectTrigger>
+            <SelectTrigger className="transition-none">
               <SelectValue placeholder={`Select ${field.name.replace(/_/g, ' ')}`} />
             </SelectTrigger>
             <SelectContent>
@@ -336,7 +375,7 @@ export default function EnhancedForm({
         return <FkCombobox field={field} formField={formField} options={fkOptions[field.name] || []} searchTerm={searchTerms[field.name] || ''} onSearchChange={(value) => setSearchTerms(prev => ({ ...prev, [field.name]: value }))} />;
       
       default:
-        return <Input {...formField} />;
+        return <Input {...formField} className="transition-none" />;
     }
   };
 
@@ -372,6 +411,17 @@ export default function EnhancedForm({
   // Get state_of_formation value for conditional rendering
   const stateOfFormation = form.watch('state_of_formation');
 
+  // Helper function to check if a field has changed
+  const hasFieldChanged = (fieldName: string): boolean => {
+    if (!initialData) return false;
+    const currentValue = form.watch(fieldName);
+    const originalValue = initialData[fieldName];
+    return currentValue !== originalValue;
+  };
+
+  // Get count of changed fields
+  const changedFieldsCount = config.fields.filter((field: FieldConfig) => hasFieldChanged(field.name)).length;
+
   return (
           <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit, (errors) => {
@@ -381,22 +431,40 @@ export default function EnhancedForm({
             errors 
           });
         })} className="space-y-6">
+        
+        {/* Show changed fields indicator for updates */}
+        {initialData && changedFieldsCount > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="text-sm text-blue-800">
+              <span className="font-medium">{changedFieldsCount}</span> field{changedFieldsCount !== 1 ? 's' : ''} changed
+            </div>
+          </div>
+        )}
+        
         {/* Main fields (not legal info) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {config.fields.filter((f: FieldConfig) => !legalInfoFields.includes(f.name) && !texasFields.includes(f.name) && !officerFields.flat().includes(f.name)).map((field: FieldConfig) => {
             // For foreign key fields, only show them if they're not already set (for creates)
             // For updates, foreign key fields are typically hidden since they shouldn't change
             if (field.type === "fk" && initialData && initialData[field.name]) return null;
+            
+            // Make description fields span full width
+            const isDescriptionField = field.name === 'description' || field.name === 'short_description';
+            const fieldClassName = isDescriptionField ? "col-span-2" : "";
+            
             return (
               <FormField
                 key={field.name}
                 control={form.control}
                 name={field.name}
                 render={({ field: formField }) => (
-                  <FormItem>
+                  <FormItem className={fieldClassName}>
                     <FormLabel className="capitalize font-medium">
                       {field.label || field.name.replace(/_/g, ' ')}
                       {field.type === "fk" && <Badge variant="outline" className="ml-2 text-xs">Related</Badge>}
+                      {initialData && hasFieldChanged(field.name) && (
+                        <Badge variant="secondary" className="ml-2 text-xs bg-blue-100 text-blue-800">Changed</Badge>
+                      )}
                     </FormLabel>
                     <FormControl>
                       {renderField(field, formField)}
@@ -413,7 +481,7 @@ export default function EnhancedForm({
         {table === 'entities' && (
           <Accordion type="single" collapsible defaultValue="legal-info">
             <AccordionItem value="legal-info">
-              <AccordionTrigger className="bg-blue-50 hover:bg-blue-100 text-blue-800 font-semibold rounded-lg px-4 py-2">Legal Information for the entity</AccordionTrigger>
+              <AccordionTrigger className="bg-blue-50 hover:bg-blue-100 text-blue-800 font-semibold rounded-lg px-4 py-2 transition-none">Legal Information for the entity</AccordionTrigger>
               <AccordionContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {config.fields.filter((f: FieldConfig) => legalInfoFields.includes(f.name)).map((field: FieldConfig) => {
@@ -463,7 +531,7 @@ export default function EnhancedForm({
                   <div className="font-semibold mb-2">Officers (up to 4)</div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {officerFields.map((fields, idx) => (
-                      <div key={idx} className="border rounded p-3 mb-2">
+                      <div key={idx} className="border rounded p-3 mb-2 transition-none">
                         <div className="font-medium mb-1">Officer {idx + 1}</div>
                         {fields.map((fname) => {
                           const field = config.fields.find((f: FieldConfig) => f.name === fname);
@@ -530,8 +598,16 @@ export default function EnhancedForm({
               Cancel
             </Button>
           )}
-          <Button type="submit" className="min-w-[100px]">
-            {submitLabel}
+          <Button 
+            type="submit" 
+            className="min-w-[100px]"
+            disabled={initialData && changedFieldsCount === 0}
+          >
+            {initialData ? (
+              changedFieldsCount > 0 ? `Update (${changedFieldsCount})` : 'No Changes'
+            ) : (
+              submitLabel
+            )}
           </Button>
         </div>
       </form>
@@ -573,14 +649,14 @@ function FkCombobox({ field, formField, options, searchTerm, onSearchChange }: F
   return (
     <div className="relative">
       {selectedOption ? (
-        <div className="flex items-center justify-between p-2 border rounded-md bg-background">
+        <div className="flex items-center justify-between p-2 border rounded-md bg-background transition-none">
           <span className="text-sm">{selectedOption.display}</span>
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={handleClear}
-            className="h-6 w-6 p-0"
+            className="h-6 w-6 p-0 transition-none"
           >
             <X className="h-3 w-3" />
           </Button>
@@ -592,20 +668,20 @@ function FkCombobox({ field, formField, options, searchTerm, onSearchChange }: F
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             onFocus={() => setIsOpen(true)}
-            className="pr-8"
+            className="pr-8 transition-none"
           />
           <Search className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
         </div>
       )}
       
       {isOpen && !selectedOption && (
-        <div className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto transition-none">
           {filteredOptions.length > 0 ? (
             filteredOptions.map((option) => (
               <button
                 key={option.id}
                 type="button"
-                className="w-full text-left px-3 py-2 hover:bg-accent text-sm"
+                className="w-full text-left px-3 py-2 hover:bg-accent text-sm transition-none"
                 onClick={() => handleSelect(option)}
               >
                 {option.display}

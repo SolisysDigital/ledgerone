@@ -50,17 +50,24 @@ export function DetailsGrid<T extends Record<string, any>>({
       .join(' ');
   };
 
+  // Check if a field should span full width
+  const shouldSpanFullWidth = (fieldName: string): boolean => {
+    return fieldName === 'description' || fieldName === 'short_description';
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {displayFields.map((fieldName) => {
         const value = data[fieldName];
         const formattedValue = formatFieldValue(fieldName as string, value);
+        const isFullWidth = shouldSpanFullWidth(fieldName as string);
         
         return (
           <DetailTile
             key={fieldName as string}
             label={getFieldLabel(fieldName as string)}
             value={formattedValue}
+            className={isFullWidth ? "col-span-2" : ""}
           />
         );
       })}
