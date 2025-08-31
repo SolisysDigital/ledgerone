@@ -55,7 +55,7 @@ export default async function PhoneDetailPage({ params }: { params: Promise<{ id
               <div className="flex items-center gap-3">
                 <p className="text-sm text-muted-foreground">ID: {id}</p>
                 {phone.phone && (
-                  <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-xl">
+                  <span className="rounded-md bg-teal-700/10 px-2 py-1 text-teal-700 text-sm font-medium">
                     {phone.phone}
                   </span>
                 )}
