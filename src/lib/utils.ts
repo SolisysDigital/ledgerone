@@ -10,8 +10,9 @@ export function cn(...inputs: ClassValue[]) {
  * Ensures the URL always has https:// for production and http:// for localhost
  */
 export function getApiUrl(path: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` 
+  // Use the production domain for production, fallback to localhost for development
+  const baseUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://ledgerone-one.vercel.app'
     : 'http://localhost:3000';
   
   return `${baseUrl}/api${path.startsWith('/') ? path : `/${path}`}`;
