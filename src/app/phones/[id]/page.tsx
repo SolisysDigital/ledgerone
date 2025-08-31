@@ -142,9 +142,7 @@ export default async function PhoneDetailPage({ params }: { params: Promise<{ id
             <CardContent>
               <div className="bg-muted/10 rounded-lg p-4 border border-border/50" style={{ borderRadius: '0.5rem' }}>
                 <Suspense fallback={<div>Loading entity relationships...</div>}>
-                  {/* Temporarily commented out to fix TypeScript error */}
-                  {/* <DetailObjectRelationships detailObjectId={id} detailObjectType="phones" /> */}
-                  <div>Related Entities functionality temporarily disabled</div>
+                  <DetailObjectRelationships detailObjectId={id} detailObjectType="phones" />
                 </Suspense>
               </div>
             </CardContent>
