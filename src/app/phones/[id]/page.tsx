@@ -44,17 +44,24 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
 
   if (!phone) return notFound();
 
-  // Get relationships for this phone
-  const { data: relationships, error: relationshipsError } = (await supabase
-    .from('entity_related_data')
-    .select(`
-      id,
-      entity_id,
-      relationship_description,
-      entities(name)
-    `)
-    .eq('related_data_id', id)
-    .eq('type_of_record', 'phones')) as { data: any[] | null; error: any };
+  // Get relationships for this phone using the API endpoint
+  let relationships = [];
+  try {
+    const relationshipsResponse = await fetch(getApiUrl(`/relationships?related_data_id=${id}&type_of_record=phones`), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (relationshipsResponse.ok) {
+      const relationshipsData = await relationshipsResponse.json();
+      relationships = relationshipsData.data || [];
+    }
+  } catch (error) {
+    console.error('Failed to fetch relationships:', error);
+    relationships = [];
+  }
 
   return (
     <ClientNavigationWrapper>
@@ -62,7 +69,7 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
         {/* Simple Header without box */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-6">
-            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-shadow">
+            <Button asChild variant="outline" size="sm" className="shadow-sm">
               <Link href="/phones">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to List
@@ -81,13 +88,13 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150">
+            <Button asChild variant="ghost" size="sm">
               <Link href={`/phones/${id}/edit`}>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Link>
             </Button>
-            <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150 text-red-600 hover:text-red-700">
+            <Button asChild variant="ghost" size="sm" className="text-red-600">
               <Link href={`/phones/${id}/delete`}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
@@ -98,7 +105,7 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
 
         <div className="space-y-6">
           {/* Basic Information Section */}
-          <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+          <Card className="bg-white/80 backdrop-blur-sm border-white/50">
             <CardHeader>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-1 h-6 bg-primary rounded-full"></div>
@@ -123,7 +130,7 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
                     .join(' ');
 
                   return (
-                    <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50 hover:border-border transition-colors" style={{ borderRadius: '0.5rem' }}>
+                    <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50" style={{ borderRadius: '0.5rem' }}>
                       <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                         {fieldLabel}
                       </Label>
@@ -147,7 +154,7 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
 
           {/* Related Entities Section */}
           {relationships && relationships.length > 0 && (
-            <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/50">
               <CardHeader>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-1 h-6 bg-primary rounded-full"></div>
@@ -159,7 +166,7 @@ export default async function PhoneDetailPage({ params }: PhoneDetailPageProps) 
                   {relationships.map((relationship: any) => (
                     <div key={relationship.id} className="flex items-center justify-between p-4 bg-muted/10 rounded-lg border border-border/50">
                       <div>
-                        <h4 className="font-medium text-teal-800">{relationship.entities?.name || 'Unknown Entity'}</h4>
+                        <h4 className="font-medium text-teal-800">{relationship.entity_name || 'Unknown Entity'}</h4>
                         <p className="text-sm text-muted-foreground">
                           {relationship.relationship_description || 'Existing Phone Relationship'}
                         </p>
