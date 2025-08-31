@@ -8,6 +8,7 @@ import { Edit, Trash2, ArrowLeft, Users, FileText, Building2 } from "lucide-reac
 import Link from "next/link";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 import ClientRelationshipTabs from "@/components/relationships/ClientRelationshipTabs";
+import DetailObjectRelationships from "@/components/relationships/DetailObjectRelationships";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RecordHeader from "@/components/record/RecordHeader";
 import { DetailsGrid } from "@/components/record/DetailsGrid";
@@ -174,7 +175,7 @@ export default async function EntityPage({
             <CardContent>
               <div className="bg-muted/10 rounded-lg p-4 border border-border/50" style={{ borderRadius: '0.5rem' }}>
                 <Suspense fallback={<div>Loading relationships...</div>}>
-                  <ClientRelationshipTabs entityId={id} />
+                  <DetailObjectRelationships detailObjectId={id} detailObjectType={table} />
                 </Suspense>
               </div>
             </CardContent>
