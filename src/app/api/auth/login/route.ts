@@ -44,7 +44,7 @@ export async function POST(req: Request) {
       .select('id, username, password_hash, full_name, role, status')
       .eq('username', username)
       .eq('status', 'active')
-      .single();
+      .single() as { data: any; error: any };
 
     if (error) {
       log('Database query error:', error);
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    log('Password verification successful for username:', username, 'Role:', data.role);
+    log('Password verification successful for username:', { username, role: data.role });
 
     // Create a signed session/cookie
     const user = {

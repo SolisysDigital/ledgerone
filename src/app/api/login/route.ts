@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     log('Credentials validation passed, querying database for user:', username);
 
     // Fetch minimal fields; never return password_hash
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('users')
       .select('id, username, password_hash, full_name, role, status')
       .eq('username', username)
@@ -71,15 +71,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    log('Password verification successful for username:', username, 'Role:', data.role);
+    log('Password verification successful for username:', { username, role: (data as any).role });
 
     // Create a signed session/cookie
     const user = {
-      id: data.id,
-      username: data.username,
-      full_name: data.full_name ?? 'User',
-      role: data.role ?? 'user',
-      status: data.status ?? 'active',
+      id: (data as any).id,
+      username: (data as any).username,
+      full_name: (data as any).full_name ?? 'User',
+      role: (data as any).role ?? 'user',
+      status: (data as any).status ?? 'active',
     };
 
     log('User object created for session:', user);

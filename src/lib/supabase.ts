@@ -97,7 +97,7 @@ export async function callRpc<
   Ret  extends Database['public']['Functions'][FnName] extends { Returns: infer R } ? R : never
 >(fn: FnName, args: Args): Promise<Ret> {
   const supabase = getServiceSupabase();
-  const { data, error } = await supabase.rpc(fn as string, args as Record<string, unknown>);
+  const { data, error } = await supabase.rpc(fn as string, args as any);
   if (error) {
     const message = typeof error.message === 'string' ? error.message : 'Unknown error';
     throw new Error(`RPC ${String(fn)} failed: ${message}`);

@@ -26,8 +26,7 @@ export async function GET() {
     log('Session cookie retrieved:', { 
       exists: !!sessionCookie, 
       hasValue: !!sessionCookie?.value,
-      cookieName: sessionCookie?.name,
-      cookiePath: sessionCookie?.path
+      cookieName: sessionCookie?.name
     });
 
     if (!sessionCookie?.value) {
@@ -60,7 +59,7 @@ export async function GET() {
     log('Session age validation passed, querying user data for uid:', uid);
 
     // Fetch user data (excluding password_hash)
-    const { data: user, error } = await supabase
+    const { data: user, error } = await (supabase as any)
       .from('users')
       .select('id, username, full_name, role, status')
       .eq('id', uid)

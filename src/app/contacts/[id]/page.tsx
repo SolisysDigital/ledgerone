@@ -99,7 +99,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {tableConfigs.contacts.fields.map((field) => {
+                {tableConfigs.contacts.fields.map((field: any): React.ReactElement | null => {
                   // Skip certain fields that are handled separately
                   if (['id', 'created_at', 'updated_at', 'user_id'].includes(field.name)) {
                     return null;
@@ -111,7 +111,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
                   // Format the field label (convert snake_case to Title Case)
                   const fieldLabel = field.label || field.name
                     .split('_')
-                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(' ');
 
                   return (
@@ -124,7 +124,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
                       <div className="text-sm">
                         {field.type === 'textarea' ? (
                           <div className="whitespace-pre-wrap bg-muted p-3 rounded-md">
-                            {fieldValue ? fieldValue : 'No description provided'}
+                            {fieldValue ? fieldValue : 'Not specified'}
                           </div>
                         ) : (
                           <span className="text-teal-800 font-medium">

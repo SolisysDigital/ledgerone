@@ -43,7 +43,7 @@ export async function GET(
     const supabase = getServiceSupabase();
 
     // Get the central node data
-    const { data: centralNode, error: centralError } = await supabase
+    const { data: centralNode, error: centralError } = await (supabase as any)
       .from(table)
       .select('*')
       .eq('id', id)
@@ -74,7 +74,7 @@ export async function GET(
       if (config.children) {
         for (const child of config.children) {
           try {
-            const { data: childRecords, error: childError } = await supabase
+            const { data: childRecords, error: childError } = await (supabase as any)
               .from(child.table)
               .select('*')
               .eq(child.fk, id);
@@ -106,7 +106,7 @@ export async function GET(
         try {
           const parentId = centralNode[config.parent.fk];
           if (parentId && typeof parentId === 'string') {
-            const { data: parentRecords, error: parentError } = await supabase
+            const { data: parentRecords, error: parentError } = await (supabase as any)
               .from(config.parent.table)
               .select('*')
               .eq('id', parentId);
@@ -137,7 +137,7 @@ export async function GET(
     // 3. Get entity_related_data relationships (many-to-many relationships)
     if (table === 'entities') {
       try {
-        const { data: relatedDataRecords, error: relatedDataError } = await supabase
+        const { data: relatedDataRecords, error: relatedDataError } = await (supabase as any)
           .from('entity_related_data')
           .select('*')
           .eq('entity_id', id);
@@ -201,13 +201,13 @@ export async function GET(
     if (table === 'entities') {
       try {
         // Get relationships where this entity is the source
-        const { data: fromRelationships, error: fromError } = await supabase
+        const { data: fromRelationships, error: fromError } = await (supabase as any)
           .from('entity_relationships')
           .select('*')
           .eq('from_entity_id', id);
 
         // Get relationships where this entity is the target
-        const { data: toRelationships, error: toError } = await supabase
+        const { data: toRelationships, error: toError } = await (supabase as any)
           .from('entity_relationships')
           .select('*')
           .eq('to_entity_id', id);
@@ -221,7 +221,7 @@ export async function GET(
           );
 
           // Fetch the actual entity records
-          const { data: relatedEntities, error: entitiesError } = await supabase
+          const { data: relatedEntities, error: entitiesError } = await (supabase as any)
             .from('entities')
             .select('*')
             .in('id', relatedEntityIds);

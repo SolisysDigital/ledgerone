@@ -20,7 +20,7 @@ export async function GET(
     // Use service role Supabase client to bypass RLS
     const supabase = getServiceSupabase();
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('entity_related_data')
       .select('*')
       .eq('id', id)
@@ -54,7 +54,7 @@ export async function DELETE(
     // Use service role Supabase client to bypass RLS
     const supabase = getServiceSupabase();
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('entity_related_data')
       .delete()
       .eq('id', relationshipId);
@@ -84,7 +84,7 @@ export async function PUT(
     // Use service role Supabase client to bypass RLS
     const supabase = getServiceSupabase();
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('entity_related_data')
       .update({
         relationship_description: relationshipDescription || null

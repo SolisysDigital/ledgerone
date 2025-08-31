@@ -44,11 +44,11 @@ export async function fetchRelatedData(table: string, id: string) {
           if (childData && Array.isArray(childData)) {
             relatedData[child.table] = childData;
           }
-        }
-        
-        // Debug logging for specific tables
-        if (child.table === 'contacts' || child.table === 'emails' || child.table === 'phones' || child.table === 'bank_accounts') {
-          console.log(`${child.table} query:`, { table: child.table, fk: child.fk, id, data: childData, error: null });
+          
+          // Debug logging for specific tables
+          if (child.table === 'contacts' || child.table === 'emails' || child.table === 'phones' || child.table === 'bank_accounts') {
+            console.log(`${child.table} query:`, { table: child.table, fk: child.fk, id, data: childData, error: null });
+          }
         }
       } catch (error) {
         console.error(`Error fetching child data for ${child.table}:`, error);

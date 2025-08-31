@@ -216,7 +216,7 @@ export async function createRelationship(
   relationshipDescription: string
 ) {
   try {
-    const { data, error } = await getServiceSupabase()
+    const { data, error } = await (getServiceSupabase() as any)
       .from('entity_related_data')
       .insert({
         entity_id: entityId,
@@ -261,7 +261,7 @@ export async function updateRelationship(
   relationshipDescription: string
 ) {
   try {
-    const { data, error } = await getServiceSupabase()
+    const { data, error } = await (getServiceSupabase() as any)
       .from('entity_related_data')
       .update({ relationship_description: relationshipDescription })
       .eq('id', relationshipId)
@@ -292,7 +292,7 @@ export async function updateRelationship(
 
 export async function deleteRelationship(relationshipId: string) {
   try {
-    const { error } = await getServiceSupabase()
+    const { error } = await (getServiceSupabase() as any)
       .from('entity_related_data')
       .delete()
       .eq('id', relationshipId);
@@ -310,12 +310,12 @@ export async function deleteRelationship(relationshipId: string) {
   }
 }
 
-export async function getRelationship(relationshipId: string) {
+export async function getRelationship(relationshipId: string): Promise<any> {
   try {
     console.log('getRelationship called with relationshipId:', relationshipId);
     
     // First try to find the relationship by its ID in entity_related_data
-    let { data, error } = await getServiceSupabase()
+    let { data, error } = await (getServiceSupabase() as any)
       .from('entity_related_data')
       .select(`
         id,
@@ -331,7 +331,7 @@ export async function getRelationship(relationshipId: string) {
     if (error && error.code === 'PGRST116') {
       console.log('Relationship not found by ID, trying to find by related_data_id:', relationshipId);
       
-      const { data: relationshipByRelatedId, error: relatedIdError } = await getServiceSupabase()
+      const { data: relationshipByRelatedId, error: relatedIdError } = await (getServiceSupabase() as any)
         .from('entity_related_data')
         .select(`
           id,
@@ -375,7 +375,7 @@ export async function getEntityForRelatedData(relatedDataId: string, typeOfRecor
     const supabase = getServiceSupabase();
     
     // Find the entity that owns this related data
-    const { data: relationship, error } = await supabase
+    const { data: relationship, error } = await (supabase as any)
       .from('entity_related_data')
       .select(`
         id,
@@ -407,7 +407,7 @@ export async function getHoverPopupData(entityId: string) {
     const supabase = getServiceSupabase();
     
     // First get the relationships
-    const { data: relationships, error: relationshipsError } = await supabase
+    const { data: relationships, error: relationshipsError } = await (supabase as any)
       .from('entity_related_data')
       .select(`
         id,
@@ -416,7 +416,7 @@ export async function getHoverPopupData(entityId: string) {
         relationship_description
       `)
       .eq('entity_id', entityId)
-      .order('type_of_record', { ascending: true }) as { data: EntityRelationship[] | null; error: any };
+      .order('type_of_record', { ascending: true });
 
     if (relationshipsError) {
       console.error('Error fetching relationships:', relationshipsError);
@@ -444,7 +444,7 @@ export async function getHoverPopupData(entityId: string) {
 
     // For each relationship, fetch the related data to get the display name and additional fields for hover popups
     const enrichedRelationships = await Promise.all(
-      (relationships || []).map(async (relationship) => {
+      (relationships || []).map(async (relationship: any) => {
         try {
           const displayField = getDisplayField(relationship.type_of_record);
           console.log(`Fetching ${relationship.type_of_record} data for ID: ${relationship.related_data_id}`);
@@ -517,7 +517,7 @@ export async function getEntitiesForDetailObject(detailObjectId: string, detailO
     const supabase = getServiceSupabase();
     
     // Find all entities that are related to this detail object
-    const { data: relationships, error } = await supabase
+    const { data: relationships, error } = await (supabase as any)
       .from('entity_related_data')
       .select(`
         id,
@@ -540,8 +540,8 @@ export async function getEntitiesForDetailObject(detailObjectId: string, detailO
     }
 
     // Fetch entity details for each relationship
-    const entityIds = relationships.map(r => r.entity_id);
-    const { data: entities, error: entityError } = await supabase
+    const entityIds = relationships.map((r: any) => r.entity_id);
+    const { data: entities, error: entityError } = await (supabase as any)
       .from('entities')
       .select('id, name, type, created_at, updated_at')
       .in('id', entityIds);
@@ -552,8 +552,8 @@ export async function getEntitiesForDetailObject(detailObjectId: string, detailO
     }
 
     // Combine relationship data with entity details
-    return relationships.map(relationship => {
-      const entity = entities?.find(e => e.id === relationship.entity_id);
+    return relationships.map((relationship: any) => {
+      const entity = entities?.find((e: any) => e.id === relationship.entity_id);
       return {
         relationship_id: relationship.id,
         entity_id: relationship.entity_id,

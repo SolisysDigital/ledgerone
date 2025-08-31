@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const supabase = getServiceSupabase();
 
     // Find all entities that are related to this detail object
-    const { data: relationships, error } = await supabase
+    const { data: relationships, error } = await (supabase as any)
       .from('entity_related_data')
       .select(`
         id,
@@ -47,8 +47,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch entity details for each relationship
-    const entityIds = relationships.map(r => r.entity_id);
-    const { data: entities, error: entityError } = await supabase
+    const entityIds = relationships.map((r: any) => r.entity_id);
+    const { data: entities, error: entityError } = await (supabase as any)
       .from('entities')
       .select('id, name, type, created_at, updated_at')
       .in('id', entityIds);
@@ -61,8 +61,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Combine relationship data with entity details
-    const enrichedRelationships = relationships.map(relationship => {
-      const entity = entities?.find(e => e.id === relationship.entity_id);
+    const enrichedRelationships = relationships.map((relationship: any) => {
+      const entity = entities?.find((e: any) => e.id === relationship.entity_id);
       return {
         relationship_id: relationship.id,
         entity_id: relationship.entity_id,

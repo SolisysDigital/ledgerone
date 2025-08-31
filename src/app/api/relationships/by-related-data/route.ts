@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const supabase = getServiceSupabase();
     
     // Find the relationship where this related data belongs to an entity
-    const { data: relationship, error } = await supabase
+    const { data: relationship, error } = await (supabase as any)
       .from('entity_related_data')
       .select(`
         id,
@@ -38,10 +38,10 @@ export async function GET(request: NextRequest) {
 
     // If we found a relationship, get the entity details
     if (relationship) {
-      const { data: entity, error: entityError } = await supabase
+      const { data: entity, error: entityError } = await (supabase as any)
         .from('entities')
         .select('id, name, type')
-        .eq('id', relationship.entity_id)
+        .eq('id', (relationship as any).entity_id)
         .single();
 
       if (entityError) {
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       }
 
       return NextResponse.json({
-        ...relationship,
+        ...(relationship as any),
         entities: entity
       });
     }

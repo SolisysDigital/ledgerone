@@ -1,4 +1,5 @@
 import { getServiceSupabase } from './supabase';
+import type { Database } from './database.types';
 
 export type LogLevel = 'ERROR' | 'WARNING' | 'INFO' | 'DEBUG';
 
@@ -128,7 +129,7 @@ export class AppLogger {
       const supabase = getServiceSupabase();
       
       // Skip RPC call and use direct insert to avoid build failures
-      const { data: insertData, error: insertError } = await supabase
+      const { data: insertData, error: insertError } = await (supabase as any)
         .from('app_logs')
         .insert({
           level: logEntry.level,
@@ -143,7 +144,7 @@ export class AppLogger {
           user_agent: logEntry.userAgent
         })
         .select('id')
-        .single() as { data: { id: string } | null; error: any };
+        .single();
 
       if (insertError) {
         console.error('Direct insert error:', insertError);
@@ -160,12 +161,12 @@ export class AppLogger {
   /**
    * Get a specific log by ID
    */
-  static async getLogById(logId: string) {
+  static async getLogById(logId: string): Promise<Database['public']['Tables']['app_logs']['Row'] | null> {
     try {
       // Use service role Supabase client to bypass RLS
       const supabase = getServiceSupabase();
       
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('app_logs')
         .select('*')
         .eq('id', logId)
@@ -182,19 +183,19 @@ export class AppLogger {
   /**
    * Get recent errors
    */
-  static async getRecentErrors(limit: number = 50) {
+  static async getRecentErrors(limit: number = 50): Promise<Database['public']['Tables']['app_logs']['Row'][]> {
     try {
       // Use service role Supabase client to bypass RLS
       const supabase = getServiceSupabase();
       
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('app_logs')
         .select('*')
         .order('timestamp', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
-      return data;
+      return data || [];
     } catch (error) {
       console.error('Failed to get recent errors:', error);
       return [];
@@ -209,7 +210,7 @@ export class AppLogger {
       // Use service role Supabase client to bypass RLS
       const supabase = getServiceSupabase();
       
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('debug_logs')
         .select('*')
         .limit(limit);
@@ -230,7 +231,7 @@ export class AppLogger {
       // Use service role Supabase client to bypass RLS
       const supabase = getServiceSupabase();
       
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('app_logs')
         .delete()
         .lt('timestamp', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
@@ -239,7 +240,7 @@ export class AppLogger {
       return { success: true };
     } catch (error) {
       console.error('Failed to clear old logs:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 }

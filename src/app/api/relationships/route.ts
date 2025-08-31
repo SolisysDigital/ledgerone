@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     const supabase = getServiceSupabase();
 
     // Check if relationship already exists
-    const { data: existingRelationship, error: checkError } = await supabase
+    const { data: existingRelationship, error: checkError } = await (supabase as any)
       .from('entity_related_data')
       .select('id')
       .eq('entity_id', entityId)
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new relationship
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('entity_related_data')
       .insert({
         entity_id: entityId,
