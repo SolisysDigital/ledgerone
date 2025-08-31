@@ -53,16 +53,34 @@ export async function getEntityRelationships(entityId: string) {
       return displayFields[type] || 'name';
     };
 
-    // For each relationship, fetch the related data to get the display name
+    // For each relationship, fetch the related data to get the display name and additional fields
     const enrichedRelationships = await Promise.all(
       (relationships || []).map(async (relationship) => {
         try {
           const displayField = getDisplayField(relationship.type_of_record);
           console.log(`Fetching ${relationship.type_of_record} data for ID: ${relationship.related_data_id}`);
           
+          // Define which fields to fetch for each table type to support hover popups
+          const getFieldsToSelect = (type: string) => {
+            const fieldMappings: Record<string, string> = {
+              contacts: 'name, title, email, phone, short_description, description',
+              emails: 'email, label, short_description, description',
+              phones: 'phone, label, short_description, description',
+              bank_accounts: 'bank_name, account_number, routing_number, institution_held_at, purpose, last_balance, short_description, description',
+              investment_accounts: 'provider, account_type, account_number, institution_held_at, purpose, last_balance, short_description, description',
+              crypto_accounts: 'platform, account_number, wallet_address, institution_held_at, purpose, last_balance, short_description, description',
+              credit_cards: 'cardholder_name, card_number, issuer, type, institution_held_at, purpose, last_balance, short_description, description',
+              websites: 'url, label, short_description, description',
+              hosting_accounts: 'provider, login_url, username, short_description, description'
+            };
+            return fieldMappings[type] || displayField;
+          };
+          
+          const fieldsToSelect = getFieldsToSelect(relationship.type_of_record);
+          
           const { data: relatedData, error: relatedDataError } = await supabase
             .from(relationship.type_of_record)
-            .select(displayField)
+            .select(fieldsToSelect)
             .eq('id', relationship.related_data_id)
             .single();
 
@@ -77,9 +95,12 @@ export async function getEntityRelationships(entityId: string) {
           const displayName = (relatedData as any)?.[displayField] || 'Unnamed Record';
           console.log(`Display name for ${relationship.type_of_record}:`, displayName);
           
+          // Return the relationship with display name and all the fetched data for hover popups
           return {
             ...relationship,
-            related_data_display_name: displayName
+            related_data_display_name: displayName,
+            // Spread all the fetched data so hover popups can access it
+            ...(relatedData as Record<string, any>)
           };
         } catch (error) {
           console.error(`Error processing relationship ${relationship.id}:`, error);
@@ -342,6 +363,118 @@ export async function getRelationship(relationshipId: string) {
     return data;
   } catch (error) {
     await AppLogger.error('relationshipActions', 'getRelationship', 'Exception in getRelationship', error, { relationshipId });
+    throw error;
+  }
+} 
+
+export async function getHoverPopupData(entityId: string) {
+  try {
+    console.log('getHoverPopupData called with entityId:', entityId);
+    
+    // Use service role Supabase client to bypass RLS
+    const supabase = getServiceSupabase();
+    
+    // First get the relationships
+    const { data: relationships, error: relationshipsError } = await supabase
+      .from('entity_related_data')
+      .select(`
+        id,
+        related_data_id,
+        type_of_record,
+        relationship_description
+      `)
+      .eq('entity_id', entityId)
+      .order('type_of_record', { ascending: true }) as { data: EntityRelationship[] | null; error: any };
+
+    if (relationshipsError) {
+      console.error('Error fetching relationships:', relationshipsError);
+      await AppLogger.error('relationshipActions', 'getHoverPopupData', 'Failed to fetch relationships', relationshipsError, { entityId });
+      throw relationshipsError;
+    }
+
+    console.log('Raw relationships fetched:', relationships);
+
+    // Get the display field mapping
+    const getDisplayField = (type: string) => {
+      const displayFields: Record<string, string> = {
+        contacts: 'name',
+        emails: 'email',
+        phones: 'phone',
+        bank_accounts: 'bank_name',
+        investment_accounts: 'provider',
+        crypto_accounts: 'platform',
+        credit_cards: 'cardholder_name',
+        websites: 'url',
+        hosting_accounts: 'provider'
+      };
+      return displayFields[type] || 'name';
+    };
+
+    // For each relationship, fetch the related data to get the display name and additional fields for hover popups
+    const enrichedRelationships = await Promise.all(
+      (relationships || []).map(async (relationship) => {
+        try {
+          const displayField = getDisplayField(relationship.type_of_record);
+          console.log(`Fetching ${relationship.type_of_record} data for ID: ${relationship.related_data_id}`);
+          
+          // Define which fields to fetch for each table type to support hover popups
+          const getFieldsToSelect = (type: string) => {
+            const fieldMappings: Record<string, string> = {
+              contacts: 'name, title, email, phone, short_description, description',
+              emails: 'email, label, short_description, description',
+              phones: 'phone, label, short_description, description',
+              bank_accounts: 'bank_name, account_number, routing_number, institution_held_at, purpose, last_balance, short_description, description',
+              investment_accounts: 'provider, account_type, account_number, institution_held_at, purpose, last_balance, short_description, description',
+              crypto_accounts: 'platform, account_number, wallet_address, institution_held_at, purpose, last_balance, short_description, description',
+              credit_cards: 'cardholder_name, card_number, issuer, type, institution_held_at, purpose, last_balance, short_description, description',
+              websites: 'url, label, short_description, description',
+              hosting_accounts: 'provider, login_url, username, short_description, description'
+            };
+            return fieldMappings[type] || displayField;
+          };
+          
+          const fieldsToSelect = getFieldsToSelect(relationship.type_of_record);
+          
+          const { data: relatedData, error: relatedDataError } = await supabase
+            .from(relationship.type_of_record)
+            .select(fieldsToSelect)
+            .eq('id', relationship.related_data_id)
+            .single();
+
+          if (relatedDataError) {
+            console.error(`Error fetching ${relationship.type_of_record} data:`, relatedDataError);
+            return {
+              ...relationship,
+              related_data_display_name: 'Unknown Record'
+            };
+          }
+
+          const displayName = (relatedData as any)?.[displayField] || 'Unnamed Record';
+          console.log(`Display name for ${relationship.type_of_record}:`, displayName);
+          
+          // Return the relationship with display name and all the fetched data for hover popups
+          return {
+            ...relationship,
+            related_data_display_name: displayName,
+            // Spread all the fetched data so hover popups can access it
+            ...(relatedData as Record<string, any>)
+          };
+        } catch (error) {
+          console.error(`Error processing relationship ${relationship.id}:`, error);
+          return {
+            ...relationship,
+            related_data_display_name: 'Error Loading Record'
+          };
+        }
+      })
+    );
+
+    console.log('Enriched relationships for hover popups:', enrichedRelationships);
+    await AppLogger.info('relationshipActions', 'getHoverPopupData', 'Successfully fetched hover popup data', { entityId, count: enrichedRelationships?.length });
+    return enrichedRelationships;
+  } catch (error) {
+    console.error('Exception in getHoverPopupData:', error);
+    await AppLogger.error('relationshipActions', 'getHoverPopupData', 'Exception in getHoverPopupData', error, { entityId });
     throw error;
   }
 } 

@@ -185,6 +185,12 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                                               <span className="font-medium text-muted-foreground">Name:</span>
                                               <span className="ml-2">{item.name || 'Not available'}</span>
                                             </div>
+                                            {item.title && (
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Title:</span>
+                                                <span className="ml-2">{item.title}</span>
+                                              </div>
+                                            )}
                                             <div>
                                               <span className="font-medium text-muted-foreground">Email:</span>
                                               <span className="ml-2">{item.email || 'Not available'}</span>
@@ -193,30 +199,70 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                                               <span className="font-medium text-muted-foreground">Phone:</span>
                                               <span className="ml-2">{item.phone || 'Not available'}</span>
                                             </div>
+                                            {item.short_description && (
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Short Description:</span>
+                                                <span className="ml-2">{item.short_description}</span>
+                                              </div>
+                                            )}
+                                            {item.description && (
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Description:</span>
+                                                <span className="ml-2">{item.description}</span>
+                                              </div>
+                                            )}
                                           </>
                                         )}
                                         {child.table === 'emails' && (
                                           <>
                                             <div>
                                               <span className="font-medium text-muted-foreground">Email:</span>
-                                              <span className="ml-2">{item.email_address || item.name || 'Not available'}</span>
+                                              <span className="ml-2">{item.email || item.name || 'Not available'}</span>
                                             </div>
-                                            <div>
-                                              <span className="font-medium text-muted-foreground">Description:</span>
-                                              <span className="ml-2">{item.description || 'No description'}</span>
-                                            </div>
+                                            {item.label && (
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Label:</span>
+                                                <span className="ml-2">{item.label}</span>
+                                              </div>
+                                            )}
+                                            {item.short_description && (
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Short Description:</span>
+                                                <span className="ml-2">{item.short_description}</span>
+                                              </div>
+                                            )}
+                                            {item.description && (
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Description:</span>
+                                                <span className="ml-2">{item.description}</span>
+                                              </div>
+                                            )}
                                           </>
                                         )}
                                         {child.table === 'phones' && (
                                           <>
                                             <div>
                                               <span className="font-medium text-muted-foreground">Phone:</span>
-                                              <span className="ml-2">{item.phone_number || item.name || 'Not available'}</span>
+                                              <span className="ml-2">{item.phone || item.name || 'Not available'}</span>
                                             </div>
-                                            <div>
-                                              <span className="font-medium text-muted-foreground">Label:</span>
-                                              <span className="ml-2">{item.label || 'No label'}</span>
-                                            </div>
+                                            {item.label && (
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Label:</span>
+                                                <span className="ml-2">{item.label}</span>
+                                              </div>
+                                            )}
+                                            {item.short_description && (
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Short Description:</span>
+                                                <span className="ml-2">{item.short_description}</span>
+                                              </div>
+                                            )}
+                                            {item.description && (
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Description:</span>
+                                                <span className="ml-2">{item.description}</span>
+                                              </div>
+                                            )}
                                           </>
                                         )}
                                         {child.table === 'bank_accounts' && (
@@ -225,14 +271,36 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                                               <span className="font-medium text-muted-foreground">Bank Name:</span>
                                               <span className="ml-2">{item.bank_name || item.name || 'Not available'}</span>
                                             </div>
-                                            <div>
-                                              <span className="font-medium text-muted-foreground">Institution Held At:</span>
-                                              <span className="ml-2">{item.institution_held_at || 'Not specified'}</span>
-                                            </div>
-                                            <div>
-                                              <span className="font-medium text-muted-foreground">Purpose:</span>
-                                              <span className="ml-2">{item.purpose || 'No purpose specified'}</span>
-                                            </div>
+                                            {item.account_number && (
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Account Number:</span>
+                                                <span className="ml-2">{item.account_number}</span>
+                                              </div>
+                                            )}
+                                            {item.institution_held_at && (
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Institution Held At:</span>
+                                                <span className="ml-2">{item.institution_held_at}</span>
+                                              </div>
+                                            )}
+                                            {item.purpose && (
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Purpose:</span>
+                                                <span className="ml-2">{item.purpose}</span>
+                                              </div>
+                                            )}
+                                            {item.short_description && (
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Short Description:</span>
+                                                <span className="ml-2">{item.short_description}</span>
+                                              </div>
+                                            )}
+                                            {item.description && (
+                                              <div>
+                                                <span className="font-medium text-muted-foreground">Description:</span>
+                                                <span className="ml-2">{item.description}</span>
+                                              </div>
+                                            )}
                                           </>
                                         )}
                                         {child.table === 'investment_accounts' && (

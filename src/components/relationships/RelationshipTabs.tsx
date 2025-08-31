@@ -33,6 +33,8 @@ interface Relationship {
   issuer?: string;
   platform?: string;
   relationship_id?: string; // Added for edit button
+  title?: string;
+  short_description?: string;
 }
 
 interface RelationshipTabsProps {
@@ -286,6 +288,12 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                                                 <span className="font-medium text-muted-foreground">Name:</span>
                                                 <span className="ml-2">{relationship.related_data_display_name}</span>
                                               </div>
+                                              {relationship.title && (
+                                                <div>
+                                                  <span className="font-medium text-muted-foreground">Title:</span>
+                                                  <span className="ml-2">{relationship.title}</span>
+                                                </div>
+                                              )}
                                               <div>
                                                 <span className="font-medium text-muted-foreground">Email:</span>
                                                 <span className="ml-2">{relationship.email || 'Not available'}</span>
@@ -294,30 +302,70 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                                                 <span className="font-medium text-muted-foreground">Phone:</span>
                                                 <span className="ml-2">{relationship.phone || 'Not available'}</span>
                                               </div>
+                                              {relationship.short_description && (
+                                                <div>
+                                                  <span className="font-medium text-muted-foreground">Short Description:</span>
+                                                  <span className="ml-2">{relationship.short_description}</span>
+                                                </div>
+                                              )}
+                                              {relationship.description && (
+                                                <div>
+                                                  <span className="font-medium text-muted-foreground">Description:</span>
+                                                  <span className="ml-2">{relationship.description}</span>
+                                                </div>
+                                              )}
                                             </>
                                           )}
                                           {typeInfo.key === 'emails' && (
                                             <>
                                               <div>
                                                 <span className="font-medium text-muted-foreground">Email:</span>
-                                                <span className="ml-2">{relationship.email_address || relationship.related_data_display_name}</span>
+                                                <span className="ml-2">{relationship.email || relationship.related_data_display_name}</span>
                                               </div>
-                                              <div>
-                                                <span className="font-medium text-muted-foreground">Description:</span>
-                                                <span className="ml-2">{relationship.description || 'No description'}</span>
-                                              </div>
+                                              {relationship.label && (
+                                                <div>
+                                                  <span className="font-medium text-muted-foreground">Label:</span>
+                                                  <span className="ml-2">{relationship.label}</span>
+                                                </div>
+                                              )}
+                                              {relationship.short_description && (
+                                                <div>
+                                                  <span className="font-medium text-muted-foreground">Short Description:</span>
+                                                  <span className="ml-2">{relationship.short_description}</span>
+                                                </div>
+                                              )}
+                                              {relationship.description && (
+                                                <div>
+                                                  <span className="font-medium text-muted-foreground">Description:</span>
+                                                  <span className="ml-2">{relationship.description}</span>
+                                                </div>
+                                              )}
                                             </>
                                           )}
                                           {typeInfo.key === 'phones' && (
                                             <>
                                               <div>
                                                 <span className="font-medium text-muted-foreground">Phone:</span>
-                                                <span className="ml-2">{relationship.phone_number || relationship.related_data_display_name}</span>
+                                                <span className="ml-2">{relationship.phone || relationship.related_data_display_name}</span>
                                               </div>
-                                              <div>
-                                                <span className="font-medium text-muted-foreground">Label:</span>
-                                                <span className="ml-2">{relationship.label || 'No label'}</span>
-                                              </div>
+                                              {relationship.label && (
+                                                <div>
+                                                  <span className="font-medium text-muted-foreground">Label:</span>
+                                                  <span className="ml-2">{relationship.label}</span>
+                                                </div>
+                                              )}
+                                              {relationship.short_description && (
+                                                <div>
+                                                  <span className="font-medium text-muted-foreground">Short Description:</span>
+                                                  <span className="ml-2">{relationship.short_description}</span>
+                                                </div>
+                                              )}
+                                              {relationship.description && (
+                                                <div>
+                                                  <span className="font-medium text-muted-foreground">Description:</span>
+                                                  <span className="ml-2">{relationship.description}</span>
+                                                </div>
+                                              )}
                                             </>
                                           )}
                                           {typeInfo.key === 'bank_accounts' && (
@@ -326,14 +374,36 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                                                 <span className="font-medium text-muted-foreground">Bank Name:</span>
                                                 <span className="ml-2">{relationship.bank_name || relationship.related_data_display_name}</span>
                                               </div>
-                                              <div>
-                                                <span className="font-medium text-muted-foreground">Institution Held At:</span>
-                                                <span className="ml-2">{relationship.institution_held_at || 'Not specified'}</span>
-                                              </div>
-                                              <div>
-                                                <span className="font-medium text-muted-foreground">Purpose:</span>
-                                                <span className="ml-2">{relationship.purpose || 'No purpose specified'}</span>
-                                              </div>
+                                              {relationship.account_number && (
+                                                <div>
+                                                  <span className="font-medium text-muted-foreground">Account Number:</span>
+                                                  <span className="ml-2">{relationship.account_number}</span>
+                                                </div>
+                                              )}
+                                              {relationship.institution_held_at && (
+                                                <div>
+                                                  <span className="font-medium text-muted-foreground">Institution Held At:</span>
+                                                  <span className="ml-2">{relationship.institution_held_at}</span>
+                                                </div>
+                                              )}
+                                              {relationship.purpose && (
+                                                <div>
+                                                  <span className="font-medium text-muted-foreground">Purpose:</span>
+                                                  <span className="ml-2">{relationship.purpose}</span>
+                                                </div>
+                                              )}
+                                              {relationship.short_description && (
+                                                <div>
+                                                  <span className="font-medium text-muted-foreground">Short Description:</span>
+                                                  <span className="ml-2">{relationship.short_description}</span>
+                                                </div>
+                                              )}
+                                              {relationship.description && (
+                                                <div>
+                                                  <span className="font-medium text-muted-foreground">Description:</span>
+                                                  <span className="ml-2">{relationship.description}</span>
+                                                </div>
+                                              )}
                                             </>
                                           )}
                                           {typeInfo.key === 'investment_accounts' && (

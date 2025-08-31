@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
 import { AppLogger } from '@/lib/logger';
+import { getHoverPopupData } from '@/lib/relationshipActions';
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = 'force-dynamic';
@@ -15,115 +16,59 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Entity ID is required' }, { status: 400 });
     }
 
-    // Use service role Supabase client to bypass RLS
-    const supabase = getServiceSupabase();
-
-    // Try to use the view first, fallback to basic table if view doesn't exist
-    let query = supabase
-      .from('entity_relationships_view')
-      .select('*')
-      .eq('entity_id', entityId);
-
+    // Use the getHoverPopupData function to get complete data for hover popups
+    const relationships = await getHoverPopupData(entityId);
+    
+    // Filter by type if specified
+    let filteredRelationships = relationships;
     if (typeOfRecord) {
-      query = query.eq('type_of_record', typeOfRecord);
+      filteredRelationships = relationships.filter(rel => rel.type_of_record === typeOfRecord);
     }
 
-    let { data, error } = await query;
-
-    // If view doesn't exist, fallback to basic table
-    if (error && error.message && error.message.includes('relation "entity_relationships_view" does not exist')) {
-      console.log('View not found, falling back to basic table');
+    // Transform the data to match the expected API response format
+    const transformedData = filteredRelationships.map(relationship => {
+      // Extract the additional fields for hover popups (excluding the base relationship fields)
+      const { id, related_data_id, type_of_record, relationship_description, related_data_display_name, ...additionalFields } = relationship;
       
-      query = supabase
-        .from('entity_related_data')
-        .select('*')
-        .eq('entity_id', entityId);
+      return {
+        relationship_id: id,
+        entity_id: entityId, // Use the entityId from the request
+        related_data_id: related_data_id,
+        type_of_record: type_of_record,
+        relationship_description: relationship_description,
+        created_at: new Date().toISOString(), // Use current timestamp as fallback
+        updated_at: new Date().toISOString(), // Use current timestamp as fallback
+        related_data_display_name: related_data_display_name,
+        // Include all the additional fields for hover popups
+        ...additionalFields
+      };
+    });
 
-      if (typeOfRecord) {
-        query = query.eq('type_of_record', typeOfRecord);
-      }
+    // Log the response for debugging
+    console.log('API: Returning relationships with complete data for hover popups');
+    console.log('API: Sample relationship data:', transformedData[0]);
 
-      const fallbackResult = await query;
-      data = fallbackResult.data;
-      error = fallbackResult.error;
-    }
-
-    // Ensure we have the relationship ID field for editing
-    if (data && data.length > 0) {
-      // Check if the data has the relationship ID field
-      const hasRelationshipId = 'id' in data[0];
-      console.log('API: Data has relationship ID field:', hasRelationshipId);
-      
-      if (!hasRelationshipId) {
-        console.log('API: Missing relationship ID field, enriching data with relationship IDs');
-        
-        // Enrich the data with relationship IDs by querying entity_related_data
-        const enrichedData = await Promise.all(
-          data.map(async (item: any) => {
-            try {
-              const { data: relationshipData, error: relError } = await supabase
-                .from('entity_related_data')
-                .select('id, relationship_description')
-                .eq('entity_id', entityId)
-                .eq('related_data_id', item.related_data_id || item.id)
-                .eq('type_of_record', item.type_of_record)
-                .single();
-
-              if (relError) {
-                console.warn('API: Could not find relationship data for item:', item);
-                return {
-                  ...item,
-                  relationship_id: null,
-                  relationship_description: item.relationship_description || null
-                };
-              }
-
-              return {
-                ...item,
-                relationship_id: relationshipData.id,
-                relationship_description: relationshipData.relationship_description
-              };
-            } catch (error) {
-              console.warn('API: Error enriching relationship data:', error);
-              return {
-                ...item,
-                relationship_id: null,
-                relationship_description: item.relationship_description || null
-              };
-            }
-          })
-        );
-        
-        data = enrichedData;
-      }
-    }
-
-    if (error) {
-      console.error('Supabase error:', error);
-      await AppLogger.error('api/relationships', 'GET', 'Failed to fetch relationships', error, { entityId, typeOfRecord });
-      
-      return NextResponse.json({ 
-        error: 'Failed to fetch relationships',
-        details: error.message 
-      }, { status: 500 });
-    }
-
-    await AppLogger.info('api/relationships', 'GET', 'Successfully fetched relationships', { entityId, typeOfRecord, count: data?.length });
-    
-    // Add metadata about the data source
-    const responseData = {
-      data: data || [],
+    return NextResponse.json({
+      data: transformedData,
       metadata: {
-        source: 'entity_relationships_view',
-        count: data?.length || 0,
-        hasDisplayNames: data && data.length > 0 && 'related_data_display_name' in data[0]
+        source: 'getHoverPopupData_function',
+        count: transformedData.length,
+        hasDisplayNames: true,
+        hasCompleteData: true
       }
-    };
-    
-    return NextResponse.json(responseData);
+    });
+
   } catch (error) {
-    await AppLogger.error('api/relationships', 'GET', 'Exception in GET relationships', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('API: Error fetching relationships:', error);
+    await AppLogger.error('relationships_api', 'get_relationships_failed', 'Failed to fetch relationships', error as Error, { 
+      entityId: request.nextUrl.searchParams.get('entityId'),
+      typeOfRecord: request.nextUrl.searchParams.get('typeOfRecord')
+    });
+    
+    return NextResponse.json({ 
+      error: 'Failed to fetch relationships',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
 
