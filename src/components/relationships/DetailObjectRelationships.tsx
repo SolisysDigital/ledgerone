@@ -42,7 +42,7 @@ export default function DetailObjectRelationships({
       setLoading(true);
       setError(null);
       
-      const apiUrl = getApiUrl(`/relationships/by-detail-object?detail_object_id=${detailObjectId}&detail_object_type=${detailObjectType}`);
+      const apiUrl = getApiUrl(`/relationships-detail/by-detail-object?detail_object_id=${detailObjectId}&detail_object_type=${detailObjectType}`);
       console.log('DetailObjectRelationships: Attempting to fetch from:', apiUrl);
       
       const response = await fetch(apiUrl);
