@@ -510,3 +510,63 @@ export async function getHoverPopupData(entityId: string) {
     throw error;
   }
 } 
+
+export async function getEntitiesForDetailObject(detailObjectId: string, detailObjectType: string) {
+  try {
+    console.log('getEntitiesForDetailObject called with:', { detailObjectId, detailObjectType });
+    const supabase = getServiceSupabase();
+    
+    // Find all entities that are related to this detail object
+    const { data: relationships, error } = await supabase
+      .from('entity_related_data')
+      .select(`
+        id,
+        entity_id,
+        type_of_record,
+        relationship_description,
+        created_at,
+        updated_at
+      `)
+      .eq('related_data_id', detailObjectId)
+      .eq('type_of_record', detailObjectType);
+
+    if (error) {
+      console.error('Error fetching relationships by detail object:', error);
+      return [];
+    }
+
+    if (!relationships || relationships.length === 0) {
+      return [];
+    }
+
+    // Fetch entity details for each relationship
+    const entityIds = relationships.map(r => r.entity_id);
+    const { data: entities, error: entityError } = await supabase
+      .from('entities')
+      .select('id, name, type, created_at, updated_at')
+      .in('id', entityIds);
+
+    if (entityError) {
+      console.error('Error fetching entities:', entityError);
+      return [];
+    }
+
+    // Combine relationship data with entity details
+    return relationships.map(relationship => {
+      const entity = entities?.find(e => e.id === relationship.entity_id);
+      return {
+        relationship_id: relationship.id,
+        entity_id: relationship.entity_id,
+        type_of_record: relationship.type_of_record,
+        relationship_description: relationship.relationship_description,
+        created_at: relationship.created_at,
+        updated_at: relationship.updated_at,
+        entity: entity || null
+      };
+    });
+
+  } catch (error) {
+    console.error('Exception in getEntitiesForDetailObject:', error);
+    return [];
+  }
+} 
