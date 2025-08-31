@@ -180,7 +180,7 @@ export default function VisualizePage() {
                       {branch.items.map((item) => (
                         <div
                           key={item.id}
-                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer"
                           onClick={() => handleNodeClick(item)}
                         >
                           <div className="flex items-center space-x-3">

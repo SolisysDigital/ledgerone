@@ -38,13 +38,13 @@ export default async function CreditCardPage({
   // Actions for the header
   const actions = (
     <>
-      <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150">
+      <Button asChild variant="ghost" size="sm">
         <Link href={`/credit-cards/${id}/edit`}>
           <Edit className="h-4 w-4 mr-2" />
           Edit
         </Link>
       </Button>
-      <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150 text-red-600 hover:text-red-700">
+      <Button asChild variant="ghost" size="sm" className="text-red-600">
         <Link href={`/credit-cards/${id}/delete`}>
           <Trash2 className="h-4 w-4 mr-2" />
           Delete
@@ -75,7 +75,7 @@ export default async function CreditCardPage({
         />
 
         {/* Basic Information Section */}
-        <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+        <Card className="bg-white/80 backdrop-blur-sm border-white/50">
           <CardHeader>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-1 h-6 bg-primary rounded-full"></div>
@@ -92,7 +92,7 @@ export default async function CreditCardPage({
         </Card>
 
         {/* Related Data Section */}
-        <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+        <Card className="bg-white/80 backdrop-blur-sm border-white/50">
           <CardHeader>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-1 h-6 bg-primary rounded-full"></div>

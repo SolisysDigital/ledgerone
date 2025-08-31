@@ -157,7 +157,7 @@ export default function GlobalSearch() {
                     href={`/${result.table}/${result.id}`}
                     onClick={() => handleResultClick()}
                   >
-                    <Card className="hover:bg-accent transition-colors cursor-pointer">
+                    <Card className="cursor-pointer">
                       <CardContent className="p-3">
                         <div className="flex items-center space-x-3">
                           <Icon className="h-5 w-5 text-muted-foreground" />

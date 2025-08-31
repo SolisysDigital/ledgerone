@@ -38,13 +38,13 @@ export default async function HostingAccountPage({
   // Actions for the header
   const actions = (
     <>
-      <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150">
+      <Button asChild variant="ghost" size="sm">
         <Link href={`/hosting-accounts/${id}/edit`}>
           <Edit className="h-4 w-4 mr-2" />
           Edit
         </Link>
       </Button>
-      <Button asChild variant="ghost" size="sm" className="hover:bg-muted/30 transition-colors duration-150 text-red-600 hover:text-red-700">
+      <Button asChild variant="ghost" size="sm" className="text-red-600">
         <Link href={`/hosting-accounts/${id}/delete`}>
           <Trash2 className="h-4 w-4 mr-2" />
           Delete

@@ -131,7 +131,7 @@ export function DataTable({
           {data.map((record, index) => (
             <tr 
               key={record.id} 
-              className={`hover:bg-muted/30 transition-colors duration-150 border-b border-teal-300 ${
+              className={`border-b border-teal-300 ${
                 index % 2 === 0 ? 'bg-white' : 'bg-slate-50'
               }`}
             >
@@ -147,7 +147,6 @@ export function DataTable({
                       variant="ghost"
                       size="sm"
                       onClick={() => onView(record.id)}
-                      className="hover:bg-muted/30 transition-colors duration-150"
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
@@ -157,7 +156,6 @@ export function DataTable({
                       variant="ghost"
                       size="sm"
                       onClick={() => onEdit(record.id)}
-                      className="hover:bg-muted/30 transition-colors duration-150"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -167,7 +165,7 @@ export function DataTable({
                       variant="ghost"
                       size="sm"
                       onClick={() => onVisualize(record.id)}
-                      className="hover:bg-purple-50 text-purple-600 transition-colors duration-150"
+                      className="text-purple-600"
                       title="Visualize Relationships"
                     >
                       <Network className="h-4 w-4" />

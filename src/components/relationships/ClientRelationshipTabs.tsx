@@ -52,7 +52,7 @@ export default function ClientRelationshipTabs({ entityId }: ClientRelationshipT
         <p className="text-sm mb-4">{error}</p>
         <button 
           onClick={() => window.location.reload()} 
-          className="px-4 py-2 bg-red-100 hover:bg-red-200 rounded"
+          className="px-4 py-2 bg-red-100 rounded"
         >
           Try Again
         </button>
@@ -71,7 +71,7 @@ export default function ClientRelationshipTabs({ entityId }: ClientRelationshipT
         <p className="text-sm mb-4">Failed to load relationship data.</p>
         <button 
           onClick={() => window.location.reload()} 
-          className="px-4 py-2 bg-red-100 hover:bg-red-200 rounded"
+          className="px-4 py-2 bg-red-100 rounded"
         >
           Try Again
         </button>

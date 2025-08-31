@@ -4,11 +4,12 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, Users, Mail, Phone, CreditCard, TrendingUp, Bitcoin, Globe, Server, ExternalLink } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Mail, Phone, CreditCard, TrendingUp, Bitcoin, Globe, Server, ExternalLink, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import Link from "next/link";
 
 interface Relationship {
   id: string;
@@ -531,29 +532,24 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                             </TableCell>
                             <TableCell className="py-4">
                               <div className="flex gap-3">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    console.log('RelationshipTabs: Edit button clicked for relationship:', relationship);
-                                    // Use relationship_id if available, otherwise fall back to id or related_data_id
-                                    const idToUse = relationship.relationship_id || relationship.id || relationship.related_data_id;
-                                    console.log('RelationshipTabs: Using ID for edit:', idToUse);
-                                    handleEditRelationship(idToUse, typeInfo.key);
-                                  }}
-                                  className="hover:bg-muted/30 transition-colors duration-150"
-                                  title="Edit Relationship"
-                                >
-                                  <Edit className="w-5 h-5" />
+                                <Button asChild variant="ghost" size="sm" title="View Details">
+                                  <Link href={`/${typeInfo.key}/${relationship.related_data_id}`}>
+                                    <Eye className="h-4 w-4" />
+                                  </Link>
+                                </Button>
+                                <Button asChild variant="ghost" size="sm" title="Edit">
+                                  <Link href={`/entities/${entityId}/relationships/${typeInfo.key}/${relationship.id}/edit`}>
+                                    <Edit className="h-4 w-4" />
+                                  </Link>
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
+                                  className="text-red-600"
                                   onClick={() => handleDeleteRelationship(relationship.id)}
-                                  className="hover:bg-muted/30 transition-colors duration-150 text-red-600 hover:text-red-700"
-                                  title="Delete Relationship"
+                                  title="Delete"
                                 >
-                                  <Trash2 className="w-5 h-5" />
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </TableCell>

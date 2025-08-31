@@ -93,7 +93,7 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
             
             <Button 
               type="submit" 
-              className="w-full bg-teal-600 hover:bg-teal-700 text-white"
+              className="w-full bg-teal-600 text-white"
               disabled={isLoading}
             >
               {isLoading ? (

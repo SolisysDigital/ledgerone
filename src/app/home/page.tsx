@@ -44,7 +44,7 @@ export default function HomePage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-200"
                   autoFocus
                 />
               </div>
@@ -53,7 +53,7 @@ export default function HomePage() {
                 <Button 
                   type="submit" 
                   size="lg"
-                  className="px-8 py-3 bg-teal-600 hover:bg-teal-700 text-white flex items-center space-x-2"
+                  className="px-8 py-3 bg-teal-600 text-white flex items-center space-x-2"
                   disabled={!searchQuery.trim()}
                 >
                   <span>Search</span>
@@ -70,7 +70,7 @@ export default function HomePage() {
                   variant="outline" 
                   size="sm"
                   onClick={() => router.push('/entities')}
-                  className="text-teal-600 border-teal-200 hover:bg-teal-50"
+                  className="text-teal-600 border-teal-200"
                 >
                   Entities
                 </Button>
@@ -78,7 +78,7 @@ export default function HomePage() {
                   variant="outline" 
                   size="sm"
                   onClick={() => router.push('/contacts')}
-                  className="text-teal-600 border-teal-200 hover:bg-teal-50"
+                  className="text-teal-600 border-teal-200"
                 >
                   Contacts
                 </Button>
@@ -86,7 +86,7 @@ export default function HomePage() {
                   variant="outline" 
                   size="sm"
                   onClick={() => router.push('/bank-accounts')}
-                  className="text-teal-600 border-teal-200 hover:bg-teal-50"
+                  className="text-teal-600 border-teal-200"
                 >
                   Bank Accounts
                 </Button>
@@ -94,7 +94,7 @@ export default function HomePage() {
                   variant="outline" 
                   size="sm"
                   onClick={() => router.push('/credit-cards')}
-                  className="text-teal-600 border-teal-200 hover:bg-teal-50"
+                  className="text-teal-600 border-teal-200"
                 >
                   Credit Cards
                 </Button>

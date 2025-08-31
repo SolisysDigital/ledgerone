@@ -94,9 +94,9 @@ export default function Navigation() {
             <Link
               key={item.name}
               href={item.href}
-              className="flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200 group"
+              className="flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 rounded-lg group"
             >
-              <Icon className={`h-4 w-4 ${item.color} group-hover:scale-110 transition-transform duration-200`} />
+              <Icon className={`h-4 w-4 ${item.color}`} />
               <span>{item.name}</span>
             </Link>
           );
