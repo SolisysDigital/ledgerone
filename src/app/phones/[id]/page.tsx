@@ -9,37 +9,37 @@ import { notFound } from "next/navigation";
 import { Edit, ArrowLeft, Trash2 } from "lucide-react";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 
-export default async function ContactDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PhoneDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
-  // Fetch contact data using the working API endpoint instead of direct Supabase
-  const contactResponse = await fetch(getApiUrl(`/contacts/${id}`), {
+  // Fetch phone data using the working API endpoint instead of direct Supabase
+  const phoneResponse = await fetch(getApiUrl(`/phones/${id}`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
   });
 
-  if (!contactResponse.ok) {
-    console.error('Failed to fetch contact data:', contactResponse.status, contactResponse.statusText);
+  if (!phoneResponse.ok) {
+    console.error('Failed to fetch phone data:', phoneResponse.status, phoneResponse.statusText);
     notFound();
   }
 
-  const contact = await contactResponse.json();
+  const phone = await phoneResponse.json();
 
-  if (!contact) {
+  if (!phone) {
     notFound();
   }
 
-  // Get entity relationships for this contact using the working API endpoint
-  const relationshipsResponse = await fetch(getApiUrl(`/relationships/by-related-data?related_data_id=${id}&type_of_record=contacts`), {
+  // Get entity relationships for this phone using the working API endpoint
+  const relationshipsResponse = await fetch(getApiUrl(`/relationships/by-related-data?related_data_id=${id}&type_of_record=phones`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
   });
 
-  let relationships = [];
+  let relationships: any[] = [];
   if (relationshipsResponse.ok) {
     const relationshipsData = await relationshipsResponse.json();
     // Convert single relationship to array for consistency
@@ -53,18 +53,18 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-6">
             <Button asChild variant="outline" size="sm" className="shadow-sm">
-              <Link href="/contacts">
+              <Link href="/phones">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to List
               </Link>
             </Button>
             <div className="space-y-1">
-              <h1 className="text-2xl font-bold text-foreground">Contact Details</h1>
+              <h1 className="text-2xl font-bold text-foreground">Phone Details</h1>
               <div className="flex items-center gap-3">
                 <p className="text-sm text-muted-foreground">ID: {id}</p>
-                {(contact.name as string) && (
+                {phone.phone && (
                   <span className="text-lg font-semibold text-white bg-teal-600 px-3 py-1 rounded-xl">
-                    {contact.name as string}
+                    {phone.phone}
                   </span>
                 )}
               </div>
@@ -72,13 +72,13 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
           </div>
           <div className="flex items-center space-x-2">
             <Button asChild variant="ghost" size="sm">
-              <Link href={`/contacts/${id}/edit`}>
+              <Link href={`/phones/${id}/edit`}>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Link>
             </Button>
             <Button asChild variant="ghost" size="sm" className="text-red-600">
-              <Link href={`/contacts/${id}/delete`}>
+              <Link href={`/phones/${id}/delete`}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
               </Link>
@@ -88,7 +88,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
 
         <div className="space-y-6">
           {/* Basic Information Section */}
-          <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+          <Card className="bg-white/80 backdrop-blur-sm border-white/50">
             <CardHeader>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-1 h-6 bg-primary rounded-full"></div>
@@ -97,14 +97,14 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {tableConfigs.contacts.fields.map((field) => {
+                {tableConfigs.phones.fields.map((field) => {
                   // Skip certain fields that are handled separately
                   if (['id', 'created_at', 'updated_at', 'user_id'].includes(field.name)) {
                     return null;
                   }
 
-                  // Get the field value from contact
-                  const fieldValue = (contact as any)[field.name];
+                  // Get the field value from phone
+                  const fieldValue = (phone as any)[field.name];
                   
                   // Format the field label (convert snake_case to Title Case)
                   const fieldLabel = field.label || field.name
@@ -139,7 +139,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
 
           {/* Related Entities Section */}
           {relationships && relationships.length > 0 && (
-            <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/50">
               <CardHeader>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-1 h-6 bg-primary rounded-full"></div>
@@ -153,7 +153,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
                       <div>
                         <h4 className="font-medium text-teal-800">{relationship.entities?.name || 'Unknown Entity'}</h4>
                         <p className="text-sm text-muted-foreground">
-                          {relationship.relationship_description || 'Existing Contact Relationship'}
+                          {relationship.relationship_description || 'Existing Phone Relationship'}
                         </p>
                       </div>
                       <Button asChild variant="outline" size="sm">
@@ -171,4 +171,4 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
       </div>
     </ClientNavigationWrapper>
   );
-} 
+}
