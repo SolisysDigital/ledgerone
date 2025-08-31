@@ -44,6 +44,8 @@ export default function DetailObjectRelationships({
       
       const apiUrl = getApiUrl(`/relationships-detail/by-detail-object?detail_object_id=${detailObjectId}&detail_object_type=${detailObjectType}`);
       console.log('DetailObjectRelationships: Attempting to fetch from:', apiUrl);
+      console.log('DetailObjectRelationships: detailObjectId:', detailObjectId);
+      console.log('DetailObjectRelationships: detailObjectType:', detailObjectType);
       
       const response = await fetch(apiUrl);
       console.log('DetailObjectRelationships: Response status:', response.status, response.statusText);
@@ -81,8 +83,11 @@ export default function DetailObjectRelationships({
       
       const responseData = await response.json();
       console.log('DetailObjectRelationships: API response data:', responseData);
+      console.log('DetailObjectRelationships: relationships array:', responseData.relationships);
+      console.log('DetailObjectRelationships: relationships length:', responseData.relationships?.length);
       
       setRelationships(responseData.relationships || []);
+      console.log('DetailObjectRelationships: After setRelationships, local state should be updated');
     } catch (error) {
       console.error('DetailObjectRelationships: Error loading relationships:', error);
       

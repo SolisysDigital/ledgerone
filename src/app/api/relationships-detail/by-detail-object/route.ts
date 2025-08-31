@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     const supabase = getServiceSupabase();
 
     // Find all entities that are related to this detail object
+    // When we're on a detail object page (e.g., website), we want to find entities that reference this object
     const { data: relationships, error } = await (supabase as any)
       .from('entity_related_data')
       .select(`
