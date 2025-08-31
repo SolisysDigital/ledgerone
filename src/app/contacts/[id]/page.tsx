@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import { tableConfigs } from "@/lib/tableConfigs";
 import { getApiUrl } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Edit, ArrowLeft, Trash2 } from "lucide-react";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
+import DetailObjectRelationships from "@/components/relationships/DetailObjectRelationships";
 
 export default async function ContactDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -138,35 +140,21 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
           </Card>
 
           {/* Related Entities Section */}
-          {relationships && relationships.length > 0 && (
-            <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
-              <CardHeader>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-1 h-6 bg-primary rounded-full"></div>
-                  <h3 className="text-lg font-semibold">Related Entities</h3>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {relationships.map((relationship: any) => (
-                    <div key={relationship.id} className="flex items-center justify-between p-4 bg-muted/10 rounded-lg border border-border/50">
-                      <div>
-                        <h4 className="font-medium text-teal-800">{relationship.entities?.name || 'Unknown Entity'}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {relationship.relationship_description || 'Existing Contact Relationship'}
-                        </p>
-                      </div>
-                      <Button asChild variant="outline" size="sm">
-                        <Link href={`/entities/${relationship.entity_id}`}>
-                          View Entity
-                        </Link>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
+            <CardHeader>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-6 bg-primary rounded-full"></div>
+                <h3 className="text-lg font-semibold">Related Entities</h3>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-muted/10 rounded-lg p-4 border border-border/50" style={{ borderRadius: '0.5rem' }}>
+                <Suspense fallback={<div>Loading entity relationships...</div>}>
+                  <DetailObjectRelationships detailObjectId={id} detailObjectType="contacts" />
+                </Suspense>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </ClientNavigationWrapper>

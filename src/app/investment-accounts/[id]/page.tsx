@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
-import ClientRelationshipTabs from "@/components/relationships/ClientRelationshipTabs";
+import DetailObjectRelationships from "@/components/relationships/DetailObjectRelationships";
 import RecordHeader from "@/components/record/RecordHeader";
 import { DetailsGrid } from "@/components/record/DetailsGrid";
 import { investmentAccountDisplayFields, InvestmentAccount } from "@/lib/entities/investment-account.fields";
@@ -91,18 +91,18 @@ export default async function InvestmentAccountPage({
           </CardContent>
         </Card>
 
-        {/* Related Data Section */}
+        {/* Related Entities Section */}
         <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
           <CardHeader>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-1 h-6 bg-primary rounded-full"></div>
-              <h3 className="text-lg font-semibold">Related Information</h3>
+              <h3 className="text-lg font-semibold">Related Entities</h3>
             </div>
           </CardHeader>
           <CardContent>
             <div className="bg-muted/10 rounded-lg p-4 border border-border/50" style={{ borderRadius: '0.5rem' }}>
-              <Suspense fallback={<div>Loading relationships...</div>}>
-                <ClientRelationshipTabs entityId={id} />
+              <Suspense fallback={<div>Loading entity relationships...</div>}>
+                <DetailObjectRelationships detailObjectId={id} detailObjectType="investment_accounts" />
               </Suspense>
             </div>
           </CardContent>
