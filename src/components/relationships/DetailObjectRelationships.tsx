@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus, Building2, ExternalLink } from "lucide-react";
+import { Building2, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { getApiUrl } from "@/lib/utils";
@@ -151,24 +150,10 @@ export default function DetailObjectRelationships({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Building2 className="h-5 w-5 text-blue-600" />
-          <h3 className="text-lg font-semibold">Related Entities</h3>
-          <Badge variant="secondary">{relationships.length}</Badge>
-        </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="text-blue-600 border-blue-200 hover:bg-blue-50"
-          onClick={() => {
-            // TODO: Implement add entity relationship functionality
-            alert('Add entity relationship functionality coming soon');
-          }}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Entity
-        </Button>
+      <div className="flex items-center space-x-2">
+        <Building2 className="h-5 w-5 text-blue-600" />
+        <h3 className="text-lg font-semibold">Related Entities</h3>
+        <Badge variant="secondary">{relationships.length}</Badge>
       </div>
 
       {/* Relationships List */}
