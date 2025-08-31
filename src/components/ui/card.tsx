@@ -2,20 +2,17 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-const cardVariants = cva(
-  "rounded-xl border bg-card text-card-foreground shadow-sm",
-  {
-    variants: {
-      variant: {
-        default: "rounded-xl border bg-card text-card-foreground shadow-sm",
-        hover: "rounded-xl border bg-card text-card-foreground shadow-sm",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-)
+const cardVariants = (props: { variant?: string } = {}) => {
+  const baseClasses = "rounded-xl border bg-card text-card-foreground shadow-sm";
+  
+  const variantClasses = {
+    default: "rounded-xl border bg-card text-card-foreground shadow-sm",
+    hover: "rounded-xl border bg-card text-card-foreground shadow-sm",
+  };
+  
+  const variant = props.variant || "default";
+  return `${baseClasses} ${variantClasses[variant as keyof typeof variantClasses] || variantClasses.default}`.trim();
+};
 
 const Card = React.forwardRef<
   HTMLDivElement,
