@@ -127,50 +127,30 @@ export class AppLogger {
       // Use service role Supabase client to bypass RLS
       const supabase = getServiceSupabase();
       
-      // Try database function first
-      const { data, error } = await supabase.rpc('insert_app_log', {
-        p_level: logEntry.level,
-        p_source: logEntry.source,
-        p_action: logEntry.action,
-        p_message: logEntry.message,
-        p_details: logEntry.details,
-        p_stack_trace: logEntry.stackTrace,
-        p_user_id: logEntry.userId,
-        p_session_id: logEntry.sessionId,
-        p_ip_address: logEntry.ipAddress,
-        p_user_agent: logEntry.userAgent
-      });
+      // Skip RPC call and use direct insert to avoid build failures
+      const { data: insertData, error: insertError } = await supabase
+        .from('app_logs')
+        .insert({
+          level: logEntry.level,
+          source: logEntry.source,
+          action: logEntry.action,
+          message: logEntry.message,
+          details: logEntry.details,
+          stack_trace: logEntry.stackTrace,
+          user_id: logEntry.userId,
+          session_id: logEntry.sessionId,
+          ip_address: logEntry.ipAddress,
+          user_agent: logEntry.userAgent
+        })
+        .select('id')
+        .single() as { data: { id: string } | null; error: any };
 
-      if (error) {
-        console.error('Database function error:', error);
-        
-        // Fallback: direct insert
-        const { data: insertData, error: insertError } = await supabase
-          .from('app_logs')
-          .insert({
-            level: logEntry.level,
-            source: logEntry.source,
-            action: logEntry.action,
-            message: logEntry.message,
-            details: logEntry.details,
-            stack_trace: logEntry.stackTrace,
-            user_id: logEntry.userId,
-            session_id: logEntry.sessionId,
-            ip_address: logEntry.ipAddress,
-            user_agent: logEntry.userAgent
-          })
-          .select('id')
-          .single() as { data: { id: string } | null; error: any };
-
-        if (insertError) {
-          console.error('Direct insert error:', insertError);
-          return { success: false, error: insertError.message };
-        }
-
-        return { success: true, logId: insertData?.id };
+      if (insertError) {
+        console.error('Direct insert error:', insertError);
+        return { success: false, error: insertError.message };
       }
 
-      return { success: true, logId: data || undefined };
+      return { success: true, logId: insertData?.id };
     } catch (error) {
       console.error('Logger error:', error);
       return { success: false, error: 'Logger failed' };

@@ -164,7 +164,7 @@ export default async function EntityPage({
             </CardContent>
           </Card>
 
-          {/* Related Entities Section - Updated */}
+          {/* Related Entities Section - Database Fixed */}
           <Card className="card-animate bg-white/80 backdrop-blur-sm border-white/50">
             <CardHeader>
               <div className="flex items-center gap-2 mb-4">
