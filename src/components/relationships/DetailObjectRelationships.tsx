@@ -42,11 +42,40 @@ export default function DetailObjectRelationships({
       setLoading(true);
       setError(null);
       
-      const response = await fetch(getApiUrl(`/relationships/by-detail-object?detail_object_id=${detailObjectId}&detail_object_type=${detailObjectType}`));
+      const apiUrl = getApiUrl(`/relationships/by-detail-object?detail_object_id=${detailObjectId}&detail_object_type=${detailObjectType}`);
+      console.log('DetailObjectRelationships: Attempting to fetch from:', apiUrl);
+      
+      const response = await fetch(apiUrl);
+      console.log('DetailObjectRelationships: Response status:', response.status, response.statusText);
       
       if (!response.ok) {
         const errorText = await response.text();
         console.error('DetailObjectRelationships: API error response:', errorText);
+        
+        // Log error to admin logs
+        try {
+          await fetch(getApiUrl('/api/auth/log'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              level: 'error',
+              source: 'DetailObjectRelationships',
+              action: 'api_fetch_failed',
+              message: `Failed to load relationships: ${response.status} ${response.statusText}`,
+              details: {
+                detailObjectId,
+                detailObjectType,
+                apiUrl,
+                responseStatus: response.status,
+                responseStatusText: response.statusText,
+                errorText
+              }
+            })
+          });
+        } catch (logError) {
+          console.error('Failed to log error to admin logs:', logError);
+        }
+        
         throw new Error(`Failed to load relationships: ${response.status} ${response.statusText}`);
       }
       
@@ -56,6 +85,29 @@ export default function DetailObjectRelationships({
       setRelationships(responseData.relationships || []);
     } catch (error) {
       console.error('DetailObjectRelationships: Error loading relationships:', error);
+      
+      // Log error to admin logs
+      try {
+        await fetch(getApiUrl('/api/auth/log'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            level: 'error',
+            source: 'DetailObjectRelationships',
+            action: 'fetch_exception',
+            message: `Exception loading relationships: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            details: {
+              detailObjectId,
+              detailObjectType,
+              error: error instanceof Error ? error.message : 'Unknown error',
+              stack: error instanceof Error ? error.stack : undefined
+            }
+          })
+        });
+      } catch (logError) {
+        console.error('Failed to log error to admin logs:', logError);
+      }
+      
       setError(`Failed to load relationships: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
