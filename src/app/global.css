@@ -233,6 +233,130 @@ input:focus, textarea:focus, select:focus {
   transition: none !important;
 }
 
+/* Global animation removal for all components */
+* {
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Remove all hover animations and transitions */
+*:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Remove all focus animations and transitions */
+*:focus {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Remove all active state animations */
+*:active {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Remove all button hover effects */
+button:hover,
+.btn:hover,
+[class*="btn-"]:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove all card hover effects */
+.card:hover,
+[class*="card"]:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove all table row hover effects */
+tr:hover,
+[class*="row"]:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  background-color: inherit !important;
+}
+
+/* Remove all navigation hover effects */
+nav *:hover,
+[class*="nav"] *:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Remove all badge hover effects */
+.badge:hover,
+[class*="badge"]:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Remove all popover hover effects */
+.popover:hover,
+[class*="popover"]:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Remove all accordion hover effects */
+.accordion:hover,
+[class*="accordion"]:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Remove all select hover effects */
+.select:hover,
+[class*="select"]:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Remove all tabs hover effects */
+.tabs:hover,
+[class*="tabs"]:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Remove all input focus animations */
+input:focus,
+textarea:focus,
+select:focus {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove all button focus animations */
+button:focus,
+.btn:focus,
+[class*="btn-"]:focus {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  box-shadow: none !important;
+}
+
 /* Loading States */
 .loading-shimmer {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
