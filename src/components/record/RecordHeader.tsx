@@ -23,14 +23,16 @@ export default function RecordHeader({ title, id, primaryName, backHref, actions
               Back to List
             </Link>
           </Button>
+        </div>
+        <h1 className="mt-3 text-2xl font-semibold">{title}</h1>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+          <span>ID: {id}</span>
           {primaryName && (
             <span className="rounded-md bg-teal-700/10 px-2 py-1 text-teal-700 text-sm font-medium">
               {primaryName}
             </span>
           )}
         </div>
-        <h1 className="mt-3 text-2xl font-semibold">{title}</h1>
-        <div className="text-xs text-muted-foreground mt-1">ID: {id}</div>
       </div>
       <div className="flex gap-2">{actions}</div>
     </div>
