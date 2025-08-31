@@ -112,7 +112,9 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
                     .join(' ');
 
                   return (
-                    <div key={field.name} className="bg-muted/10 rounded-lg p-4 border border-border/50" style={{ borderRadius: '0.5rem' }}>
+                    <div key={field.name} className={`bg-muted/10 rounded-lg p-4 border border-border/50 ${
+                      field.name === 'short_description' || field.name === 'description' ? 'col-span-2' : ''
+                    }`} style={{ borderRadius: '0.5rem' }}>
                       <Label className="text-sm font-medium text-muted-foreground capitalize mb-2 block">
                         {fieldLabel}
                       </Label>

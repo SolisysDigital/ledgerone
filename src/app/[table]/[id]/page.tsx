@@ -202,12 +202,12 @@ export default async function EntityPage({
           <CardContent className="p-0">
             <Tabs defaultValue="information" className="w-full">
               <TabsList className={`border-b border-gray-200 bg-gray-100 rounded-t-lg h-16 p-2 ${table === 'entities' ? 'grid-cols-2' : 'grid-cols-1'} grid w-full`}>
-                <TabsTrigger value="information" className="data-[state=active]:bg-white data-[state=active]:text-teal-600 data-[state=active]:shadow-md data-[state=active]:border-b-2 data-[state=active]:border-teal-600 data-[state=active]:rounded-t-lg data-[state=active]:font-semibold rounded-md transition-all duration-300 ease-out hover:bg-teal-100 hover:border-teal-400 border-b border-gray-200">
+                <TabsTrigger value="information" className="data-[state=active]:bg-white data-[state=active]:text-teal-600 data-[state=active]:shadow-md data-[state=active]:border-b-2 data-[state=active]:border-teal-600 data-[state=active]:rounded-t-lg data-[state=active]:font-semibold rounded-md border-b border-gray-200">
                   <FileText className="h-4 w-4 mr-2" />
                   Information
                 </TabsTrigger>
                 {table === 'entities' && (
-                  <TabsTrigger value="relationships" className="data-[state=active]:bg-white data-[state=active]:text-teal-600 data-[state=active]:shadow-md data-[state=active]:border-b-2 data-[state=active]:border-teal-600 data-[state=active]:rounded-t-lg data-[state=active]:font-semibold rounded-md transition-all duration-300 ease-out hover:bg-teal-100 hover:border-teal-400 border-b border-gray-200">
+                  <TabsTrigger value="relationships" className="data-[state=active]:bg-white data-[state=active]:text-teal-600 data-[state=active]:shadow-md data-[state=active]:border-b-2 data-[state=active]:border-teal-600 data-[state=active]:rounded-t-lg data-[state=active]:font-semibold rounded-md border-b border-gray-200">
                     <Users className="h-4 w-4 mr-2" />
                     Relationships
                   </TabsTrigger>
