@@ -367,6 +367,38 @@ export async function getRelationship(relationshipId: string) {
   }
 } 
 
+export async function getEntityForRelatedData(relatedDataId: string, typeOfRecord: string) {
+  try {
+    console.log('getEntityForRelatedData called with:', { relatedDataId, typeOfRecord });
+    
+    // Use service role Supabase client to bypass RLS
+    const supabase = getServiceSupabase();
+    
+    // Find the entity that owns this related data
+    const { data: relationship, error } = await supabase
+      .from('entity_related_data')
+      .select(`
+        id,
+        entity_id,
+        type_of_record,
+        relationship_description
+      `)
+      .eq('related_data_id', relatedDataId)
+      .eq('type_of_record', typeOfRecord)
+      .single();
+
+    if (error) {
+      console.error('Error fetching entity for related data:', error);
+      return null;
+    }
+
+    return relationship;
+  } catch (error) {
+    console.error('Exception in getEntityForRelatedData:', error);
+    return null;
+  }
+}
+
 export async function getHoverPopupData(entityId: string) {
   try {
     console.log('getHoverPopupData called with entityId:', entityId);
