@@ -32,18 +32,40 @@ export default async function PhoneDetailPage({ params }: { params: Promise<{ id
   }
 
   // Get entity relationships for this phone using the working API endpoint
-  const relationshipsResponse = await fetch(getApiUrl(`/relationships/by-related-data?related_data_id=${id}&type_of_record=phones`), {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
   let relationships: any[] = [];
-  if (relationshipsResponse.ok) {
-    const relationshipsData = await relationshipsResponse.json();
-    // Convert single relationship to array for consistency
-    relationships = relationshipsData ? [relationshipsData] : [];
+  try {
+    // First, find the entity that owns this phone
+    const entityResponse = await fetch(getApiUrl(`/api/relationships/by-related-data?related_data_id=${id}&type_of_record=phones`), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (entityResponse.ok) {
+      const entityData = await entityResponse.json();
+      if (entityData.entity_id) {
+        // Now get the relationships for that entity
+        const relationshipsResponse = await fetch(getApiUrl(`/api/relationships?entityId=${entityData.entity_id}`), {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (relationshipsResponse.ok) {
+          const relationshipsData = await relationshipsResponse.json();
+          // Filter to only show relationships for this phone
+          relationships = (relationshipsData.data || []).filter((rel: any) => 
+            rel.related_data_id === id && rel.type_of_record === 'phones'
+          );
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch relationships:', error);
+    // Don't fail the page if relationships can't be loaded
+    relationships = [];
   }
 
   return (
