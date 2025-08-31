@@ -17,7 +17,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Log to admin logs using the service role
-    await AppLogger.log(level, source, action, message, details);
+    let logResult;
+    switch (level.toLowerCase()) {
+      case 'error':
+        logResult = await AppLogger.error(source, action, message, null, details);
+        break;
+      case 'warning':
+        logResult = await AppLogger.warning(source, action, message, details);
+        break;
+      case 'info':
+        logResult = await AppLogger.info(source, action, message, details);
+        break;
+      case 'debug':
+        logResult = await AppLogger.debug(source, action, message, details);
+        break;
+      default:
+        logResult = await AppLogger.info(source, action, message, details);
+    }
 
     return NextResponse.json({ 
       success: true, 
