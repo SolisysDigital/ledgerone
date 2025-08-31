@@ -267,7 +267,7 @@ export default function RelationshipTabs({ entityId }: RelationshipTabsProps) {
                                         {relationship.related_data_display_name}
                                       </div>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-80 p-4 bg-white border-2 border-gray-200 shadow-xl rounded-lg" align="start" side="right" sideOffset={5}>
+                                    <PopoverContent className="w-80 p-4 bg-white border-2 border-gray-200 shadow-xl rounded-lg" align="start" side="right" sideOffset={5} avoidCollisions={true} collisionPadding={10} forceMount>
                                       <div className="space-y-3">
                                         <div className="flex items-center gap-2">
                                           <Icon className={`h-4 w-4 ${typeInfo.textColor}`} />
