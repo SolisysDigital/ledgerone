@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
       try {
         console.log(`[SEARCH] Searching table: ${tableName} for query: ${query}`);
         
-        // Build search query for each table
+        // Build search query for each table - use exact same pattern as table API
         let query = (supabase as any).from(tableName).select('*');
         
         // Add search conditions using the same pattern as the table API
