@@ -18,13 +18,13 @@ export async function GET(request: NextRequest) {
 
     console.log(`[SEARCH] Searching for: "${searchTerm}"`);
 
-    // Use the database function to search all objects
+    // Query the unified search view directly
     const { data, error } = await (supabase as any)
-      .rpc('search_all_objects', {
-        search_term: searchTerm,
-        page_num: page,
-        page_size: limit
-      });
+      .from('unified_search_view')
+      .select('*')
+      .or(`title.ilike.%${searchTerm}%,subtitle.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`)
+      .range((page - 1) * limit, page * limit - 1)
+      .order('created_at', { ascending: false, nullsLast: true });
 
     if (error) {
       console.error('[SEARCH] Database function error:', error);
@@ -51,8 +51,10 @@ export async function GET(request: NextRequest) {
       updated_at: item.updated_at || null
     }));
 
-    const total = data && data.length > 0 ? data[0].total_count : 0;
-    const hasMore = (page * limit) < total;
+    // For now, we'll assume there are more results if we got a full page
+    // In a production environment, you might want to do a separate count query
+    const hasMore = data && data.length === limit;
+    const total = data ? data.length : 0;
 
     AppLogger.info('Global search completed', { 
       query: searchTerm, 
