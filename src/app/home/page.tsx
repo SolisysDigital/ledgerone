@@ -14,9 +14,8 @@ export default function HomePage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // For now, redirect to entities page with search
-      // In the future, this could be a global search across all tables
-      router.push(`/entities?search=${encodeURIComponent(searchQuery.trim())}`);
+      // Redirect to global search page
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
