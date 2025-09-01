@@ -76,35 +76,42 @@ export async function GET(request: NextRequest) {
       try {
         console.log(`[SEARCH] Searching table: ${tableName} for query: ${query}`);
         
-        // Build search query for each table - use exact same pattern as table API
-        let query = (supabase as any).from(tableName).select('*');
+        // Try a simpler approach - search one field at a time
+        let foundData: any[] = [];
         
-        // Add search conditions using the same pattern as the table API
-        const searchConditions = config.fields.map(field => `${field}.ilike.${searchTerm}`);
-        console.log(`[SEARCH] Search conditions for ${tableName}:`, searchConditions);
-        
-        if (searchConditions.length > 0) {
-          query = query.or(searchConditions.join(','));
+        for (const field of config.fields) {
+          try {
+            const { data, error } = await (supabase as any)
+              .from(tableName)
+              .select('*')
+              .ilike(field, searchTerm)
+              .range((page - 1) * limit, page * limit - 1)
+              .order('created_at', { ascending: false });
+            
+            if (error) {
+              console.log(`[SEARCH] Error searching ${tableName}.${field}:`, error);
+              continue;
+            }
+            
+            if (data && data.length > 0) {
+              foundData = [...foundData, ...data];
+            }
+          } catch (fieldError) {
+            console.log(`[SEARCH] Field error for ${tableName}.${field}:`, fieldError);
+            continue;
+          }
         }
         
-        // Add pagination and ordering
-        const { data, error } = await query
-          .range((page - 1) * limit, page * limit - 1)
-          .order('created_at', { ascending: false });
+        // Remove duplicates based on ID
+        const uniqueData = foundData.filter((item, index, self) => 
+          index === self.findIndex(t => t.id === item.id)
+        );
         
-        console.log(`[SEARCH] Results for ${tableName}:`, data?.length || 0, 'records');
-        if (error) {
-          console.log(`[SEARCH] Error for ${tableName}:`, error);
-        }
+        console.log(`[SEARCH] Results for ${tableName}:`, uniqueData.length, 'records');
 
-        if (error) {
-          AppLogger.error(`Search error in table ${tableName}`, { error, query });
-          continue;
-        }
-
-        if (data && data.length > 0) {
+        if (uniqueData && uniqueData.length > 0) {
           // Transform results to unified format
-          const transformedResults = data.map((item: any) => {
+          const transformedResults = uniqueData.map((item: any) => {
             // Determine the primary title field based on table
             let title = '';
             let subtitle = '';
