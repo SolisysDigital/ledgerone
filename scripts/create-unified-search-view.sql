@@ -24,8 +24,8 @@ SELECT
     COALESCE(name, 'Unnamed Contact') as title,
     COALESCE(title, email, '') as subtitle,
     COALESCE(short_description, description, '') as description,
-    created_at,
-    updated_at
+    NULL as created_at,
+    NULL as updated_at
 FROM contacts
 
 UNION ALL
@@ -38,8 +38,8 @@ SELECT
     COALESCE(email, 'No Email') as title,
     COALESCE(label, '') as subtitle,
     COALESCE(short_description, description, '') as description,
-    created_at,
-    updated_at
+    NULL as created_at,
+    NULL as updated_at
 FROM emails
 
 UNION ALL
@@ -52,8 +52,8 @@ SELECT
     COALESCE(phone, 'No Phone') as title,
     COALESCE(label, '') as subtitle,
     COALESCE(short_description, description, '') as description,
-    created_at,
-    updated_at
+    NULL as created_at,
+    NULL as updated_at
 FROM phones
 
 UNION ALL
@@ -66,8 +66,8 @@ SELECT
     COALESCE(url, 'No URL') as title,
     COALESCE(label, '') as subtitle,
     COALESCE(short_description, description, '') as description,
-    created_at,
-    updated_at
+    NULL as created_at,
+    NULL as updated_at
 FROM websites
 
 UNION ALL
@@ -84,8 +84,8 @@ SELECT
         ELSE ''
     END as subtitle,
     COALESCE(short_description, description, '') as description,
-    created_at,
-    updated_at
+    NULL as created_at,
+    NULL as updated_at
 FROM bank_accounts
 
 UNION ALL
@@ -98,8 +98,8 @@ SELECT
     COALESCE(provider, 'Unnamed Investment Account') as title,
     COALESCE(account_type, '') as subtitle,
     COALESCE(short_description, description, '') as description,
-    created_at,
-    updated_at
+    NULL as created_at,
+    NULL as updated_at
 FROM investment_accounts
 
 UNION ALL
@@ -112,8 +112,8 @@ SELECT
     COALESCE(platform, 'Unnamed Crypto Account') as title,
     COALESCE(account_number, '') as subtitle,
     COALESCE(short_description, description, '') as description,
-    created_at,
-    updated_at
+    NULL as created_at,
+    NULL as updated_at
 FROM crypto_accounts
 
 UNION ALL
@@ -126,8 +126,8 @@ SELECT
     COALESCE(cardholder_name, 'Unnamed Credit Card') as title,
     COALESCE(issuer, '') as subtitle,
     COALESCE(short_description, description, '') as description,
-    created_at,
-    updated_at
+    NULL as created_at,
+    NULL as updated_at
 FROM credit_cards
 
 UNION ALL
@@ -140,8 +140,8 @@ SELECT
     COALESCE(provider, 'Unnamed Hosting Account') as title,
     COALESCE(username, '') as subtitle,
     COALESCE(short_description, description, '') as description,
-    created_at,
-    updated_at
+    NULL as created_at,
+    NULL as updated_at
 FROM hosting_accounts;
 
 -- Create an index on the view for better search performance
@@ -181,8 +181,8 @@ BEGIN
             CASE WHEN usv.title ILIKE search_term THEN 1
                  WHEN usv.title ILIKE '%' || search_term || '%' THEN 2
                  ELSE 3 END,
-            -- Then by creation date (newer first)
-            usv.created_at DESC
+            -- Then by creation date (newer first) - handle NULL values
+            COALESCE(usv.created_at, '1970-01-01'::timestamptz) DESC
         LIMIT page_size
         OFFSET (page_num - 1) * page_size
     )

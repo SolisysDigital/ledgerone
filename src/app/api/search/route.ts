@@ -47,8 +47,8 @@ export async function GET(request: NextRequest) {
       subtitle: item.subtitle,
       description: item.description,
       url: `/${item.object_type}/${item.id}`,
-      created_at: item.created_at,
-      updated_at: item.updated_at
+      created_at: item.created_at || null,
+      updated_at: item.updated_at || null
     }));
 
     const total = data && data.length > 0 ? data[0].total_count : 0;
