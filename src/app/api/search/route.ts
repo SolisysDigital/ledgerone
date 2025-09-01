@@ -74,14 +74,28 @@ export async function GET(request: NextRequest) {
     // Search each table
     for (const [tableName, config] of Object.entries(searchConfig)) {
       try {
-        const searchConditions = config.fields.map(field => `${field}.ilike.${searchTerm}`);
+        console.log(`[SEARCH] Searching table: ${tableName} for query: ${query}`);
         
-        const { data, error } = await (supabase as any)
-          .from(tableName)
-          .select('*')
-          .or(searchConditions.join(','))
+        // Build search query for each table
+        let query = (supabase as any).from(tableName).select('*');
+        
+        // Add search conditions using the same pattern as the table API
+        const searchConditions = config.fields.map(field => `${field}.ilike.${searchTerm}`);
+        console.log(`[SEARCH] Search conditions for ${tableName}:`, searchConditions);
+        
+        if (searchConditions.length > 0) {
+          query = query.or(searchConditions.join(','));
+        }
+        
+        // Add pagination and ordering
+        const { data, error } = await query
           .range((page - 1) * limit, page * limit - 1)
           .order('created_at', { ascending: false });
+        
+        console.log(`[SEARCH] Results for ${tableName}:`, data?.length || 0, 'records');
+        if (error) {
+          console.log(`[SEARCH] Error for ${tableName}:`, error);
+        }
 
         if (error) {
           AppLogger.error(`Search error in table ${tableName}`, { error, query });
