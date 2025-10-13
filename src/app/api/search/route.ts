@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('[SEARCH] Database function error:', error);
-      AppLogger.error('Search function error', { error, query: searchTerm });
+      AppLogger.error('api/search', 'query_unified_search_view', 'Search function error', error, { query: searchTerm });
       return NextResponse.json(
         { error: 'Search failed', details: error.message },
         { status: 500 }
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
     const hasMore = data && data.length === limit;
     const total = data ? data.length : 0;
 
-    AppLogger.info('Global search completed', { 
+    AppLogger.info('api/search', 'search_completed', 'Global search completed', { 
       query: searchTerm, 
       totalResults: total, 
       returnedResults: results.length,
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
 
 
   } catch (error) {
-    AppLogger.error('Global search error', { error, query: request.nextUrl.searchParams.get('q') });
+    AppLogger.error('api/search', 'global_search', 'Global search error', error, { query: request.nextUrl.searchParams.get('q') });
     return NextResponse.json(
       { error: 'Search failed', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
