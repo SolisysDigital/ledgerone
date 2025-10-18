@@ -17,6 +17,7 @@ CREATE OR REPLACE FUNCTION public.insert_app_log(
 RETURNS uuid
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_log_id uuid;

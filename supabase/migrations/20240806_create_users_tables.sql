@@ -141,7 +141,10 @@ CREATE OR REPLACE FUNCTION check_user_permission(
   p_user_id UUID,
   p_table_name TEXT,
   p_permission TEXT
-) RETURNS BOOLEAN AS $$
+) 
+RETURNS BOOLEAN 
+SET search_path = public
+AS $$
 DECLARE
   has_permission BOOLEAN := FALSE;
 BEGIN

@@ -36,7 +36,9 @@ COMMENT ON COLUMN entity_related_data.relationship_description IS 'Description o
 
 -- 4. Create a function to update the updated_at timestamp
 CREATE OR REPLACE FUNCTION update_entity_related_data_updated_at()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+SET search_path = public
+AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
@@ -91,7 +93,10 @@ CREATE OR REPLACE FUNCTION create_entity_relationship(
   p_related_data_id UUID,
   p_type_of_record VARCHAR(50),
   p_relationship_description TEXT DEFAULT NULL
-) RETURNS UUID AS $$
+) 
+RETURNS UUID 
+SET search_path = public
+AS $$
 DECLARE
   relationship_id UUID;
 BEGIN
@@ -119,7 +124,9 @@ RETURNS TABLE (
   type_of_record VARCHAR(50),
   relationship_description TEXT,
   related_data_display_name TEXT
-) AS $$
+) 
+SET search_path = public
+AS $$
 BEGIN
   RETURN QUERY
   SELECT 
