@@ -111,7 +111,7 @@ export function LoginForm({ onSubmit, isLoading = false, error }: LoginFormProps
             <p className="text-sm text-gray-600">
               Demo credentials: <br />
               <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
-                Username: admin | Password: admin123
+                Username and password are encrypted
               </span>
             </p>
             <div className="mt-2 text-xs text-gray-500">
