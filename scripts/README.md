@@ -1,95 +1,254 @@
-# Admin Password Update Script
+# 📁 LedgerOne Scripts Directory
 
-This script allows you to update the default admin password for the LedgerOne application.
+This directory contains the master database schema and utility scripts for the LedgerOne application.
 
-## Prerequisites
+---
 
-1. **Environment Variables**: Make sure your `.env` file contains the Supabase credentials:
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
+## 📄 Main File
 
-2. **Dependencies**: Install the required dependencies:
+### `database-schema.sql`
+**The complete database definition for LedgerOne**
+
+This is the single source of truth for your database structure. Run this script to:
+- Create all tables
+- Set up indexes
+- Configure Row Level Security (RLS)
+- Create all functions
+- Set up triggers
+- Create all views
+- Insert initial admin user
+
+**To run:**
+1. Go to your Supabase Dashboard
+2. Open SQL Editor
+3. Copy the contents of `database-schema.sql`
+4. Paste and execute
+
+**What it includes:**
+- ✅ 15 core tables (users, entities, contacts, etc.)
+- ✅ All indexes (including full-text search)
+- ✅ Complete RLS policies  
+- ✅ 9 database functions (with `SET search_path = public`)
+- ✅ All triggers
+- ✅ 6 views (with `security_invoker=true`)
+- ✅ Initial admin user setup
+
+---
+
+## 🛠️ Utility Scripts
+
+### JavaScript Utilities
+
+#### `generate-bcrypt-hash.js`
+Generate bcrypt password hashes for user accounts.
+
+```bash
+node scripts/generate-bcrypt-hash.js
+```
+
+#### `create-admin-user.js`
+Create a new admin user via command line.
+
+```bash
+node scripts/create-admin-user.js
+```
+
+#### `update-admin-password.js`
+Update an existing admin user's password.
+
+```bash
+node scripts/update-admin-password.js
+```
+
+#### `check-database-coverage.js`
+Check which tables have proper coverage in your codebase.
+
+```bash
+node scripts/check-database-coverage.js
+```
+
+---
+
+## 📋 Database Schema Overview
+
+### Core Tables
+
+| Table | Description | Key Features |
+|-------|-------------|--------------|
+| `users` | Application users | RLS enabled, role-based access |
+| `user_permissions` | Granular permissions | Table-level permissions |
+| `entities` | Main business entities | Full-text search enabled |
+| `contacts` | Individual contacts | Relationships supported |
+| `emails` | Email addresses | Primary email flag |
+| `phones` | Phone numbers | Primary phone flag |
+| `websites` | Website URLs | - |
+| `bank_accounts` | Bank account info | Encrypted account numbers |
+| `investment_accounts` | Investment accounts | Securities tracking |
+| `crypto_accounts` | Crypto wallets | Wallet addresses |
+| `credit_cards` | Credit card info | Masked card numbers |
+| `hosting_accounts` | Hosting services | - |
+| `securities_held` | Investment holdings | Links to investment accounts |
+| `entity_related_data` | Relationships | MANY-MANY junction table |
+| `app_logs` | Application logs | Error tracking & debugging |
+
+### Security Features
+
+✅ **Row Level Security (RLS)** - Enabled on all tables  
+✅ **Search Path Protection** - All functions use `SET search_path = public`  
+✅ **Security Invoker Views** - Views respect caller's permissions  
+✅ **Admin-only Functions** - Restricted to `service_role`  
+✅ **Audit Logging** - All admin actions logged  
+
+### Search & Performance
+
+✅ **Full-Text Search** - GIN indexes on all searchable fields  
+✅ **Unified Search View** - Search across all tables at once  
+✅ **Optimized Indexes** - Performance-tuned for common queries  
+✅ **Relationship Views** - Pre-joined views for complex queries  
+
+---
+
+## 🔐 Security Compliance
+
+This schema follows all Supabase security best practices:
+
+- ✅ No `SECURITY DEFINER` views (all use `security_invoker=true`)
+- ✅ All functions have `SET search_path = public`
+- ✅ RLS enabled on all public tables
+- ✅ Proper permission grants
+- ✅ Admin functions restricted to service_role
+
+**Supabase Linter**: This schema passes all security checks! ✨
+
+---
+
+## 🚀 Quick Start
+
+### 1. Fresh Installation
+
+```bash
+# 1. Run the master schema
+# Copy scripts/database-schema.sql into Supabase SQL Editor and execute
+
+# 2. Update admin password
+node scripts/update-admin-password.js
+```
+
+### 2. Update Existing Database
+
+The `database-schema.sql` uses `CREATE TABLE IF NOT EXISTS` and `CREATE OR REPLACE` statements, so it's safe to run on an existing database. It will:
+- Create missing tables
+- Update existing functions
+- Recreate views
+- Leave existing data intact
+
+---
+
+## 📖 Function Reference
+
+### User Management
+
+- `check_user_permission(user_id, table_name, permission)` - Check if user has permission
+- `create_admin_user(username, password_hash, full_name)` - Create admin user
+- `update_admin_password(username, new_password_hash)` - Update admin password
+
+### Relationships
+
+- `create_entity_relationship(entity_id, related_data_id, type, description)` - Create relationship
+- `get_entity_relationships(entity_id)` - Get all relationships for an entity
+- `update_entity_related_data_updated_at()` - Trigger function for timestamps
+
+### Logging
+
+- `insert_app_log(level, source, action, message, ...)` - Insert log entry
+- `log_app_event(level, source, action, message, ...)` - Alias for insert_app_log
+
+### Search
+
+- `search_all_objects(search_term, page_num, page_size)` - Search across all tables
+
+---
+
+## 🔄 Migration Notes
+
+### From Previous Versions
+
+If you're migrating from an older version of the database:
+
+1. **Backup your data first!**
    ```bash
-   npm install
+   # In Supabase: Database → Backups → Create Backup
    ```
 
-## Usage
+2. **Run the master schema**
+   - Existing tables won't be modified
+   - Functions will be updated
+   - Views will be recreated
+   - New tables will be added
 
-### Method 1: Using npm script
-```bash
-npm run update-admin-password "YourNewPassword123!"
-```
+3. **Verify everything works**
+   - Check your application
+   - Run queries
+   - Test permissions
 
-### Method 2: Direct node execution
-```bash
-node scripts/update-admin-password.js "YourNewPassword123!"
-```
+### Breaking Changes
 
-## Password Requirements
+**None!** This schema is designed to be backwards compatible.
 
-- **Minimum length**: 8 characters
-- **Recommended**: Use a strong password with:
-  - Uppercase letters (A-Z)
-  - Lowercase letters (a-z)
-  - Numbers (0-9)
-  - Special characters (!@#$%^&*)
+---
 
-## Example
+## 📞 Support
 
-```bash
-# Update admin password to a secure password
-npm run update-admin-password "MySecurePassword123!"
+If you encounter any issues:
 
-# Output:
-# 🚀 Starting admin password update...
-# 📝 New password length: 19 characters
-# 
-# 🔐 Updating admin password...
-# ✅ Password hash generated successfully
-# ✅ Admin password updated successfully!
-# 📝 Username: admin
-# 🔑 New password: MySecurePassword123!
-# ⚠️  Please keep this password secure and don't share it
-# 
-# 🎉 Password update completed successfully!
-# 🔗 You can now log in to your application with the new password
-```
+1. Check the verification queries at the end of `database-schema.sql`
+2. Review the Supabase logs
+3. Check for any constraint violations
+4. Verify RLS policies match your needs
 
-## Security Notes
+---
 
-1. **Keep it secure**: Don't share your admin password with others
-2. **Strong passwords**: Use a combination of letters, numbers, and symbols
-3. **Regular updates**: Consider updating the password periodically
-4. **Environment**: Make sure you're running this in a secure environment
+## 🎯 Best Practices
 
-## Troubleshooting
+### When Modifying the Schema
 
-### Error: Missing Supabase environment variables
-- Ensure your `.env` file exists and contains the correct Supabase credentials
-- Check that `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set
+1. **Always update `database-schema.sql`** - Keep it as the single source of truth
+2. **Use migrations for data changes** - Schema changes go in the master file
+3. **Test in development first** - Never run untested SQL in production
+4. **Backup before major changes** - Better safe than sorry
+5. **Document your changes** - Add comments in the SQL file
 
-### Error: Password too short
-- Use a password with at least 8 characters
+### Security Guidelines
 
-### Error: Admin user not found
-- Ensure the database migration has been run and the admin user exists
-- Check that your Supabase connection is working
+- Never store plain-text passwords
+- Always use `SET search_path = public` in functions
+- Keep RLS enabled on all tables
+- Restrict admin functions to `service_role`
+- Log all admin operations
 
-### Error: Database connection issues
-- Verify your Supabase URL and API key are correct
-- Check your internet connection
-- Ensure your Supabase project is active
+---
 
-## Database Schema
+## 📊 Schema Statistics
 
-The script updates the `users` table in your Supabase database:
+- **15 Tables** - Core data structure
+- **50+ Indexes** - Optimized for performance  
+- **15 RLS Policies** - Comprehensive security
+- **9 Functions** - Business logic
+- **5 Triggers** - Automated tasks
+- **6 Views** - Simplified queries
 
-```sql
-UPDATE users 
-SET password_hash = 'bcrypt_hash_here', updated_at = NOW()
-WHERE username = 'admin';
-```
+---
 
-The password is hashed using bcrypt with 10 salt rounds for security. 
+## 🔗 Related Documentation
+
+- [Supabase RLS Guide](https://supabase.com/docs/guides/auth/row-level-security)
+- [PostgreSQL Functions](https://www.postgresql.org/docs/current/sql-createfunction.html)
+- [Full-Text Search](https://www.postgresql.org/docs/current/textsearch.html)
+
+---
+
+**Version:** 2.0  
+**Last Updated:** 2025-10-19  
+**Maintainer:** LedgerOne Team  
+
+---
