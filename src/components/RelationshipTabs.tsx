@@ -8,8 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import Link from "next/link";
-import { Plus, ExternalLink, Building2, Users, Mail, Phone, CreditCard, Globe, Server, Bitcoin, TrendingUp, BarChart3, FileText, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, ExternalLink, Building2, Users, Mail, Phone, CreditCard, Globe, Server, Bitcoin, TrendingUp, BarChart3, FileText, Edit, Eye } from "lucide-react";
 import { tableConfigs } from "@/lib/tableConfigs";
+import DeleteButton from "@/components/DeleteButton";
 
 interface RelationshipTabsProps {
   currentTable: string;
@@ -136,7 +137,7 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                         {tableConfigs[child.table]?.label || child.table}
                       </div>
                       <Button asChild size="sm">
-                        <Link href={`/${child.table}/new?fk=${currentId}&fkField=${child.fk}`}>
+                        <Link href={`/${child.table.replace(/_/g, '-')}/new?fk=${currentId}&fkField=${child.fk}`}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add New
                         </Link>
@@ -397,10 +398,9 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                                         )}
                                       </div>
                                       <Button 
-                                        asChild 
                                         size="sm" 
                                         className="w-full"
-                                        onClick={() => window.open(`/${child.table}/${item.id}`, '_blank')}
+                                        onClick={() => window.open(`/${child.table.replace(/_/g, '-')}/${item.id}`, '_blank')}
                                       >
                                         <div className="flex items-center justify-center gap-2">
                                           <ExternalLink className="h-4 w-4" />
@@ -419,20 +419,16 @@ export default function RelationshipTabs({ currentTable, currentId, relatedData 
                               <TableCell className="text-xs">
                                 <div className="flex space-x-3">
                                   <Button asChild variant="ghost" size="sm" title="View Details">
-                                    <Link href={`/${child.table}/${item.id}`}>
+                                    <Link href={`/${child.table.replace(/_/g, '-')}/${item.id}`}>
                                       <Eye className="h-4 w-4" />
                                     </Link>
                                   </Button>
                                   <Button asChild variant="ghost" size="sm" title="Edit">
-                                    <Link href={`/${child.table}/${item.id}/edit`}>
+                                    <Link href={`/${child.table.replace(/_/g, '-')}/${item.id}/edit`}>
                                       <Edit className="h-4 w-4" />
                                     </Link>
                                   </Button>
-                                  <Button asChild variant="ghost" size="sm" className="text-red-600" title="Delete">
-                                    <Link href={`/${child.table}/${item.id}/delete`}>
-                                      <Trash2 className="h-4 w-4" />
-                                    </Link>
-                                  </Button>
+                                  <DeleteButton table={child.table} id={item.id} routePath={child.table.replace(/_/g, '-')} />
                                 </div>
                               </TableCell>
                             </TableRow>
