@@ -3,13 +3,14 @@ import { notFound } from "next/navigation";
 import { getApiUrl } from "@/lib/utils";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit } from "lucide-react";
 import Link from "next/link";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 import DetailObjectRelationships from "@/components/relationships/DetailObjectRelationships";
 import RecordHeader from "@/components/record/RecordHeader";
 import { DetailsGrid } from "@/components/record/DetailsGrid";
 import { hostingAccountDisplayFields, HostingAccount } from "@/lib/entities/hosting-account.fields";
+import DeleteButton from "@/components/DeleteButton";
 
 export default async function HostingAccountPage({ 
   params 
@@ -44,12 +45,7 @@ export default async function HostingAccountPage({
           Edit
         </Link>
       </Button>
-      <Button asChild variant="ghost" size="sm" className="text-red-600">
-        <Link href={`/hosting-accounts/${id}/delete`}>
-          <Trash2 className="h-4 w-4 mr-2" />
-          Delete
-        </Link>
-      </Button>
+      <DeleteButton table="hosting_accounts" id={id} routePath="hosting-accounts" />
     </>
   );
 

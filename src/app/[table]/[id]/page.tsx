@@ -4,7 +4,7 @@ import { tableConfigs } from "@/lib/tableConfigs";
 import { getApiUrl } from "@/lib/utils";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, ArrowLeft, Users, FileText, Building2 } from "lucide-react";
+import { Edit, ArrowLeft, Users, FileText, Building2 } from "lucide-react";
 import Link from "next/link";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 import ClientRelationshipTabs from "@/components/relationships/ClientRelationshipTabs";
@@ -12,6 +12,7 @@ import DetailObjectRelationships from "@/components/relationships/DetailObjectRe
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RecordHeader from "@/components/record/RecordHeader";
 import { DetailsGrid } from "@/components/record/DetailsGrid";
+import DeleteButton from "@/components/DeleteButton";
 
 export default async function EntityPage({ 
   params 
@@ -116,20 +117,17 @@ export default async function EntityPage({
   };
 
   // Actions for the header
+  // Convert table name from snake_case (database) to kebab-case (route) for navigation
+  const routePath = table.replace(/_/g, '-');
   const actions = (
     <>
       <Button asChild variant="ghost" size="sm">
-        <Link href={`/${table}/${id}/edit`}>
+        <Link href={`/${routePath}/${id}/edit`}>
           <Edit className="h-4 w-4 mr-2" />
           Edit
         </Link>
       </Button>
-      <Button asChild variant="ghost" size="sm" className="text-red-600">
-        <Link href={`/${table}/${id}/delete`}>
-          <Trash2 className="h-4 w-4 mr-2" />
-          Delete
-        </Link>
-      </Button>
+      <DeleteButton table={table} id={id} routePath={routePath} />
     </>
   );
 

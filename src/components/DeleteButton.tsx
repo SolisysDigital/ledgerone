@@ -8,11 +8,12 @@ import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface DeleteButtonProps {
-  table: string;
+  table: string; // Database table name (snake_case)
   id: string;
+  routePath?: string; // Optional route path for navigation (kebab-case), defaults to converting table name
 }
 
-export default function DeleteButton({ table, id }: DeleteButtonProps) {
+export default function DeleteButton({ table, id, routePath }: DeleteButtonProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = React.useState(false);
 
@@ -23,7 +24,9 @@ export default function DeleteButton({ table, id }: DeleteButtonProps) {
       
       if (result.success) {
         // Navigate to the table listing page on success
-        router.push(`/${table}`);
+        // Use routePath if provided, otherwise convert table name (snake_case to kebab-case)
+        const navPath = routePath || table.replace(/_/g, '-');
+        router.push(`/${navPath}`);
       } else {
         throw new Error(result.error || 'Delete failed');
       }

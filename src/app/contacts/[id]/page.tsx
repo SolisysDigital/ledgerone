@@ -7,9 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Edit, ArrowLeft, Trash2 } from "lucide-react";
+import { Edit, ArrowLeft } from "lucide-react";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 import DetailObjectRelationships from "@/components/relationships/DetailObjectRelationships";
+import DeleteButton from "@/components/DeleteButton";
 
 export default async function ContactDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -79,12 +80,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
                 Edit
               </Link>
             </Button>
-            <Button asChild variant="ghost" size="sm" className="text-red-600">
-              <Link href={`/contacts/${id}/delete`}>
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Link>
-            </Button>
+            <DeleteButton table="contacts" id={id} routePath="contacts" />
           </div>
         </div>
 

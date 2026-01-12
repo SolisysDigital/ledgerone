@@ -3,13 +3,14 @@ import { notFound } from "next/navigation";
 import { getApiUrl } from "@/lib/utils";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit } from "lucide-react";
 import Link from "next/link";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
 import DetailObjectRelationships from "@/components/relationships/DetailObjectRelationships";
 import RecordHeader from "@/components/record/RecordHeader";
 import { DetailsGrid } from "@/components/record/DetailsGrid";
 import { bankAccountDisplayFields, BankAccount } from "@/lib/entities/bank-account.fields";
+import DeleteButton from "@/components/DeleteButton";
 
 export default async function BankAccountPage({ 
   params 
@@ -44,12 +45,7 @@ export default async function BankAccountPage({
           Edit
         </Link>
       </Button>
-      <Button asChild variant="ghost" size="sm" className="text-red-600">
-        <Link href={`/bank-accounts/${id}/delete`}>
-          <Trash2 className="h-4 w-4 mr-2" />
-          Delete
-        </Link>
-      </Button>
+      <DeleteButton table="bank_accounts" id={id} routePath="bank-accounts" />
     </>
   );
 
