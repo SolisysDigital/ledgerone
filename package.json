@@ -12,6 +12,9 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "update-admin-password": "node scripts/update-admin-password.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
     "test:field-parity": "node scripts/check-database-coverage.js",
     "test:coverage": "npm run test:field-parity",
     "prebuild": "npm run test:coverage"

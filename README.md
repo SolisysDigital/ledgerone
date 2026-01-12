@@ -20,6 +20,13 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## About the application 
+LedgerOne is an app designed for comprehensive management of entities, contacts, and various financial accounts.
+
+It provides a secure and intuitive platform for individuals and small businesses to organize and track critical information, offering a unified view of diverse data points.
+
+Stack : Next.js, Supabase, Vercel
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
