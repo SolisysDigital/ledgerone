@@ -23,14 +23,17 @@ export async function GET(
       return NextResponse.json({ error: 'Auth routes not handled here' }, { status: 404 });
     }
     
-    const config = tableConfigs[table as keyof typeof tableConfigs];
+    // Convert kebab-case route to snake_case for tableConfigs lookup and database queries
+    const dbTable = table.replace(/-/g, '_');
+    
+    const config = tableConfigs[dbTable as keyof typeof tableConfigs];
     if (!config) {
       return NextResponse.json({ error: 'Table not found' }, { status: 404 });
     }
 
     // Use service role Supabase client to bypass RLS
     const supabase = getServiceSupabase();
-    console.log(`[API] Using service role client for table: ${table}`);
+    console.log(`[API] Using service role client for table: ${dbTable}`);
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -40,7 +43,7 @@ export async function GET(
     const offset = (page - 1) * limit;
 
     let query = supabase
-      .from(table)
+      .from(dbTable)
       .select('*', { count: 'exact' });
 
     // Add search filter if provided
@@ -69,7 +72,7 @@ export async function GET(
     const totalRecords = count || 0;
     const totalPages = Math.ceil(totalRecords / limit);
 
-    console.log(`[API] Table ${table}: Found ${totalRecords} records, returning ${data?.length || 0} records`);
+    console.log(`[API] Table ${dbTable}: Found ${totalRecords} records, returning ${data?.length || 0} records`);
 
     return NextResponse.json({
       records: data || [],

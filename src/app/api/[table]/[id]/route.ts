@@ -26,17 +26,20 @@ export async function GET(
       }, { status: 404 });
     }
     
-    const config = tableConfigs[table as keyof typeof tableConfigs];
+    // Convert kebab-case route to snake_case for tableConfigs lookup and database queries
+    const dbTable = table.replace(/-/g, '_');
+    
+    const config = tableConfigs[dbTable as keyof typeof tableConfigs];
     if (!config) {
       return NextResponse.json({ error: 'Table not found' }, { status: 404 });
     }
 
     // Use service role Supabase client to bypass RLS
     const supabase = getServiceSupabase();
-    console.log(`[API] Using service role client for table: ${table}, id: ${id}`);
+    console.log(`[API] Using service role client for table: ${dbTable}, id: ${id}`);
 
     const { data, error } = await supabase
-      .from(table)
+      .from(dbTable)
       .select('*')
       .eq('id', id)
       .single();
@@ -46,7 +49,7 @@ export async function GET(
       return NextResponse.json({ error: 'Record not found' }, { status: 404 });
     }
 
-    console.log(`[API] Table ${table}: Found record with id: ${id}`);
+    console.log(`[API] Table ${dbTable}: Found record with id: ${id}`);
 
     return NextResponse.json(data);
 
@@ -77,17 +80,20 @@ export async function DELETE(
       }, { status: 404 });
     }
     
-    const config = tableConfigs[table as keyof typeof tableConfigs];
+    // Convert kebab-case route to snake_case for tableConfigs lookup and database queries
+    const dbTable = table.replace(/-/g, '_');
+    
+    const config = tableConfigs[dbTable as keyof typeof tableConfigs];
     if (!config) {
       return NextResponse.json({ error: 'Table not found' }, { status: 404 });
     }
 
     // Use service role Supabase client to bypass RLS
     const supabase = getServiceSupabase();
-    console.log(`[API] Using service role client for DELETE on table: ${table}, id: ${id}`);
+    console.log(`[API] Using service role client for DELETE on table: ${dbTable}, id: ${id}`);
 
     const { error } = await supabase
-      .from(table)
+      .from(dbTable)
       .delete()
       .eq('id', id);
 
@@ -96,7 +102,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Failed to delete record' }, { status: 500 });
     }
 
-    console.log(`[API] Table ${table}: Successfully deleted record with id: ${id}`);
+    console.log(`[API] Table ${dbTable}: Successfully deleted record with id: ${id}`);
 
     return NextResponse.json({ success: true });
 
