@@ -5,7 +5,7 @@ export default function HomePage() {
     <div className="flex h-screen">
       <Navigation />
       <main className="flex-1 overflow-auto">
-        <div className="min-h-full bg-gradient-to-br from-orange-50 via-pink-50 via-blue-50 to-purple-100">
+        <div className="min-h-full bg-gray-50">
           <div className="max-w-7xl mx-auto p-6">
             <div className="text-center py-12">
               <h1 className="text-4xl font-bold text-gray-900 mb-4">

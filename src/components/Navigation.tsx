@@ -47,7 +47,7 @@ export default function Navigation() {
     <div className="w-64 bg-white/90 backdrop-blur-sm border-r border-gray-200 flex flex-col h-screen">
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center space-x-3">
+        <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 bg-gradient-to-r from-teal-600 to-blue-600 rounded-lg flex items-center justify-center">
             <FileText className="h-5 w-5 text-white" />
           </div>
@@ -55,7 +55,7 @@ export default function Navigation() {
             <h1 className="text-lg font-bold text-gray-900">LedgerOne</h1>
             <p className="text-xs text-gray-500">Entity Management</p>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* User Info */}
