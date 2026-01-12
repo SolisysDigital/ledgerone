@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
 import { tableConfigs } from '@/lib/tableConfigs';
+import { AppLogger } from '@/lib/logger';
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,7 @@ export async function GET(
     
     // Build-time safety check
     if (!table) {
+      await AppLogger.error('api/[table]', 'GET', 'Invalid table parameter provided', new Error('Missing table parameter'), { table });
       return NextResponse.json({ error: 'Invalid table parameter' }, { status: 400 });
     }
     
@@ -28,6 +30,7 @@ export async function GET(
     
     const config = tableConfigs[dbTable as keyof typeof tableConfigs];
     if (!config) {
+      await AppLogger.error('api/[table]', 'GET', `Table not found: ${dbTable}`, new Error('Table not found in tableConfigs'), { table, dbTable });
       return NextResponse.json({ error: 'Table not found' }, { status: 404 });
     }
 
@@ -66,6 +69,7 @@ export async function GET(
 
     if (error) {
       console.error('Database error:', error);
+      await AppLogger.error('api/[table]', 'GET', `Failed to fetch records from ${dbTable}`, error as Error, { table, dbTable, supabaseError: error });
       return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 
@@ -84,6 +88,8 @@ export async function GET(
 
   } catch (error) {
     console.error('API error:', error);
+    const resolvedParams = await params;
+    await AppLogger.error('api/[table]', 'GET', 'Exception in GET endpoint', error as Error, { table: resolvedParams.table });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

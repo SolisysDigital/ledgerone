@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
 import { tableConfigs } from '@/lib/tableConfigs';
+import { AppLogger } from '@/lib/logger';
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,7 @@ export async function GET(
     
     // Build-time safety check
     if (!table || !id) {
+      await AppLogger.error('api/[table]/[id]', 'GET', 'Invalid parameters provided', new Error('Missing table or id parameter'), { table, id });
       return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
     }
     
@@ -31,6 +33,7 @@ export async function GET(
     
     const config = tableConfigs[dbTable as keyof typeof tableConfigs];
     if (!config) {
+      await AppLogger.error('api/[table]/[id]', 'GET', `Table not found: ${dbTable}`, new Error('Table not found in tableConfigs'), { table, dbTable, id });
       return NextResponse.json({ error: 'Table not found' }, { status: 404 });
     }
 
@@ -46,6 +49,7 @@ export async function GET(
 
     if (error) {
       console.error('Database error:', error);
+      await AppLogger.error('api/[table]/[id]', 'GET', `Failed to fetch record from ${dbTable}`, error as Error, { table, dbTable, id, supabaseError: error });
       return NextResponse.json({ error: 'Record not found' }, { status: 404 });
     }
 
@@ -55,6 +59,8 @@ export async function GET(
 
   } catch (error) {
     console.error('API error:', error);
+    const resolvedParams = await params;
+    await AppLogger.error('api/[table]/[id]', 'GET', 'Exception in GET endpoint', error as Error, { table: resolvedParams.table, id: resolvedParams.id });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -69,6 +75,7 @@ export async function DELETE(
     
     // Build-time safety check
     if (!table || !id) {
+      await AppLogger.error('api/[table]/[id]', 'DELETE', 'Invalid parameters provided', new Error('Missing table or id parameter'), { table, id });
       return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
     }
     
@@ -85,6 +92,7 @@ export async function DELETE(
     
     const config = tableConfigs[dbTable as keyof typeof tableConfigs];
     if (!config) {
+      await AppLogger.error('api/[table]/[id]', 'DELETE', `Table not found: ${dbTable}`, new Error('Table not found in tableConfigs'), { table, dbTable, id });
       return NextResponse.json({ error: 'Table not found' }, { status: 404 });
     }
 
@@ -99,6 +107,7 @@ export async function DELETE(
 
     if (error) {
       console.error('Database error:', error);
+      await AppLogger.error('api/[table]/[id]', 'DELETE', `Failed to delete record from ${dbTable}`, error as Error, { table, dbTable, id, supabaseError: error });
       return NextResponse.json({ error: 'Failed to delete record' }, { status: 500 });
     }
 
@@ -108,6 +117,8 @@ export async function DELETE(
 
   } catch (error) {
     console.error('API error:', error);
+    const resolvedParams = await params;
+    await AppLogger.error('api/[table]/[id]', 'DELETE', 'Exception in DELETE endpoint', error as Error, { table: resolvedParams.table, id: resolvedParams.id });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}
