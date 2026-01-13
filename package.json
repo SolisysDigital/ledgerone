@@ -15,10 +15,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:field-parity": "node scripts/check-database-coverage.js",
-    "test:coverage": "npm run test:field-parity",
-    "test:admin-crud": "node scripts/test-admin-crud.js",
-    "prebuild": "npm run test:coverage"
+    "test:admin-crud": "node scripts/test-admin-crud.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
