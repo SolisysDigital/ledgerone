@@ -2,6 +2,7 @@
 
 import { getServiceSupabase } from "./supabase";
 import { AppLogger } from "./logger";
+import { getCurrentUserId } from "./session";
 
 export async function createItem(table: string, data: Record<string, string>) {
   console.log('Creating item in table:', table, 'with data:', data);
@@ -19,7 +20,20 @@ export async function createItem(table: string, data: Record<string, string>) {
     return { success: false, error: 'No data provided for creation' };
   }
   
-  const { error } = await (supabase as any).from(table).insert(data);
+  // Exclude user_id from form data - it's managed server-side
+  const { user_id, ...cleanData } = data;
+  
+  // Get current user ID and add to data
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    const error = new Error('Authentication required to create records');
+    await AppLogger.error('createItem', 'authentication', 'No user session found', error, { table });
+    return { success: false, error: 'Authentication required to create records' };
+  }
+  
+  const dataWithUserId = { ...cleanData, user_id: userId };
+  
+  const { error } = await (supabase as any).from(table).insert(dataWithUserId);
   if (error) {
     console.error('Supabase error:', error);
     await AppLogger.error('createItem', 'database_insert', `Failed to create item in ${table}`, error, { table, data, supabaseError: error });
@@ -47,7 +61,15 @@ export async function updateItem(table: string, id: string, data: Record<string,
     return { success: false, error: 'No data provided for update' };
   }
   
-  const { error } = await (supabase as any).from(table).update(data).eq('id', id);
+  // Exclude user_id from update data - it should never be changed via updates
+  // user_id is set on creation and should remain constant
+  const { user_id, ...updateData } = data;
+  
+  if (user_id !== undefined) {
+    await AppLogger.warning('updateItem', 'validation', 'user_id was included in update data and was excluded', { table, id });
+  }
+  
+  const { error } = await (supabase as any).from(table).update(updateData).eq('id', id);
   if (error) {
     console.error('Supabase update error:', error);
     await AppLogger.error('updateItem', 'database_update', `Failed to update item in ${table}`, error, { table, id, data, supabaseError: error });

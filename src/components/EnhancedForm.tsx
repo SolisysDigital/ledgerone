@@ -150,6 +150,11 @@ export default function EnhancedForm({
       // Clean up the data - handle updates vs creates differently
       const cleanedData: Record<string, any> = {};
       Object.entries(data).forEach(([key, value]) => {
+        // Exclude user_id from form submissions - it's managed server-side
+        if (key === 'user_id') {
+          return; // Skip user_id - it should never be in form data
+        }
+        
         // Get field configuration to understand the expected type
         const fieldConfig = config.fields.find((f: FieldConfig) => f.name === key);
         

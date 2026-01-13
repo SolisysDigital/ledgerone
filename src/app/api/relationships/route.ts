@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
 import { AppLogger } from '@/lib/logger';
 import { getHoverPopupData } from '@/lib/relationshipActions';
+import { getCurrentUserId } from '@/lib/session';
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = 'force-dynamic';
@@ -102,15 +103,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Relationship already exists' }, { status: 409 });
     }
 
+    // Get current user ID for user_id field
+    const userId = await getCurrentUserId();
+    
+    const insertData: any = {
+      entity_id: entityId,
+      related_data_id: relatedDataId,
+      type_of_record: typeOfRecord,
+      relationship_description: relationshipDescription || null,
+    };
+    
+    if (userId) {
+      insertData.user_id = userId;
+    }
+    
     // Create new relationship
     const { data, error } = await (supabase as any)
       .from('entity_related_data')
-      .insert({
-        entity_id: entityId,
-        related_data_id: relatedDataId,
-        type_of_record: typeOfRecord,
-        relationship_description: relationshipDescription || null
-      })
+      .insert(insertData)
       .select()
       .single();
 

@@ -216,14 +216,24 @@ export async function createRelationship(
   relationshipDescription: string
 ) {
   try {
+    // Get current user ID for user_id field
+    const { getCurrentUserId } = await import('./session');
+    const userId = await getCurrentUserId();
+    
+    const insertData: any = {
+      entity_id: entityId,
+      related_data_id: relatedDataId,
+      type_of_record: typeOfRecord,
+      relationship_description: relationshipDescription || null,
+    };
+    
+    if (userId) {
+      insertData.user_id = userId;
+    }
+    
     const { data, error } = await (getServiceSupabase() as any)
       .from('entity_related_data')
-      .insert({
-        entity_id: entityId,
-        related_data_id: relatedDataId,
-        type_of_record: typeOfRecord,
-        relationship_description: relationshipDescription
-      })
+      .insert(insertData)
       .select()
       .single();
 
