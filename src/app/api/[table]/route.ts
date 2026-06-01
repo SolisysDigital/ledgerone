@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
 import { tableConfigs } from '@/lib/tableConfigs';
 import { AppLogger } from '@/lib/logger';
+// SECURITY FIX: Import session utility to inspect user authentication on server side
+import { getCurrentUserId } from '@/lib/session';
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = 'force-dynamic';
@@ -13,6 +15,12 @@ export async function GET(
   try {
     const resolvedParams = await params;
     const { table } = resolvedParams;
+    
+    // SECURITY FIX: Enforce server-side user authentication. Unauthenticated requests are rejected.
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized. Valid login session required.' }, { status: 401 });
+    }
     
     // Build-time safety check
     if (!table) {
@@ -45,9 +53,11 @@ export async function GET(
 
     const offset = (page - 1) * limit;
 
+    // SECURITY FIX: Constrain query results strictly to records owned by the authenticated user
     let query = supabase
       .from(dbTable)
-      .select('*', { count: 'exact' });
+      .select('*', { count: 'exact' })
+      .eq('user_id', userId);
 
     // Add search filter if provided
     if (search) {

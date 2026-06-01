@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
 import { tableConfigs } from '@/lib/tableConfigs';
 import { AppLogger } from '@/lib/logger';
+// SECURITY FIX: Import session utility to inspect user authentication on server side
+import { getCurrentUserId } from '@/lib/session';
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = 'force-dynamic';
@@ -13,6 +15,12 @@ export async function GET(
   try {
     const resolvedParams = await params;
     const { table, id } = resolvedParams;
+    
+    // SECURITY FIX: Enforce server-side user authentication. Unauthenticated requests are rejected.
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized. Valid login session required.' }, { status: 401 });
+    }
     
     // Build-time safety check
     if (!table || !id) {
@@ -41,10 +49,12 @@ export async function GET(
     const supabase = getServiceSupabase();
     console.log(`[API] Using service role client for table: ${dbTable}, id: ${id}`);
 
+    // SECURITY FIX: Constrain detail fetch strictly to the record owned by the authenticated user
     const { data, error } = await supabase
       .from(dbTable)
       .select('*')
       .eq('id', id)
+      .eq('user_id', userId)
       .single();
 
     if (error) {
@@ -73,6 +83,12 @@ export async function DELETE(
     const resolvedParams = await params;
     const { table, id } = resolvedParams;
     
+    // SECURITY FIX: Enforce server-side user authentication. Unauthenticated requests are rejected.
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized. Valid login session required.' }, { status: 401 });
+    }
+    
     // Build-time safety check
     if (!table || !id) {
       await AppLogger.error('api/[table]/[id]', 'DELETE', 'Invalid parameters provided', new Error('Missing table or id parameter'), { table, id });
@@ -100,10 +116,12 @@ export async function DELETE(
     const supabase = getServiceSupabase();
     console.log(`[API] Using service role client for DELETE on table: ${dbTable}, id: ${id}`);
 
+    // SECURITY FIX: Constrain record deletion strictly to the record owned by the authenticated user
     const { error } = await supabase
       .from(dbTable)
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Database error:', error);

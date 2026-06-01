@@ -10,14 +10,14 @@ const nextConfig: NextConfig = {
     // Temporarily disable ESLint checking during build
     ignoreDuringBuilds: true,
   },
-  turbopack: {
-    rules: {
-      '*.css': {
-        loaders: ['css-loader'],
-        as: '*.css',
-      },
-    },
-  },
+  // turbopack: {
+  //   rules: {
+  //     '*.css': {
+  //       loaders: ['css-loader'],
+  //       as: '*.css',
+  //     },
+  //   },
+  // },
   // Disable build cache for deployment
   generateBuildId: async () => {
     return `build-${Date.now()}`;

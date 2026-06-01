@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
+// SECURITY FIX: Import session utility to inspect user authentication on server side
+import { getCurrentUserId } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,10 +9,32 @@ export async function GET() {
   try {
     console.log('=== TEST ENDPOINT START ===');
     
+    // SECURITY FIX: Enforce server-side user authentication.
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
+    }
+
+    const supabase = getServiceSupabase();
+    
+    // SECURITY FIX: Enforce server-side authorization check. Verify that the user has the 'admin' role.
+    const { data: user, error: authError } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', userId)
+      .eq('status', 'active')
+      .single() as { data: any; error: any };
+      
+    if (authError || !user || user.role !== 'admin') {
+      console.log('Access denied to non-admin user:', userId);
+      return NextResponse.json({ error: 'Forbidden. Admin privileges required.' }, { status: 403 });
+    }
+
     // Test 1: Check if environment variables are loaded
     const hasServiceKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
     const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const hasAnonKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    // added
+    const hasAnonKey = !!(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
     
     console.log('Environment variables:', {
       hasServiceKey,
@@ -20,9 +44,8 @@ export async function GET() {
     });
     
     // Test 2: Try to initialize Supabase client
-    let supabase;
     try {
-      supabase = getServiceSupabase();
+      // Supabase client is already successfully initialized above for the authorization check
       console.log('Supabase client initialized successfully');
     } catch (error) {
       console.log('Failed to initialize Supabase client:', error);

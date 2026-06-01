@@ -1,15 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
 import { AppLogger } from '@/lib/logger';
+// SECURITY FIX: Import session utility to inspect user authentication on server side
+import { getCurrentUserId } from '@/lib/session';
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY FIX: Enforce server-side user authentication. Unauthenticated requests are rejected.
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized. Valid login session required.' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const relatedDataId = searchParams.get('related_data_id');
-    const typeOfRecord = searchParams.get('type_of_record');
+    const typeOfRecord = searchParams.get('typeOfRecord') || searchParams.get('type_of_record');
 
     if (!relatedDataId || !typeOfRecord) {
       return NextResponse.json({ error: 'Related data ID and type of record are required' }, { status: 400 });
@@ -19,6 +27,7 @@ export async function GET(request: NextRequest) {
     const supabase = getServiceSupabase();
     
     // Find the entity that owns this related data
+    // SECURITY FIX: Constrain relationship fetch strictly to records owned by the authenticated user
     const { data: relationship, error } = await supabase
       .from('entity_related_data')
       .select(`
@@ -29,6 +38,7 @@ export async function GET(request: NextRequest) {
       `)
       .eq('related_data_id', relatedDataId)
       .eq('type_of_record', typeOfRecord)
+      .eq('user_id', userId)
       .single();
 
     if (error) {

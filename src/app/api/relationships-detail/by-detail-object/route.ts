@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
 import { AppLogger } from '@/lib/logger';
+// SECURITY FIX: Import session utility to inspect user authentication on server side
+import { getCurrentUserId } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY FIX: Enforce server-side user authentication. Unauthenticated requests are rejected.
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized. Valid login session required.' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const detailObjectId = searchParams.get('detail_object_id');
     const detailObjectType = searchParams.get('detail_object_type');
@@ -20,6 +28,7 @@ export async function GET(request: NextRequest) {
 
     // Find all entities that are related to this detail object
     // When we're on a detail object page (e.g., website), we want to find entities that reference this object
+    // SECURITY FIX: Constrain relationships fetch strictly to records owned by the authenticated user
     const { data: relationships, error } = await (supabase as any)
       .from('entity_related_data')
       .select(`
@@ -31,7 +40,8 @@ export async function GET(request: NextRequest) {
         updated_at
       `)
       .eq('related_data_id', detailObjectId)
-      .eq('type_of_record', detailObjectType);
+      .eq('type_of_record', detailObjectType)
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Error fetching relationships by detail object:', error);
@@ -49,10 +59,12 @@ export async function GET(request: NextRequest) {
 
     // Fetch entity details for each relationship
     const entityIds = relationships.map((r: any) => r.entity_id);
+    // SECURITY FIX: Constrain entity query strictly to entities owned by the authenticated user
     const { data: entities, error: entityError } = await (supabase as any)
       .from('entities')
       .select('id, name, type, created_at, updated_at')
-      .in('id', entityIds);
+      .in('id', entityIds)
+      .eq('user_id', userId);
 
     if (entityError) {
       console.error('Error fetching entities:', entityError);

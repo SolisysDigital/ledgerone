@@ -48,6 +48,14 @@ export async function createItem(table: string, data: Record<string, string>) {
 export async function updateItem(table: string, id: string, data: Record<string, string>) {
   console.log('Updating item in table:', table, 'with id:', id, 'and data:', data);
   
+  // SECURITY FIX: Ensure the user is authenticated on the server side
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    const error = new Error('Authentication required to update records');
+    await AppLogger.error('updateItem', 'authentication', 'No user session found', error, { table, id });
+    return { success: false, error: 'Authentication required to update records' };
+  }
+  
   // Use service role Supabase client to bypass RLS
   const supabase = getServiceSupabase();
   
@@ -69,7 +77,8 @@ export async function updateItem(table: string, id: string, data: Record<string,
     await AppLogger.warning('updateItem', 'validation', 'user_id was included in update data and was excluded', { table, id });
   }
   
-  const { error } = await (supabase as any).from(table).update(updateData).eq('id', id);
+  // SECURITY FIX: Constrain updates only to records owned by this authenticated user
+  const { error } = await (supabase as any).from(table).update(updateData).eq('id', id).eq('user_id', userId);
   if (error) {
     console.error('Supabase update error:', error);
     await AppLogger.error('updateItem', 'database_update', `Failed to update item in ${table}`, error, { table, id, data, supabaseError: error });
@@ -83,13 +92,22 @@ export async function updateItem(table: string, id: string, data: Record<string,
 }
 
 export async function deleteItem(table: string, id: string) {
+  // SECURITY FIX: Ensure the user is authenticated on the server side
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    const error = new Error('Authentication required to delete records');
+    await AppLogger.error('deleteItem', 'authentication', 'No user session found', error, { table, id });
+    return { success: false, error: 'Authentication required' };
+  }
+
   // Use service role Supabase client to bypass RLS
   const supabase = getServiceSupabase();
   
   // Log the operation start
   await AppLogger.debug('deleteItem', 'operation_start', `Starting delete operation for table: ${table}, id: ${id}`, { table, id });
   
-  const { error } = await (supabase as any).from(table).delete().eq('id', id);
+  // SECURITY FIX: Constrain deletion strictly to records owned by this authenticated user
+  const { error } = await (supabase as any).from(table).delete().eq('id', id).eq('user_id', userId);
   if (error) {
     await AppLogger.error('deleteItem', 'database_delete', `Failed to delete item from ${table}`, error, { table, id, supabaseError: error });
     return { success: false, error: error.message };

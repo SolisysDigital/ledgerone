@@ -12,11 +12,11 @@ import type { Database } from './database.types';
 
 // Use explicit string asserts so TS never infers `any` anywhere.
 const SUPABASE_URL: string = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
-const SUPABASE_ANON_KEY: string = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+const SUPABASE_ANON_KEY: string = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) as string;
 const SUPABASE_SERVICE_ROLE_KEY: string | undefined = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 // Check if we have the required environment variables for real Supabase
-const hasRealSupabaseConfig = SUPABASE_URL && SUPABASE_ANON_KEY;
+const hasRealSupabaseConfig = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 
 // Small helper to ensure required envs exist at runtime (server only)
 function assertEnv(name: string, value: string | undefined): asserts value is string {

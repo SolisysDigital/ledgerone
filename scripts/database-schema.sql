@@ -286,6 +286,11 @@ CREATE INDEX IF NOT EXISTS idx_websites_url_fts ON websites USING gin(to_tsvecto
 -- =====================================================
 -- SECTION 3: ROW LEVEL SECURITY (RLS)
 -- =====================================================
+-- ⚠️ SECURITY WARNING: The default policies created in this section are highly permissive (using TRUE)
+-- and serve only as a baseline structure. To secure the application and enforce proper row-level
+-- user data isolation, you MUST execute "fix-rls-policies.sql" or "fix-rls-policies-hardened.sql"
+-- immediately after running this schema setup script.
+-- =====================================================
 
 -- Enable RLS on all tables
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;

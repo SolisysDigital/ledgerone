@@ -39,22 +39,26 @@ CREATE POLICY "Service role has full access to entity_relationships" ON entity_r
   USING (true) WITH CHECK (true);
 
 -- Authenticated users: Restrictive policies (NOT using true)
+-- SECURITY FIX: Restrict access to authenticated owners using auth.uid() instead of existence check
 CREATE POLICY "Authenticated users can view entity_relationships with user_id" ON entity_relationships
   FOR SELECT TO authenticated
-  USING (user_id IS NOT NULL);
+  USING (auth.uid() = user_id);
 
+-- SECURITY FIX: Restrict access to authenticated owners using auth.uid() instead of existence check
 CREATE POLICY "Authenticated users can insert entity_relationships with user_id" ON entity_relationships
   FOR INSERT TO authenticated
-  WITH CHECK (user_id IS NOT NULL);
+  WITH CHECK (auth.uid() = user_id);
 
+-- SECURITY FIX: Restrict access to authenticated owners using auth.uid() instead of existence check
 CREATE POLICY "Authenticated users can update entity_relationships with user_id" ON entity_relationships
   FOR UPDATE TO authenticated
-  USING (user_id IS NOT NULL)
-  WITH CHECK (user_id IS NOT NULL);
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
+-- SECURITY FIX: Restrict access to authenticated owners using auth.uid() instead of existence check
 CREATE POLICY "Authenticated users can delete entity_relationships with user_id" ON entity_relationships
   FOR DELETE TO authenticated
-  USING (user_id IS NOT NULL);
+  USING (auth.uid() = user_id);
 
 -- SECURITY: No policies for anon role = denied by default (secure)
 

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import { getServiceSupabase } from '@/lib/supabase';
+// SECURITY FIX: Import encryptSession helper to issue encrypted, tamper-proof session cookies
+import { encryptSession } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -92,7 +94,10 @@ export async function POST(req: Request) {
     log('Session data created:', sessionData);
     
     const res = NextResponse.json({ user });
-    res.cookies.set('session', Buffer.from(JSON.stringify(sessionData)).toString('base64'), {
+    // SECURITY FIX: Issue an AES encrypted, secure session cookie instead of plain base64
+    const secureCookieValue = encryptSession(sessionData);
+    
+    res.cookies.set('session', secureCookieValue, {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',

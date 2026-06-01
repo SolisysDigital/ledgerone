@@ -9,6 +9,12 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY FIX: Enforce server-side user authentication for fetching relationships
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized. Valid login session required.' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const entityId = searchParams.get('entityId');
     const typeOfRecord = searchParams.get('typeOfRecord');
@@ -16,7 +22,7 @@ export async function GET(request: NextRequest) {
     if (!entityId) {
       return NextResponse.json({ error: 'Entity ID is required' }, { status: 400 });
     }
-
+    
     // Use the getHoverPopupData function to get complete data for hover popups
     const relationships = await getHoverPopupData(entityId);
     
@@ -26,8 +32,11 @@ export async function GET(request: NextRequest) {
       filteredRelationships = relationships.filter(rel => rel.type_of_record === typeOfRecord);
     }
 
+    // SECURITY FIX: Ensure the retrieved relationships belong to the authenticated user
+    const userOwnedRelationships = filteredRelationships.filter(rel => rel.user_id === userId);
+
     // Transform the data to match the expected API response format
-    const transformedData = filteredRelationships.map(relationship => {
+    const transformedData = userOwnedRelationships.map(relationship => {
       // Extract the additional fields for hover popups (excluding the base relationship fields)
       const { id, related_data_id, type_of_record, relationship_description, related_data_display_name, ...additionalFields } = relationship;
       
@@ -61,8 +70,9 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('API: Error fetching relationships:', error);
+    const resolvedEntityId = request.nextUrl.searchParams.get('entityId');
     await AppLogger.error('relationships_api', 'get_relationships_failed', 'Failed to fetch relationships', error as Error, { 
-      entityId: request.nextUrl.searchParams.get('entityId'),
+      entityId: resolvedEntityId,
       typeOfRecord: request.nextUrl.searchParams.get('typeOfRecord')
     });
     
@@ -75,10 +85,16 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY FIX: Enforce server-side user authentication for creating relationships
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized. Valid login session required.' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { entityId, relatedDataId, typeOfRecord, relationshipDescription } = body;
 
-    if (!entityId || !relatedDataId || !typeOfRecord) {
+    if (!body || !entityId || !relatedDataId || !typeOfRecord) {
       return NextResponse.json({ error: 'Entity ID, related data ID, and type of record are required' }, { status: 400 });
     }
 
@@ -102,20 +118,15 @@ export async function POST(request: NextRequest) {
     if (existingRelationship) {
       return NextResponse.json({ error: 'Relationship already exists' }, { status: 409 });
     }
-
-    // Get current user ID for user_id field
-    const userId = await getCurrentUserId();
     
     const insertData: any = {
       entity_id: entityId,
       related_data_id: relatedDataId,
       type_of_record: typeOfRecord,
       relationship_description: relationshipDescription || null,
+      // SECURITY FIX: Associate relationship strictly with the authenticated user
+      user_id: userId
     };
-    
-    if (userId) {
-      insertData.user_id = userId;
-    }
     
     // Create new relationship
     const { data, error } = await (supabase as any)

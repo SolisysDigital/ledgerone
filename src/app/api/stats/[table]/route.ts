@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
 import { tableConfigs } from '@/lib/tableConfigs';
+// SECURITY FIX: Import session utility to inspect user authentication on server side
+import { getCurrentUserId } from '@/lib/session';
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = 'force-dynamic';
@@ -12,6 +14,12 @@ export async function GET(
   try {
     const resolvedParams = await params;
     const { table } = resolvedParams;
+
+    // SECURITY FIX: Enforce server-side user authentication. Unauthenticated requests are rejected.
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized. Valid login session required.' }, { status: 401 });
+    }
 
     if (!table) {
       return NextResponse.json({ error: 'Table parameter is required' }, { status: 400 });
@@ -26,9 +34,11 @@ export async function GET(
     const supabase = getServiceSupabase();
 
     // Get total count
+    // SECURITY FIX: Constrain count query strictly to records owned by the authenticated user
     const { count, error: countError } = await supabase
       .from(table)
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
 
     if (countError) {
       console.error('Count error:', countError);
@@ -36,9 +46,11 @@ export async function GET(
     }
 
     // Get recent records (last 5)
+    // SECURITY FIX: Constrain recent records fetch strictly to records owned by the authenticated user
     const { data: recentRecords, error: recentError } = await supabase
       .from(table)
       .select('*')
+      .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(5);
 

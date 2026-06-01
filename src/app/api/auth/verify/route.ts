@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getServiceSupabase } from '@/lib/supabase';
+// SECURITY FIX: Import decryptSession helper to verify securely encrypted session cookies
+import { decryptSession } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,9 +36,15 @@ export async function GET() {
       return NextResponse.json({ authenticated: false }, { status: 401 });
     }
 
-    // Decode session cookie
-    log('Attempting to decode session cookie');
-    const sessionData = JSON.parse(Buffer.from(sessionCookie.value, 'base64').toString());
+    // SECURITY FIX: Attempt to decrypt and verify the secure, encrypted session cookie
+    log('Attempting to decrypt session cookie');
+    const sessionData = decryptSession(sessionCookie.value);
+    
+    if (!sessionData) {
+      log('Failed to decrypt session cookie (invalid signature or format)');
+      return NextResponse.json({ authenticated: false }, { status: 401 });
+    }
+    
     log('Session data decoded successfully:', { uid: sessionData.uid, ts: sessionData.ts });
     
     const { uid, ts } = sessionData;

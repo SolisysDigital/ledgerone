@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
 import { AppLogger } from '@/lib/logger';
+// SECURITY FIX: Import session utility to inspect user authentication on server side
+import { getCurrentUserId } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,28 +18,28 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Log to admin logs using the service role
-    let logResult;
-    switch (level.toLowerCase()) {
-      case 'error':
-        logResult = await AppLogger.error(source, action, message, null, details);
-        break;
-      case 'warning':
-        logResult = await AppLogger.warning(source, action, message, details);
-        break;
-      case 'info':
-        logResult = await AppLogger.info(source, action, message, details);
-        break;
-      case 'debug':
-        logResult = await AppLogger.debug(source, action, message, details);
-        break;
-      default:
-        logResult = await AppLogger.info(source, action, message, details);
+    // SECURITY FIX: Enforce server-side user authentication. Anonymous logging is rejected to avoid DoS/Spam.
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized. Valid session required.' }, { status: 401 });
     }
 
+    // SECURITY FIX: Directly insert the log using AppLogger.insertLog, binding the authenticated userId to ensure audit trail integrity
+    const logData = {
+      level: level.toUpperCase() as any,
+      source,
+      action,
+      message,
+      details,
+      userId
+    };
+
+    const logResult = await AppLogger.insertLog(logData);
+
     return NextResponse.json({ 
-      success: true, 
-      message: 'Log entry created successfully' 
+      success: logResult.success, 
+      message: logResult.success ? 'Log entry created successfully' : 'Log entry creation failed',
+      logId: logResult.logId
     });
 
   } catch (error) {

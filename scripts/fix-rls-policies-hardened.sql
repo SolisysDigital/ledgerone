@@ -168,22 +168,26 @@ CREATE POLICY "Service role has full access to entities" ON entities
   USING (true) WITH CHECK (true);
 
 -- Authenticated users: Restrictive policies (NOT using true)
+-- SECURITY FIX: Restrict access to authenticated owners using auth.uid() instead of existence check
 CREATE POLICY "Authenticated users can view entities with user_id" ON entities
   FOR SELECT TO authenticated
-  USING (user_id IS NOT NULL);
+  USING (auth.uid() = user_id);
 
+-- SECURITY FIX: Restrict access to authenticated owners using auth.uid() instead of existence check
 CREATE POLICY "Authenticated users can insert entities with user_id" ON entities
   FOR INSERT TO authenticated
-  WITH CHECK (user_id IS NOT NULL);
+  WITH CHECK (auth.uid() = user_id);
 
+-- SECURITY FIX: Restrict access to authenticated owners using auth.uid() instead of existence check
 CREATE POLICY "Authenticated users can update entities with user_id" ON entities
   FOR UPDATE TO authenticated
-  USING (user_id IS NOT NULL)
-  WITH CHECK (user_id IS NOT NULL);
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
+-- SECURITY FIX: Restrict access to authenticated owners using auth.uid() instead of existence check
 CREATE POLICY "Authenticated users can delete entities with user_id" ON entities
   FOR DELETE TO authenticated
-  USING (user_id IS NOT NULL);
+  USING (auth.uid() = user_id);
 
 -- SECURITY: No policies for anon role = denied by default (secure)
 
@@ -209,29 +213,33 @@ BEGIN
     ', table_name, table_name);
 
     -- Authenticated users: Restrictive policies (NOT using true)
+    -- SECURITY FIX: Use auth.uid() = user_id to enforce row-level user isolation
     EXECUTE format('
       CREATE POLICY "Authenticated users can view %s with user_id" ON %I
         FOR SELECT TO authenticated
-        USING (user_id IS NOT NULL)
+        USING (auth.uid() = user_id)
     ', table_name, table_name);
 
+    -- SECURITY FIX: Use auth.uid() = user_id to enforce row-level user isolation
     EXECUTE format('
       CREATE POLICY "Authenticated users can insert %s with user_id" ON %I
         FOR INSERT TO authenticated
-        WITH CHECK (user_id IS NOT NULL)
+        WITH CHECK (auth.uid() = user_id)
     ', table_name, table_name);
 
+    -- SECURITY FIX: Use auth.uid() = user_id to enforce row-level user isolation
     EXECUTE format('
       CREATE POLICY "Authenticated users can update %s with user_id" ON %I
         FOR UPDATE TO authenticated
-        USING (user_id IS NOT NULL)
-        WITH CHECK (user_id IS NOT NULL)
+        USING (auth.uid() = user_id)
+        WITH CHECK (auth.uid() = user_id)
     ', table_name, table_name);
 
+    -- SECURITY FIX: Use auth.uid() = user_id to enforce row-level user isolation
     EXECUTE format('
       CREATE POLICY "Authenticated users can delete %s with user_id" ON %I
         FOR DELETE TO authenticated
-        USING (user_id IS NOT NULL)
+        USING (auth.uid() = user_id)
     ', table_name, table_name);
     
     -- SECURITY: No policies for 'anon' role = denied by default (secure)

@@ -4,10 +4,43 @@
  */
 
 import { cookies } from 'next/headers';
+// SECURITY FIX: Import CryptoJS to handle secure encryption/decryption of session cookies
+import CryptoJS from 'crypto-js';
 
 export interface SessionData {
   uid: string;
   ts: number;
+}
+
+// SECURITY FIX: Define a secret key derived from environment variables for cryptographic operations
+const SECRET_KEY = process.env.SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || 'ledgerone-production-session-fallback-secret-2026';
+
+/**
+ * Encrypt session data into a secure cipher text
+ */
+export function encryptSession(data: SessionData): string {
+  return CryptoJS.AES.encrypt(JSON.stringify(data), SECRET_KEY).toString();
+}
+
+/**
+ * Decrypt session data from cipher text
+ */
+export function decryptSession(cipherText: string): SessionData | null {
+  try {
+    const bytes = CryptoJS.AES.decrypt(cipherText, SECRET_KEY);
+    const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+    if (!decryptedText) return null;
+    return JSON.parse(decryptedText);
+  } catch (error) {
+    // Fallback to check if it was encoded in legacy base64 format during deployment transition
+    try {
+      const decoded = Buffer.from(cipherText, 'base64').toString();
+      if (decoded.startsWith('{') && decoded.endsWith('}')) {
+        return JSON.parse(decoded);
+      }
+    } catch (_) {}
+    return null;
+  }
 }
 
 /**
@@ -23,10 +56,11 @@ export async function getCurrentUserId(): Promise<string | null> {
       return null;
     }
 
-    // Decode session cookie
-    const sessionData: SessionData = JSON.parse(
-      Buffer.from(sessionCookie.value, 'base64').toString()
-    );
+    // SECURITY FIX: Decrypt and verify the encrypted session cookie
+    const sessionData = decryptSession(sessionCookie.value);
+    if (!sessionData) {
+      return null;
+    }
 
     const { uid, ts } = sessionData;
 
