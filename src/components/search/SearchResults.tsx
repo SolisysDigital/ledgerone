@@ -85,7 +85,7 @@ export default function SearchResults({
     return (
       <div className="text-center py-12">
         <div className="text-gray-500 text-lg mb-2">
-          No results found for "{query}"
+          {`No results found for "${query}"`}
         </div>
         <p className="text-gray-400">
           Try searching with different keywords or check your spelling.
@@ -99,7 +99,7 @@ export default function SearchResults({
       {/* Search Summary */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-gray-600">
-          Found {total} result{total !== 1 ? 's' : ''} for "{query}"
+          {`Found ${total} result${total !== 1 ? 's' : ''} for "${query}"`}
         </div>
         {hasMore && (
           <Button

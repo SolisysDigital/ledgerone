@@ -35,7 +35,7 @@ export default async function PhoneDetailPage({ params }: { params: Promise<{ id
   }
 
   // Get entity relationships for this phone using the working API endpoint
-  let relationships: any[] = [];
+  //const relationships: any[] = [];
   // For now, skip relationship fetching to get the basic page working
   // TODO: Implement relationship fetching once the basic page is stable
 
