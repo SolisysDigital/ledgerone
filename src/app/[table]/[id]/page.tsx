@@ -2,6 +2,7 @@ import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { tableConfigs } from "@/lib/tableConfigs";
 import { getApiUrl } from "@/lib/utils";
+import { cookies } from "next/headers";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, ArrowLeft, Users, FileText, Building2 } from "lucide-react";
@@ -20,16 +21,23 @@ export default async function EntityPage({
   params: Promise<{ table: string; id: string }> 
 }) {
   const resolvedParams = await params;
-  const { table, id } = resolvedParams;
+  const { table: rawTable, id } = resolvedParams;
+  const table = rawTable ? rawTable.replace(/-/g, '_') : '';
   
   const config = tableConfigs[table as keyof typeof tableConfigs];
   if (!config) return notFound();
+
+  // Forward session cookie for server-to-server fetch authentication
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('session');
+  const cookieHeader = sessionCookie ? `session=${sessionCookie.value}` : '';
 
   // Fetch existing data using the working API endpoint instead of direct Supabase
   const response = await fetch(getApiUrl(`/${table}/${id}`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
+      ...(cookieHeader ? { 'Cookie': cookieHeader } : {}),
     },
   });
 
@@ -141,7 +149,7 @@ export default async function EntityPage({
             title={`${config.label} Details`}
             id={id}
             primaryName={primaryName}
-            backHref={`/${table}`}
+            backHref={`/${routePath}`}
             actions={actions}
           />
 
@@ -192,7 +200,7 @@ export default async function EntityPage({
           title="Entity Details"
           id={id}
           primaryName={primaryName}
-          backHref={`/${table}`}
+          backHref={`/${routePath}`}
           actions={actions}
         />
 

@@ -21,14 +21,17 @@ interface Record {
 }
 
 interface TablePageProps {
-  params: Promise<{
+  params?: Promise<{
     table: string;
   }>;
+  table?: string;
 }
 
-export default function TablePage(_params: TablePageProps) {
+export default function TablePage({ table: propTable }: TablePageProps = {}) {
   const resolvedParams = useParams();
-  const table = Array.isArray(resolvedParams.table) ? resolvedParams.table[0] : resolvedParams.table;
+  const rawTable = propTable || (Array.isArray(resolvedParams.table) ? resolvedParams.table[0] : resolvedParams.table);
+  const table = rawTable ? rawTable.replace(/-/g, '_') : '';
+  const routePath = rawTable ? rawTable.replace(/_/g, '-') : '';
   
   const [records, setRecords] = useState<Record[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,15 +83,15 @@ export default function TablePage(_params: TablePageProps) {
   };
 
   const handleView = (id: string) => {
-    window.location.href = `/${table}/${id}`;
+    window.location.href = `/${routePath}/${id}`;
   };
 
   const handleEdit = (id: string) => {
-    window.location.href = `/${table}/${id}/edit`;
+    window.location.href = `/${routePath}/${id}/edit`;
   };
 
   const handleVisualize = (id: string) => {
-    window.location.href = `/${table}/${id}/visualize`;
+    window.location.href = `/${routePath}/${id}/visualize`;
   };
 
   if (!config) {
@@ -122,7 +125,7 @@ export default function TablePage(_params: TablePageProps) {
           subtitle={`Manage your ${config.label.toLowerCase()} data`}
           actionButton={
             <Button asChild>
-              <Link href={`/${table}/new`}>
+              <Link href={`/${routePath}/new`}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add New {config.label.slice(0, -1)}
               </Link>
@@ -153,7 +156,7 @@ export default function TablePage(_params: TablePageProps) {
                 <EmptyState
                   message={searchQuery ? 'No records found matching your search.' : `No ${config.label.toLowerCase()} records found.`}
                   actionText={`Create ${config.label.slice(0, -1)}`}
-                  actionHref={`/${table}/new`}
+                  actionHref={`/${routePath}/new`}
                 />
               ) : (
                 <>

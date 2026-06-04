@@ -76,9 +76,15 @@ export default function EnhancedForm({
   });
 
   const formSchema = z.object(schemaObject);
+  
+  const defaultValues: Record<string, any> = {};
+  config.fields.forEach((field: FieldConfig) => {
+    defaultValues[field.name] = initialData?.[field.name] ?? "";
+  });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData || {},
+    defaultValues,
     mode: 'onChange', // Allow validation on change for better UX
     reValidateMode: 'onChange', // Re-validate on change
   });

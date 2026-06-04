@@ -125,7 +125,33 @@ export class AppLogger {
    */
   static async insertLog(logEntry: LogEntry): Promise<LogResponse> {
     try {
-      // Use service role Supabase client to bypass RLS
+      // Check if we are running in the browser (client-side)
+      if (typeof window !== 'undefined') {
+        // Print to browser console
+        const consoleMethod = logEntry.level === 'ERROR' ? 'error' : logEntry.level === 'WARNING' ? 'warn' : 'log';
+        console[consoleMethod](`[${logEntry.level}] (${logEntry.source}:${logEntry.action}) ${logEntry.message}`, logEntry.details || '');
+
+        // Securely post the log to the API endpoint (since service key is server-only)
+        try {
+          const response = await fetch('/api/auth/log', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(logEntry)
+          });
+          if (response.ok) {
+            const res = await response.json();
+            return { success: res.success, logId: res.logId };
+          }
+          return { success: false, error: 'API returned error status' };
+        } catch (fetchError) {
+          console.error('Failed to post log to API:', fetchError);
+          return { success: false, error: 'API post failed' };
+        }
+      }
+
+      // Server-side logging: direct insert using service role Supabase client
       const supabase = getServiceSupabase();
       
       // Skip RPC call and use direct insert to avoid build failures

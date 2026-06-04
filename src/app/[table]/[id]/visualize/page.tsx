@@ -26,11 +26,17 @@ interface VisualizationData {
   relationships: RelationshipBranch[];
 }
 
-export default function VisualizePage() {
+interface VisualizePageProps {
+  table?: string;
+  id?: string;
+}
+
+export default function VisualizePage({ table: propTable, id: propId }: VisualizePageProps = {}) {
   const params = useParams();
   const router = useRouter();
-  const table = Array.isArray(params.table) ? params.table[0] : params.table;
-  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const rawTable = propTable || (Array.isArray(params.table) ? params.table[0] : params.table);
+  const table = rawTable ? rawTable.replace(/-/g, '_') : '';
+  const id = propId || (Array.isArray(params.id) ? params.id[0] : params.id);
 
   const [data, setData] = useState<VisualizationData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,11 +70,13 @@ export default function VisualizePage() {
   }, [table, id]);
 
   const handleNodeClick = (node: RelationshipNode) => {
-    router.push(`/${node.table}/${node.id}`);
+    const nodeRoutePath = node.table.replace(/_/g, '-');
+    router.push(`/${nodeRoutePath}/${node.id}`);
   };
 
   const handleBack = () => {
-    router.push(`/${table}/${id}`);
+    const routePath = table.replace(/_/g, '-');
+    router.push(`/${routePath}/${id}`);
   };
 
   if (!config) {

@@ -2,6 +2,7 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { tableConfigs } from "@/lib/tableConfigs";
 import { getApiUrl } from "@/lib/utils";
+import { cookies } from "next/headers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import EditForm from "./EditForm";
 import { ClientNavigationWrapper } from "@/components/layout/ClientNavigationWrapper";
@@ -13,16 +14,24 @@ export default async function EditPage({
   params: Promise<{ table: string; id: string }> 
 }) {
   const resolvedParams = await params;
-  const { table, id } = resolvedParams;
+  const { table: rawTable, id } = resolvedParams;
+  const table = rawTable ? rawTable.replace(/-/g, '_') : '';
+  const routePath = rawTable ? rawTable.replace(/_/g, '-') : '';
   
   const config = tableConfigs[table as keyof typeof tableConfigs];
   if (!config) return notFound();
+
+  // Forward session cookie for server-to-server fetch authentication
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('session');
+  const cookieHeader = sessionCookie ? `session=${sessionCookie.value}` : '';
 
   // Fetch existing data using the working API endpoint instead of direct Supabase
   const response = await fetch(getApiUrl(`/${table}/${id}`), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
+      ...(cookieHeader ? { 'Cookie': cookieHeader } : {}),
     },
   });
 
@@ -71,7 +80,7 @@ export default async function EditPage({
           title={`Edit ${config.label}`}
           id={id}
           primaryName={primaryName}
-          backHref={`/${table}/${id}`}
+          backHref={`/${routePath}/${id}`}
         />
 
         {/* Edit Form */}

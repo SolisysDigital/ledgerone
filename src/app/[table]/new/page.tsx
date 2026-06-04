@@ -1,6 +1,7 @@
 import React from "react";
 import { tableConfigs } from "@/lib/tableConfigs";
 import { getApiUrl } from "@/lib/utils";
+import { cookies } from "next/headers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import CreateForm from "./CreateForm";
@@ -15,7 +16,8 @@ export default async function CreatePage({
 }) {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
-  const table = resolvedParams.table;
+  const rawTable = resolvedParams.table;
+  const table = rawTable ? rawTable.replace(/-/g, '_') : '';
   const config = tableConfigs[table as keyof typeof tableConfigs];
 
   if (!config) {
@@ -32,11 +34,17 @@ export default async function CreatePage({
     // Find the parent table from the foreign key field
     const fkField = config.fields.find(field => field.name === resolvedSearchParams.fkField);
     if (fkField && fkField.type === 'fk' && fkField.refTable) {
+      // Forward session cookie for server-to-server fetch authentication
+      const cookieStore = await cookies();
+      const sessionCookie = cookieStore.get('session');
+      const cookieHeader = sessionCookie ? `session=${sessionCookie.value}` : '';
+
       // Fetch entity data using the working API endpoint instead of direct Supabase
       const response = await fetch(getApiUrl(`/${fkField.refTable}/${resolvedSearchParams.fk}`), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          ...(cookieHeader ? { 'Cookie': cookieHeader } : {}),
         },
       });
       

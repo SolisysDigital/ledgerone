@@ -14,6 +14,7 @@ interface CreateFormProps {
 export default function CreateForm({ table, config, entityName }: CreateFormProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const routePath = table.replace(/_/g, '-');
   
   const prefill = useMemo(() => {
     const result: Record<string, string> = {};
@@ -31,7 +32,7 @@ export default function CreateForm({ table, config, entityName }: CreateFormProp
       
       if (result.success) {
         // Navigate to the table listing page on success
-        router.push(`/${table}`);
+        router.push(`/${routePath}`);
       } else {
         throw new Error(result.error || 'Creation failed');
       }
@@ -43,7 +44,7 @@ export default function CreateForm({ table, config, entityName }: CreateFormProp
 
   const handleCancel = () => {
     // Navigate back to the table listing page
-    router.push(`/${table}`);
+    router.push(`/${routePath}`);
   };
 
   return (

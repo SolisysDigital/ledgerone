@@ -1,14 +1,13 @@
 "use client";
-
+ 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { AppLogger } from "@/lib/logger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, AlertTriangle, Info, Bug, XCircle, Clock, User, FileText, Code } from "lucide-react";
 import Navigation from "@/components/Navigation";
-
+ 
 interface LogEntry {
   id: string;
   timestamp: string;
@@ -23,33 +22,44 @@ interface LogEntry {
   ip_address?: string;
   user_agent?: string;
 }
-
+ 
 export default function LogDetailPage() {
   const params = useParams();
   const logId = params.id as string;
   const [log, setLog] = useState<LogEntry | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+ 
   useEffect(() => {
     if (logId) {
       loadLogDetail(logId);
     }
   }, [logId]);
-
+ 
   const loadLogDetail = async (id: string) => {
     try {
       setLoading(true);
       setError(null);
       
-      // Get the specific log entry
-      const logData = await AppLogger.getLogById(id);
+      // Get the specific log entry via the secure API endpoint
+      const response = await fetch(`/api/admin/logs/${id}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          setError('Log entry not found');
+        } else {
+          setError(`Error fetching log details: ${response.status}`);
+        }
+        return;
+      }
+      
+      const result = await response.json();
+      const logData = result.log;
       
       if (!logData) {
         setError('Log entry not found');
         return;
       }
-
+ 
       // Map the database response to LogEntry structure
       const mappedLog: LogEntry = {
         id: logData.id || '',

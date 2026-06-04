@@ -37,8 +37,9 @@ export default function EditForm({ table, config, initialData }: EditFormProps) 
           data 
         });
         
+        const routePath = table.replace(/_/g, '-');
         // Navigate to the detail page on success
-        router.push(`/${table}/${initialData.id}`);
+        router.push(`/${routePath}/${initialData.id}`);
       } else {
         throw new Error(result.error || 'Update failed');
       }

@@ -50,6 +50,46 @@ CREATE TABLE IF NOT EXISTS entities (
   description TEXT,
   short_description VARCHAR(500),
   status VARCHAR(50) DEFAULT 'active',
+  user_id UUID REFERENCES users(id),
+  
+  -- Legal / Business Information Section
+  legal_business_name VARCHAR(255),
+  employer_identification_number VARCHAR(100),
+  incorporation_date DATE,
+  country_of_formation VARCHAR(100),
+  state_of_formation VARCHAR(100),
+  business_type VARCHAR(100),
+  industry VARCHAR(255),
+  naics_code VARCHAR(50),
+  legal_address TEXT,
+  mailing_address TEXT,
+  registered_agent_name VARCHAR(255),
+  registered_agent_address TEXT,
+
+  -- Officer Fields (Optional, up to 4 officers)
+  officer1_name VARCHAR(255),
+  officer1_title VARCHAR(255),
+  officer1_ownership_percent DECIMAL(5, 2),
+
+  officer2_name VARCHAR(255),
+  officer2_title VARCHAR(255),
+  officer2_ownership_percent DECIMAL(5, 2),
+
+  officer3_name VARCHAR(255),
+  officer3_title VARCHAR(255),
+  officer3_ownership_percent DECIMAL(5, 2),
+
+  officer4_name VARCHAR(255),
+  officer4_title VARCHAR(255),
+  officer4_ownership_percent DECIMAL(5, 2),
+
+  -- Texas-Specific Fields (Optional)
+  texas_taxpayer_number VARCHAR(100),
+  texas_file_number VARCHAR(100),
+  texas_webfile_number VARCHAR(100),
+  texas_webfile_login VARCHAR(255),
+  texas_webfile_password VARCHAR(255),
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -59,6 +99,7 @@ COMMENT ON TABLE entities IS 'Main business entities (companies, organizations, 
 -- 1.4 Contacts Table
 CREATE TABLE IF NOT EXISTS contacts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
   name VARCHAR(255) NOT NULL,
   title VARCHAR(100),
   email VARCHAR(255),
@@ -74,6 +115,7 @@ COMMENT ON TABLE contacts IS 'Individual contacts and people';
 -- 1.5 Emails Table
 CREATE TABLE IF NOT EXISTS emails (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
   email VARCHAR(255) NOT NULL,
   label VARCHAR(100),
   description TEXT,
@@ -88,6 +130,7 @@ COMMENT ON TABLE emails IS 'Email addresses';
 -- 1.6 Phones Table
 CREATE TABLE IF NOT EXISTS phones (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
   phone VARCHAR(50) NOT NULL,
   label VARCHAR(100),
   description TEXT,
@@ -102,6 +145,7 @@ COMMENT ON TABLE phones IS 'Phone numbers';
 -- 1.7 Websites Table
 CREATE TABLE IF NOT EXISTS websites (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
   url VARCHAR(500) NOT NULL,
   label VARCHAR(100),
   description TEXT,
@@ -115,10 +159,14 @@ COMMENT ON TABLE websites IS 'Website URLs';
 -- 1.8 Bank Accounts Table
 CREATE TABLE IF NOT EXISTS bank_accounts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
   bank_name VARCHAR(255) NOT NULL,
   account_number VARCHAR(100),
   account_type VARCHAR(50),
   routing_number VARCHAR(50),
+  institution_held_at VARCHAR(255),
+  purpose VARCHAR(255),
+  last_balance DECIMAL(18, 2),
   description TEXT,
   short_description VARCHAR(500),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -130,9 +178,13 @@ COMMENT ON TABLE bank_accounts IS 'Bank account information';
 -- 1.9 Investment Accounts Table
 CREATE TABLE IF NOT EXISTS investment_accounts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
   provider VARCHAR(255) NOT NULL,
   account_number VARCHAR(100),
   account_type VARCHAR(50),
+  institution_held_at VARCHAR(255),
+  purpose VARCHAR(255),
+  last_balance DECIMAL(18, 2),
   description TEXT,
   short_description VARCHAR(500),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -144,9 +196,13 @@ COMMENT ON TABLE investment_accounts IS 'Investment and brokerage accounts';
 -- 1.10 Crypto Accounts Table
 CREATE TABLE IF NOT EXISTS crypto_accounts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
   platform VARCHAR(255) NOT NULL,
   account_number VARCHAR(100),
   wallet_address VARCHAR(255),
+  institution_held_at VARCHAR(255),
+  purpose VARCHAR(255),
+  last_balance DECIMAL(18, 2),
   description TEXT,
   short_description VARCHAR(500),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -158,8 +214,14 @@ COMMENT ON TABLE crypto_accounts IS 'Cryptocurrency accounts and wallets';
 -- 1.11 Credit Cards Table
 CREATE TABLE IF NOT EXISTS credit_cards (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
   cardholder_name VARCHAR(255) NOT NULL,
+  card_number VARCHAR(100),
   issuer VARCHAR(255),
+  type VARCHAR(50),
+  institution_held_at VARCHAR(255),
+  purpose VARCHAR(255),
+  last_balance DECIMAL(18, 2),
   last_four VARCHAR(4),
   expiration_date VARCHAR(7),
   description TEXT,
@@ -173,8 +235,11 @@ COMMENT ON TABLE credit_cards IS 'Credit card information';
 -- 1.12 Hosting Accounts Table
 CREATE TABLE IF NOT EXISTS hosting_accounts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
   provider VARCHAR(255) NOT NULL,
   username VARCHAR(100),
+  password VARCHAR(255),
+  login_url VARCHAR(500),
   account_number VARCHAR(100),
   description TEXT,
   short_description VARCHAR(500),
@@ -187,12 +252,15 @@ COMMENT ON TABLE hosting_accounts IS 'Web hosting and cloud service accounts';
 -- 1.13 Securities Held Table
 CREATE TABLE IF NOT EXISTS securities_held (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
   investment_account_id UUID REFERENCES investment_accounts(id) ON DELETE CASCADE,
   symbol VARCHAR(20) NOT NULL,
   name VARCHAR(255),
   shares DECIMAL(18, 6),
+  quantity DECIMAL(18, 6),
   cost_basis DECIMAL(18, 2),
   current_value DECIMAL(18, 2),
+  last_price DECIMAL(18, 2),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

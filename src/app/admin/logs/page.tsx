@@ -1,7 +1,6 @@
 "use client";
-
+ 
 import React, { useEffect, useState } from "react";
-import { AppLogger } from "@/lib/logger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertTriangle, Info, Bug, XCircle, RefreshCw, Activity, Clock, User, FileText } from "lucide-react";
 import Navigation from "@/components/Navigation";
-
+ 
 interface LogEntry {
   id: string;
   timestamp: string;
@@ -21,7 +20,7 @@ interface LogEntry {
   stack_trace?: string;
   user_id?: string;
 }
-
+ 
 export default function LogsPage() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,15 +32,20 @@ export default function LogsPage() {
     info: 0,
     debug: 0
   });
-
+ 
   useEffect(() => {
     loadLogs();
   }, []);
-
+ 
   const loadLogs = async () => {
     try {
       setLoading(true);
-      const recentLogs = await AppLogger.getRecentErrors(100);
+      const response = await fetch("/api/admin/logs?limit=100");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      const recentLogs = result.logs;
       
       // Map the database response to LogEntry structure
       const mappedLogs: LogEntry[] = (recentLogs || []).map((log: any) => ({
