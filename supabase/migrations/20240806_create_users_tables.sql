@@ -180,6 +180,5 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Grant execute permission on the function
-GRANT EXECUTE ON FUNCTION check_user_permission(UUID, TEXT, TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION check_user_permission(UUID, TEXT, TEXT) TO anon; 
+-- Secure function by revoking public execute privileges
+REVOKE EXECUTE ON FUNCTION check_user_permission(UUID, TEXT, TEXT) FROM anon, authenticated, PUBLIC; 

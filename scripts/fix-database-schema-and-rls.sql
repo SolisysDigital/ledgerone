@@ -143,11 +143,11 @@ BEGIN
     -- Revoke all permissions from anon (explicit denial)
     EXECUTE format('REVOKE ALL ON TABLE %I FROM anon', table_name);
     
-    -- Revoke all permissions from authenticated (we will grant selectively)
+    -- Revoke all permissions from authenticated (explicit denial)
     EXECUTE format('REVOKE ALL ON TABLE %I FROM authenticated', table_name);
     
-    -- Grant CRUD permissions to authenticated role (subject to RLS policies)
-    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I TO authenticated', table_name);
+    -- Grant CRUD permissions to service_role role explicitly
+    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I TO service_role', table_name);
   END LOOP;
 END $$;
 
@@ -172,8 +172,9 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION is_admin_user(UUID) TO authenticated, service_role;
-REVOKE EXECUTE ON FUNCTION is_admin_user(UUID) FROM anon;
+-- Secure function by revoking public execute privileges and granting to service_role only
+REVOKE EXECUTE ON FUNCTION is_admin_user(UUID) FROM anon, authenticated, PUBLIC;
+GRANT EXECUTE ON FUNCTION is_admin_user(UUID) TO service_role;
 
 
 -- SECTION 7: DROP OLD POLICIES

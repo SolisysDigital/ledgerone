@@ -103,9 +103,9 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION is_admin_user(UUID) TO authenticated, service_role;
--- Explicitly deny anon from executing this function
-REVOKE EXECUTE ON FUNCTION is_admin_user(UUID) FROM anon;
+-- Secure function by revoking public execute privileges and granting to service_role only
+REVOKE EXECUTE ON FUNCTION is_admin_user(UUID) FROM anon, authenticated, PUBLIC;
+GRANT EXECUTE ON FUNCTION is_admin_user(UUID) TO service_role;
 
 -- Step 4: SECURITY HARDENING - Explicitly REVOKE all permissions from anon and authenticated
 -- Then we'll grant only what's needed via RLS policies
@@ -125,12 +125,11 @@ BEGIN
     -- Revoke all permissions from anon (explicit denial)
     EXECUTE format('REVOKE ALL ON TABLE %I FROM anon', table_name);
     
-    -- Revoke all permissions from authenticated (we'll grant via RLS policies)
+    -- Revoke all permissions from authenticated (explicit denial)
     EXECUTE format('REVOKE ALL ON TABLE %I FROM authenticated', table_name);
     
-    -- Grant SELECT, INSERT, UPDATE, DELETE to authenticated role
-    -- (RLS policies will control what they can actually access)
-    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I TO authenticated', table_name);
+    -- Grant CRUD permissions to service_role role explicitly
+    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I TO service_role', table_name);
   END LOOP;
 END $$;
 

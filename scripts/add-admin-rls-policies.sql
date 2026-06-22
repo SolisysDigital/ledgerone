@@ -27,8 +27,9 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION is_admin_user(UUID) TO authenticated, service_role;
-REVOKE EXECUTE ON FUNCTION is_admin_user(UUID) FROM anon;
+-- Secure function by revoking public execute privileges and granting to service_role only
+REVOKE EXECUTE ON FUNCTION is_admin_user(UUID) FROM anon, authenticated, PUBLIC;
+GRANT EXECUTE ON FUNCTION is_admin_user(UUID) TO service_role;
 
 -- Add admin policies for all data tables
 -- Admins can access all records (not just their own)

@@ -507,8 +507,8 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION check_user_permission(UUID, TEXT, TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION check_user_permission(UUID, TEXT, TEXT) TO anon;
+-- Secure function by revoking public execute privileges
+REVOKE EXECUTE ON FUNCTION check_user_permission(UUID, TEXT, TEXT) FROM anon, authenticated, PUBLIC;
 
 -- 4.2 Update Entity Related Data Timestamp
 CREATE OR REPLACE FUNCTION update_entity_related_data_updated_at()
@@ -653,7 +653,8 @@ EXCEPTION
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION insert_app_log TO authenticated;
+-- Secure function by revoking public execute privileges and granting to service_role only
+REVOKE EXECUTE ON FUNCTION insert_app_log FROM anon, authenticated, PUBLIC;
 GRANT EXECUTE ON FUNCTION insert_app_log TO service_role;
 
 -- 4.6 Log App Event (alias for backward compatibility)
@@ -704,6 +705,9 @@ BEGIN
 END;
 $$;
 
+-- Secure function by revoking public execute privileges
+REVOKE EXECUTE ON FUNCTION log_app_event(varchar, varchar, varchar, text, jsonb, text, uuid, varchar, inet, text) FROM anon, authenticated, PUBLIC;
+
 -- 4.7 Search All Objects
 CREATE OR REPLACE FUNCTION search_all_objects(
     search_term TEXT, 
@@ -749,7 +753,8 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION search_all_objects(TEXT, INTEGER, INTEGER) TO authenticated;
+-- Secure function by revoking public execute privileges and granting to service_role only
+REVOKE EXECUTE ON FUNCTION search_all_objects(TEXT, INTEGER, INTEGER) FROM anon, authenticated, PUBLIC;
 GRANT EXECUTE ON FUNCTION search_all_objects(TEXT, INTEGER, INTEGER) TO service_role;
 
 -- 4.8 Create Admin User Function
@@ -784,6 +789,8 @@ EXCEPTION
 END;
 $$;
 
+-- Secure function by revoking public execute privileges and granting to service_role only
+REVOKE EXECUTE ON FUNCTION create_admin_user(TEXT, TEXT, TEXT) FROM anon, authenticated, PUBLIC;
 GRANT EXECUTE ON FUNCTION create_admin_user(TEXT, TEXT, TEXT) TO service_role;
 
 -- 4.9 Update Admin Password Function
@@ -818,6 +825,8 @@ EXCEPTION
 END;
 $$;
 
+-- Secure function by revoking public execute privileges and granting to service_role only
+REVOKE EXECUTE ON FUNCTION update_admin_password(TEXT, TEXT) FROM anon, authenticated, PUBLIC;
 GRANT EXECUTE ON FUNCTION update_admin_password(TEXT, TEXT) TO service_role;
 
 -- =====================================================
@@ -853,7 +862,8 @@ FROM entity_related_data erd
 LEFT JOIN entities e ON e.id = erd.entity_id
 ORDER BY erd.created_at DESC;
 
-GRANT SELECT ON entity_relationships_view TO authenticated, service_role;
+REVOKE SELECT ON entity_relationships_view FROM anon, authenticated, PUBLIC;
+GRANT SELECT ON entity_relationships_view TO service_role;
 
 -- 6.2 Recent Errors View
 CREATE OR REPLACE VIEW recent_errors 
@@ -871,7 +881,8 @@ FROM app_logs
 WHERE level = 'ERROR' 
 ORDER BY timestamp DESC;
 
-GRANT SELECT ON recent_errors TO authenticated, service_role;
+REVOKE SELECT ON recent_errors FROM anon, authenticated, PUBLIC;
+GRANT SELECT ON recent_errors TO service_role;
 
 -- 6.3 Debug Logs View
 CREATE OR REPLACE VIEW debug_logs 
@@ -887,7 +898,8 @@ FROM app_logs
 WHERE level = 'DEBUG' 
 ORDER BY timestamp DESC;
 
-GRANT SELECT ON debug_logs TO authenticated, service_role;
+REVOKE SELECT ON debug_logs FROM anon, authenticated, PUBLIC;
+GRANT SELECT ON debug_logs TO service_role;
 
 -- 6.4 Users Public View
 CREATE OR REPLACE VIEW users_public 
@@ -904,7 +916,8 @@ SELECT
 FROM users
 WHERE status = 'active';
 
-GRANT SELECT ON users_public TO anon, authenticated, service_role;
+REVOKE SELECT ON users_public FROM anon, authenticated, PUBLIC;
+GRANT SELECT ON users_public TO service_role;
 
 -- 6.5 Migration Summary View
 CREATE OR REPLACE VIEW migration_summary 
@@ -919,7 +932,8 @@ FROM entity_related_data
 GROUP BY type_of_record
 ORDER BY type_of_record;
 
-GRANT SELECT ON migration_summary TO authenticated, service_role;
+REVOKE SELECT ON migration_summary FROM anon, authenticated, PUBLIC;
+GRANT SELECT ON migration_summary TO service_role;
 
 -- 6.6 Unified Search View
 CREATE OR REPLACE VIEW unified_search_view 
@@ -1067,7 +1081,8 @@ SELECT
     NULL as updated_at
 FROM hosting_accounts;
 
-GRANT SELECT ON unified_search_view TO authenticated, service_role;
+REVOKE SELECT ON unified_search_view FROM anon, authenticated, PUBLIC;
+GRANT SELECT ON unified_search_view TO service_role;
 
 -- =====================================================
 -- SECTION 7: INITIAL DATA
